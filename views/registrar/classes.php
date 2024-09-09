@@ -1,14 +1,19 @@
 <?php
 require './db_connection1.php';
 
-// Initialize an empty message
+// Define paths to custom icons
+$icons = [
+    'success' => '../../assets/images/modal-icons/checked.png', // Path to your success icon
+    'error' => '../../assets/images/modal-icons/cancel.png'   // Path to your error icon
+];
+
+// Initialize variables
 $message = '';
 $messageType = '';
-$customIcon = 'checked.png'; // Path to your custom icon
+$customIcon = $icons['success']; // Default icon
 
 // Handle create/update/delete actions
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Use trim() to ensure no trailing spaces exist in the keys
     $course_id = isset($_POST['course_id']) ? trim($_POST['course_id']) : null;
     $name = $_POST['name'] ?? '';
     $description = $_POST['description'] ?? '';
@@ -17,51 +22,48 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (!$course_id || !$name || !$description) {
             $message = 'Course ID, class name, and description are required.';
             $messageType = 'error';
-            $customIcon = '<img src="cancel.png" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
+            $customIcon = '<img src="' . $icons['error'] . '" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
         } else {
             try {
                 $stmt = $pdo->prepare("INSERT INTO classes (course_id, name, description) VALUES (?, ?, ?)");
                 $stmt->execute([$course_id, $name, $description]);
-                $message = 'Class added successfully.'; // Success message
+                $message = 'Class added successfully.';
                 $messageType = 'success';
-                $customIcon = '<img src="checked.png" alt="Success Icon" class="w-12 h-12 mx-auto mb-4">';
+                $customIcon = '<img src="' . $icons['success'] . '" alt="Success Icon" class="w-12 h-12 mx-auto mb-4">';
             } catch (PDOException $e) {
-                $message = '<p class="message">Error: ' . htmlspecialchars($e->getMessage()) . '</p>'; // Error message
+                $message = 'Error: ' . htmlspecialchars($e->getMessage());
                 $messageType = 'error';
-                $customIcon = '<img src="cancel.png" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
+                $customIcon = '<img src="' . $icons['error'] . '" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
             }
         }
-    } elseif (isset($_POST['update'])) { // Corrected block here
+    } elseif (isset($_POST['update'])) {
         $class_id = $_POST['class_id'] ?? null;
 
         if (!$class_id || !$course_id || !$name || !$description) {
             $message = 'Error: Missing class ID, course ID, class name, or description.';
             $messageType = 'error';
-            $customIcon = '<img src="cancel.png" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
+            $customIcon = '<img src="' . $icons['error'] . '" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
         } else {
             try {
-                // Fetch the current values from the database
                 $stmt = $pdo->prepare("SELECT course_id, name, description FROM classes WHERE id = ?");
                 $stmt->execute([$class_id]);
                 $currentClass = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                // Check if any changes were made
                 if ($currentClass['course_id'] == $course_id && $currentClass['name'] == $name && $currentClass['description'] == $description) {
-                    $message = 'Please enter your changes.'; // No changes made
+                    $message = 'Please enter your changes.';
                     $messageType = 'error';
-                    $customIcon = '<img src="cancel.png" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
+                    $customIcon = '<img src="' . $icons['error'] . '" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
                 } else {
-                    // Perform the update if there are changes
                     $stmt = $pdo->prepare("UPDATE classes SET course_id = ?, name = ?, description = ? WHERE id = ?");
                     $stmt->execute([$course_id, $name, $description, $class_id]);
-                    $message = 'Class updated successfully.'; // Success message
+                    $message = 'Class updated successfully.';
                     $messageType = 'success';
-                    $customIcon = '<img src="checked.png" alt="Success Icon" class="w-12 h-12 mx-auto mb-4">';
+                    $customIcon = '<img src="' . $icons['success'] . '" alt="Success Icon" class="w-12 h-12 mx-auto mb-4">';
                 }
             } catch (PDOException $e) {
-                $message = '<p class="message">Error: ' . htmlspecialchars($e->getMessage()) . '</p>'; // Error message
+                $message = 'Error: ' . htmlspecialchars($e->getMessage());
                 $messageType = 'error';
-                $customIcon = '<img src="cancel.png" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
+                $customIcon = '<img src="' . $icons['error'] . '" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
             }
         }
     } elseif (isset($_POST['delete'])) {
@@ -70,24 +72,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (!$class_id) {
             $message = 'Error: Missing class ID.';
             $messageType = 'error';
-            $customIcon = '<img src="cancel.png" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
+            $customIcon = '<img src="' . $icons['error'] . '" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
         } else {
             try {
                 $stmt = $pdo->prepare("DELETE FROM classes WHERE id = ?");
                 $stmt->execute([$class_id]);
-                $message = 'Class deleted successfully.'; // Success message
+                $message = 'Class deleted successfully.';
                 $messageType = 'success';
-                $customIcon = '<img src="checked.png" alt="Success Icon" class="w-12 h-12 mx-auto mb-4">';
+                $customIcon = '<img src="' . $icons['success'] . '" alt="Success Icon" class="w-12 h-12 mx-auto mb-4">';
             } catch (PDOException $e) {
-                $message = '<p class="message">Error: ' . htmlspecialchars($e->getMessage()) . '</p>'; // Error message
+                $message = 'Error: ' . htmlspecialchars($e->getMessage());
                 $messageType = 'error';
-                $customIcon = '<img src="cancel.png" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
+                $customIcon = '<img src="' . $icons['error'] . '" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
             }
         }
     }
 }
-
-
 
 
 // Pagination variables
@@ -181,12 +181,19 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="overflow-x-auto">
                 <table class="min-w-full bg-white border-collapse">
                     <thead>
-                        <tr>
-                            <th class="py-2 px-4 text-left">ID</th>
-                            <th class="py-2 px-4 text-left">Name</th>
-                            <th class="py-2 px-4 text-left">Course</th>
-                            <th class="py-2 px-4 text-left">Description</th>
-                            <th class="py-2 px-4 text-left">Actions</th>
+                        <tr class="bg-gray-800 text-white text-left">
+                            <th class="py-3 px-4 uppercase font-semibold text-sm">ID</th>
+                            <th class="py-3 px-4 uppercase font-semibold text-sm">Name</th>
+                            <th class="py-3 px-4 uppercase font-semibold text-sm">Course</th>
+                            <th class="py-3 px-4 uppercase font-semibold text-sm">Description</th>
+                            <th class="py-3 px-4 uppercase font-semibold text-sm flex gap-8">
+                                <span>Change Course Name</span>
+                                <span>Edit Class Name</span>
+                                <span class="ml-16">Edit Description</span>
+                                <span class="ml-12">Update</span>
+                                <span class="">Delete</span>
+                            </th>
+
                         </tr>
                     </thead>
                     <tbody>
@@ -204,7 +211,7 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         <input type="hidden" name="class_id" value="<?php echo htmlspecialchars($class['id']); ?>">
 
                                         <div class="flex flex-col mr-4">
-                                            <label for="course_id_<?php echo htmlspecialchars($class['id']); ?>" class="block font-medium mb-1">Change Course</label>
+                                            <!-- <label for="course_id_<?php //echo htmlspecialchars($class['id']); ?>" class="block font-medium mb-1 uppercase">Change Course</label> -->
                                             <select id="course_id_<?php echo htmlspecialchars($class['id']); ?>" name="course_id" class="border px-2 py-1" required>
                                                 <?php foreach ($courses as $course): ?>
                                                     <option value="<?php echo htmlspecialchars($course['id']); ?>" 
@@ -216,12 +223,12 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         </div>
 
                                         <div class="flex flex-col mr-4">
-                                            <label for="name_<?php echo htmlspecialchars($class['id']); ?>" class="block font-medium mb-1">Edit Class Name</label>
+                                            <!-- <label for="name_<?php //echo htmlspecialchars($class['id']); ?>" class="block font-medium mb-1">Edit Class Name</label> -->
                                             <input type="text" id="name_<?php echo htmlspecialchars($class['id']); ?>" name="name" value="<?php echo htmlspecialchars($class['name']); ?>" class="border px-2 py-1" required>
                                         </div>
 
                                         <div class="flex flex-col mr-4">
-                                            <label for="description_<?php echo htmlspecialchars($class['id']); ?>" class="block font-medium mb-1">Edit Description</label>
+                                            <!-- <label for="description_<?php //echo htmlspecialchars($class['id']); ?>" class="block font-medium mb-1">Edit Description</label> -->
                                             <textarea id="description_<?php echo htmlspecialchars($class['id']); ?>" name="description" rows="1" class="border px-2 py-1"><?php echo htmlspecialchars($class['description']); ?></textarea>
                                         </div>
 

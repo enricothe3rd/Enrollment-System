@@ -1,10 +1,16 @@
 <?php
 require 'db_connection1.php';
 
+// Define paths to custom icons
+$icons = [
+    'success' => '../../assets/images/modal-icons/checked.png', // Path to your success icon
+    'error' => '../../assets/images/modal-icons/cancel.png'   // Path to your error icon
+];
+
 // Initialize feedback variables
 $message = '';
 $messageType = '';
-$customIcon = 'checked.png'; // Path to your custom icon
+$customIcon = $icons['success']; // Default icon
 
 // Pagination settings
 $items_per_page = 10;
@@ -14,15 +20,17 @@ $offset = ($page - 1) * $items_per_page;
 // Handle create/update/delete actions
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     try {
-        if (isset($_POST['create'])) {
-            // Validate input
+        // Handle create/update actions
+        if (isset($_POST['create']) || isset($_POST['update'])) {
+            // Common validation
             $required_fields = ['section_id', 'code', 'subject_title', 'units', 'room', 'day', 'start_time', 'end_time'];
+
             foreach ($required_fields as $field) {
                 if (empty($_POST[$field])) {
                     throw new Exception('All fields are required.');
                 }
             }
-            
+
             $section_id = $_POST['section_id'];
             $code = $_POST['code'];
             $subject_title = $_POST['subject_title'];
@@ -32,37 +40,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $start_time = $_POST['start_time'];
             $end_time = $_POST['end_time'];
 
-            $stmt = $pdo->prepare("INSERT INTO subjects (section_id, code, subject_title, units, room, day, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$section_id, $code, $subject_title, $units, $room, $day, $start_time, $end_time]);
+            if (isset($_POST['create'])) {
+                $stmt = $pdo->prepare("INSERT INTO subjects (section_id, code, subject_title, units, room, day, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt->execute([$section_id, $code, $subject_title, $units, $room, $day, $start_time, $end_time]);
 
-            $message = 'Subject added successfully.';
-            $messageType = 'success';
-            $customIcon = '<img src="checked.png" alt="Success Icon" class="w-12 h-12 mx-auto mb-4">';
-        } elseif (isset($_POST['update'])) {
-            // Validate input
-            $required_fields = ['subject_id', 'section_id', 'code', 'subject_title', 'units', 'room', 'day', 'start_time', 'end_time'];
-            foreach ($required_fields as $field) {
-                if (empty($_POST[$field])) {
-                    throw new Exception('All fields are required.');
-                }
+                $message = 'Subject added successfully.';
+                $messageType = 'success';
+                $customIcon = '<img src="' . $icons['success'] . '" alt="Success Icon" class="w-12 h-12 mx-auto mb-4">';
+            } elseif (isset($_POST['update'])) {
+                $subject_id = $_POST['subject_id'];
+
+                $stmt = $pdo->prepare("UPDATE subjects SET section_id = ?, code = ?, subject_title = ?, units = ?, room = ?, day = ?, start_time = ?, end_time = ? WHERE id = ?");
+                $stmt->execute([$section_id, $code, $subject_title, $units, $room, $day, $start_time, $end_time, $subject_id]);
+
+                $message = 'Subject updated successfully.';
+                $messageType = 'success';
+                $customIcon = '<img src="' . $icons['success'] . '" alt="Success Icon" class="w-12 h-12 mx-auto mb-4">';
             }
-
-            $subject_id = $_POST['subject_id'];
-            $section_id = $_POST['section_id'];
-            $code = $_POST['code'];
-            $subject_title = $_POST['subject_title'];
-            $units = $_POST['units'];
-            $room = $_POST['room'];
-            $day = $_POST['day'];
-            $start_time = $_POST['start_time'];
-            $end_time = $_POST['end_time'];
-
-            $stmt = $pdo->prepare("UPDATE subjects SET section_id = ?, code = ?, subject_title = ?, units = ?, room = ?, day = ?, start_time = ?, end_time = ? WHERE id = ?");
-            $stmt->execute([$section_id, $code, $subject_title, $units, $room, $day, $start_time, $end_time, $subject_id]);
-
-            $message = 'Subject updated successfully.';
-            $messageType = 'success';
-            $customIcon = '<img src="checked.png" alt="Success Icon" class="w-12 h-12 mx-auto mb-4">';
         } elseif (isset($_POST['delete'])) {
             $subject_id = $_POST['subject_id'];
             $stmt = $pdo->prepare("DELETE FROM subjects WHERE id = ?");
@@ -70,12 +64,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             $message = 'Subject deleted successfully.';
             $messageType = 'success';
-            $customIcon = '<img src="checked.png" alt="Success Icon" class="w-12 h-12 mx-auto mb-4">';
+            $customIcon = '<img src="' . $icons['success'] . '" alt="Success Icon" class="w-12 h-12 mx-auto mb-4">';
+        } elseif (isset($_POST['delete_selected'])) {
+            if (empty($_POST['subject_ids'])) {
+                throw new Exception('No subjects selected for deletion.');
+            }
+
+            $subject_ids = $_POST['subject_ids'];
+            $placeholders = rtrim(str_repeat('?, ', count($subject_ids)), ', ');
+
+            $stmt = $pdo->prepare("DELETE FROM subjects WHERE id IN ($placeholders)");
+            $stmt->execute($subject_ids);
+
+            $message = 'Selected subjects deleted successfully.';
+            $messageType = 'success';
+            $customIcon = '<img src="' . $icons['success'] . '" alt="Success Icon" class="w-12 h-12 mx-auto mb-4">';
         }
+        
     } catch (Exception $e) {
         $message = $e->getMessage();
         $messageType = 'error';
-        $customIcon = '<img src="cancel.png" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
+        $customIcon = '<img src="' . $icons['error'] . '" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
     }
 }
 
@@ -146,76 +155,150 @@ $input_values = [
         </script>
         <?php endif; ?>
 
-        <!-- Create New Subject -->
-        <div class="mb-4">
-            <h2 class="text-xl font-semibold">Add New Subject</h2>
-            <form method="POST" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="section_id">Section</label>
-                    <select name="section_id" id="section_id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                        <?php foreach ($sections as $section): ?>
-                            <option value="<?php echo $section['id']; ?>" <?php if ($input_values['section_id'] == $section['id']) echo 'selected'; ?>>
-                                <?php echo htmlspecialchars($section['section_name']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="code">Code</label>
-                    <input type="text" name="code" id="code" value="<?php echo htmlspecialchars($input_values['code']); ?>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="subject_title">Subject Title</label>
-                    <input type="text" name="subject_title" id="subject_title" value="<?php echo htmlspecialchars($input_values['subject_title']); ?>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="units">Units</label>
-                    <input type="number" step="0.01" name="units" id="units" value="<?php echo htmlspecialchars($input_values['units']); ?>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="room">Room</label>
-                    <input type="text" name="room" id="room" value="<?php echo htmlspecialchars($input_values['room']); ?>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="day">Day</label>
-                    <input type="text" name="day" id="day" value="<?php echo htmlspecialchars($input_values['day']); ?>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="start_time">Start Time</label>
-                    <input type="time" name="start_time" id="start_time" value="<?php echo htmlspecialchars($input_values['start_time']); ?>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="end_time">End Time</label>
-                    <input type="time" name="end_time" id="end_time" value="<?php echo htmlspecialchars($input_values['end_time']); ?>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                </div>
-                <div class="flex items-center justify-between">
-                    <button type="submit" name="create" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Add Subject</button>
-                </div>
-            </form>
+        <!-- Add New Subject Modal -->
+        <div id="addModal" class="fixed inset-0 hidden items-center justify-center z-50">
+            <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl">
+                <h2 class="text-xl font-semibold mb-4">Add New Subject</h2>
+                <form method="POST">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="section_id">Section</label>
+                        <select name="section_id" id="section_id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            <?php foreach ($sections as $section): ?>
+                                <option value="<?php echo $section['id']; ?>">
+                                    <?php echo htmlspecialchars($section['section_name']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="code">Code</label>
+                        <input type="text" name="code" id="code" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="subject_title">Subject Title</label>
+                        <input type="text" name="subject_title" id="subject_title" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="units">Units</label>
+                        <input type="number" name="units" id="units" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="room">Room</label>
+                        <input type="text" name="room" id="room" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="day">Day</label>
+                        <input type="text" name="day" id="day" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="start_time">Start Time</label>
+                        <input type="time" name="start_time" id="start_time" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="end_time">End Time</label>
+                        <input type="time" name="end_time" id="end_time" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="button" onclick="closeAddModal()" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2">
+                            Cancel
+                        </button>
+                        <button type="submit" name="create" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                            Add Subject
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
 
-        <!-- List All Subjects -->
-        <div class="bg-white shadow-md rounded p-4">
-            <h2 class="text-xl font-semibold mb-4">Subjects List</h2>
-            <table class="min-w-full bg-white">
+        <!-- Update Subject Modal -->
+        <div id="updateModal" class="fixed inset-0 hidden items-center justify-center z-50">
+            <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl">
+                <h2 class="text-xl font-semibold mb-4">Update Subject</h2>
+                <form method="POST">
+                    <input type="hidden" name="subject_id" id="update_subject_id">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="update_section_id">Section</label>
+                        <select name="section_id" id="update_section_id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            <?php foreach ($sections as $section): ?>
+                                <option value="<?php echo $section['id']; ?>">
+                                    <?php echo htmlspecialchars($section['section_name']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="update_code">Code</label>
+                        <input type="text" name="code" id="update_code" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="update_subject_title">Subject Title</label>
+                        <input type="text" name="subject_title" id="update_subject_title" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="update_units">Units</label>
+                        <input type="number" name="units" id="update_units" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="update_room">Room</label>
+                        <input type="text" name="room" id="update_room" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="update_day">Day</label>
+                        <input type="text" name="day" id="update_day" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="update_start_time">Start Time</label>
+                        <input type="time" name="start_time" id="update_start_time" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="update_end_time">End Time</label>
+                        <input type="time" name="end_time" id="update_end_time" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="button" onclick="closeUpdateModal()" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2">
+                            Cancel
+                        </button>
+                        <button type="submit" name="update" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                            Update Subject
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Subject Table -->
+        <form method="POST">
+            <div class="flex justify-between items-center mb-4">
+                <button type="button" onclick="openAddModal()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    Add New Subject
+                </button>
+                <button type="submit" name="delete_selected" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    Delete Selected
+                </button>
+            </div>
+
+            <table class="table-auto w-full bg-white rounded-lg shadow-lg">
                 <thead>
-                    <tr>
-                        <th class="py-2">ID</th>
-                        <th class="py-2">Code</th>
-                        <th class="py-2">Title</th>
-                        <th class="py-2">Units</th>
-                        <th class="py-2">Room</th>
-                        <th class="py-2">Day</th>
-                        <th class="py-2">Start Time</th>
-                        <th class="py-2">End Time</th>
-                        <th class="py-2">Section</th>
-                        <th class="py-2">Actions</th>
+                    <tr class="bg-gray-800 text-white text-left">
+                        <th class="py-3 px-4">
+                            <input type="checkbox" id="select_all" class="form-checkbox">
+                        </th>
+                        <th class="py-3 px-4">Code</th>
+                        <th class="py-3 px-4">Subject Title</th>
+                        <th class="py-3 px-4">Units</th>
+                        <th class="py-3 px-4">Room</th>
+                        <th class="py-3 px-4">Day</th>
+                        <th class="py-3 px-4">Start Time</th>
+                        <th class="py-3 px-4">End Time</th>
+                        <th class="py-3 px-4">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($subjects as $subject): ?>
                     <tr>
-                        <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['id']); ?></td>
+                        <td class="border px-4 py-2">
+                            <input type="checkbox" name="subject_ids[]" value="<?php echo $subject['id']; ?>" class="form-checkbox">
+                        </td>
                         <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['code']); ?></td>
                         <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['subject_title']); ?></td>
                         <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['units']); ?></td>
@@ -223,55 +306,66 @@ $input_values = [
                         <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['day']); ?></td>
                         <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['start_time']); ?></td>
                         <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['end_time']); ?></td>
-                        <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['section_name']); ?></td>
                         <td class="border px-4 py-2">
-                            <!-- Update Form -->
-                            <form method="POST" class="inline">
-                                <input type="hidden" name="subject_id" value="<?php echo $subject['id']; ?>">
-                                <select name="section_id" class="border px-2 py-1">
-                                    <?php foreach ($sections as $section): ?>
-                                        <option value="<?php echo $section['id']; ?>" <?php if ($section['id'] == $subject['section_id']) echo 'selected'; ?>>
-                                            <?php echo htmlspecialchars($section['section_name']); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <input type="text" name="code" value="<?php echo htmlspecialchars($subject['code']); ?>" class="border px-2 py-1">
-                                <input type="text" name="subject_title" value="<?php echo htmlspecialchars($subject['subject_title']); ?>" class="border px-2 py-1">
-                                <input type="number" step="0.01" name="units" value="<?php echo htmlspecialchars($subject['units']); ?>" class="border px-2 py-1">
-                                <input type="text" name="room" value="<?php echo htmlspecialchars($subject['room']); ?>" class="border px-2 py-1">
-                                <input type="text" name="day" value="<?php echo htmlspecialchars($subject['day']); ?>" class="border px-2 py-1">
-                                <input type="time" name="start_time" value="<?php echo htmlspecialchars($subject['start_time']); ?>" class="border px-2 py-1">
-                                <input type="time" name="end_time" value="<?php echo htmlspecialchars($subject['end_time']); ?>" class="border px-2 py-1">
-                                <button type="submit" name="update" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded">Update</button>
-                            </form>
-                            <!-- Delete Form -->
-                            <form method="POST" class="inline">
-                                <input type="hidden" name="subject_id" value="<?php echo $subject['id']; ?>">
-                                <button type="submit" name="delete" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">Delete</button>
-                            </form>
+                            <button type="button" onclick="openUpdateModal(<?php echo $subject['id']; ?>, '<?php echo htmlspecialchars($subject['section_id']); ?>', '<?php echo htmlspecialchars($subject['code']); ?>', '<?php echo htmlspecialchars($subject['subject_title']); ?>', '<?php echo htmlspecialchars($subject['units']); ?>', '<?php echo htmlspecialchars($subject['room']); ?>', '<?php echo htmlspecialchars($subject['day']); ?>', '<?php echo htmlspecialchars($subject['start_time']); ?>', '<?php echo htmlspecialchars($subject['end_time']); ?>')" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+                                Edit
+                            </button>
                         </td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
 
-            <!-- Pagination Controls -->
-            <div class="flex justify-between items-center mt-4">
+            <!-- Pagination -->
+            <div class="mt-4 flex justify-between items-center">
                 <div>
-                    <?php if ($page > 1): ?>
-                        <a href="?page=<?php echo $page - 1; ?>" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Previous</a>
-                    <?php endif; ?>
+                    <span class="text-sm text-gray-700">
+                        Page <?php echo $page; ?> of <?php echo $total_pages; ?>
+                    </span>
                 </div>
                 <div>
-                    Page <?php echo $page; ?> of <?php echo $total_pages; ?>
-                </div>
-                <div>
-                    <?php if ($page < $total_pages): ?>
-                        <a href="?page=<?php echo $page + 1; ?>" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Next</a>
-                    <?php endif; ?>
+                    <button type="button" onclick="location.href='?page=<?php echo max(1, $page - 1); ?>'" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                        Previous
+                    </button>
+                    <button type="button" onclick="location.href='?page=<?php echo min($total_pages, $page + 1); ?>'" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                        Next
+                    </button>
                 </div>
             </div>
-        </div>
+        </form>
     </div>
+
+    <script>
+        function openAddModal() {
+            document.getElementById('addModal').style.display = 'flex';
+        }
+
+        function closeAddModal() {
+            document.getElementById('addModal').style.display = 'none';
+        }
+
+        function openUpdateModal(id, section_id, code, subject_title, units, room, day, start_time, end_time) {
+            document.getElementById('update_subject_id').value = id;
+            document.getElementById('update_section_id').value = section_id;
+            document.getElementById('update_code').value = code;
+            document.getElementById('update_subject_title').value = subject_title;
+            document.getElementById('update_units').value = units;
+            document.getElementById('update_room').value = room;
+            document.getElementById('update_day').value = day;
+            document.getElementById('update_start_time').value = start_time;
+            document.getElementById('update_end_time').value = end_time;
+            document.getElementById('updateModal').style.display = 'flex';
+        }
+
+        function closeUpdateModal() {
+            document.getElementById('updateModal').style.display = 'none';
+        }
+
+        // Select/Deselect All Checkboxes
+        document.getElementById('select_all').addEventListener('change', function () {
+            const checkboxes = document.querySelectorAll('input[name="subject_ids[]"]');
+            checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+        });
+    </script>
 </body>
 </html>

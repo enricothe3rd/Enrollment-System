@@ -1,10 +1,16 @@
 <?php
 require './db_connection1.php';
 
+// Define paths to custom icons
+$icons = [
+    'success' => '../../assets/images/modal-icons/checked.png', // Path to your success icon
+    'error' => '../../assets/images/modal-icons/cancel.png'     // Path to your error icon
+];
+
 // Initialize message variables
 $message = '';
 $messageType = '';
-$customIcon = 'checked.png'; // Path to your custom icon
+$customIcon = $icons['success']; // Default icon
 
 // Handle create/update/delete actions
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -15,18 +21,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (!$class_id || !$section_name) {
             $message = 'Error: Both class and section name are required.';
             $messageType = 'error';
-            $customIcon = '<img src="cancel.png" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
+            $customIcon = '<img src="' . $icons['error'] . '" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
         } else {
             try {
                 $stmt = $pdo->prepare("INSERT INTO sections (class_id, section_name) VALUES (?, ?)");
                 $stmt->execute([$class_id, $section_name]);
                 $message = 'Section added successfully.'; // Success message
                 $messageType = 'success';
-                $customIcon = '<img src="checked.png" alt="Success Icon" class="w-12 h-12 mx-auto mb-4">';
+                $customIcon = '<img src="' . $icons['success'] . '" alt="Success Icon" class="w-12 h-12 mx-auto mb-4">';
             } catch (PDOException $e) {
                 $message = '<p class="message">Error: ' . htmlspecialchars($e->getMessage()) . '</p>'; // Error message
                 $messageType = 'error';
-                $customIcon = '<img src="cancel.png" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
+                $customIcon = '<img src="' . $icons['error'] . '" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
             }
         }
     } elseif (isset($_POST['update'])) {
@@ -37,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (!$section_id || !$class_id || !$section_name) {
             $message = 'Error: Missing section ID, class ID, or section name.';
             $messageType = 'error';
-            $customIcon = '<img src="cancel.png" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
+            $customIcon = '<img src="' . $icons['error'] . '" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
         } else {
             try {
                 // Fetch the current values from the database
@@ -49,19 +55,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 if ($current['class_id'] == $class_id && $current['section_name'] == $section_name) {
                     $message = 'No changes detected. Please enter a new section name before updating.';
                     $messageType = 'error';
-                    $customIcon = '<img src="cancel.png" alt="Warning Icon" class="w-12 h-12 mx-auto mb-4">';
+                    $customIcon = '<img src="' . $icons['error'] . '" alt="Warning Icon" class="w-12 h-12 mx-auto mb-4">';
                 } else {
                     // Perform the update
                     $stmt = $pdo->prepare("UPDATE sections SET class_id = ?, section_name = ? WHERE id = ?");
                     $stmt->execute([$class_id, $section_name, $section_id]);
                     $message = 'Section updated successfully.'; // Success message
                     $messageType = 'success';
-                    $customIcon = '<img src="checked.png" alt="Success Icon" class="w-12 h-12 mx-auto mb-4">';
+                    $customIcon = '<img src="' . $icons['success'] . '" alt="Success Icon" class="w-12 h-12 mx-auto mb-4">';
                 }
             } catch (PDOException $e) {
                 $message = '<p class="message">Error: ' . htmlspecialchars($e->getMessage()) . '</p>'; // Error message
                 $messageType = 'error';
-                $customIcon = '<img src="cancel.png" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
+                $customIcon = '<img src="' . $icons['error'] . '" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
             }
         }
     } elseif (isset($_POST['delete'])) {
@@ -70,18 +76,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (!$section_id) {
             $message = 'Error: Missing section ID.';
             $messageType = 'error';
-            $customIcon = '<img src="cancel.png" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
+            $customIcon = '<img src="' . $icons['error'] . '" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
         } else {
             try {
                 $stmt = $pdo->prepare("DELETE FROM sections WHERE id = ?");
                 $stmt->execute([$section_id]);
                 $message = 'Section deleted successfully.'; // Success message
                 $messageType = 'success';
-                $customIcon = '<img src="checked.png" alt="Success Icon" class="w-12 h-12 mx-auto mb-4">';
+                $customIcon = '<img src="' . $icons['success'] . '" alt="Success Icon" class="w-12 h-12 mx-auto mb-4">';
             } catch (PDOException $e) {
                 $message = '<p class="message">Error: ' . htmlspecialchars($e->getMessage()) . '</p>'; // Error message
                 $messageType = 'error';
-                $customIcon = '<img src="cancel.png" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
+                $customIcon = '<img src="' . $icons['error'] . '" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
             }
         }
     }
@@ -107,7 +113,7 @@ $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 </head>
 <body class="bg-gray-100 text-gray-900">
-    <div class="container mx-auto p-4">
+    <div class="container mx-auto">
         <h1 class="text-2xl font-bold mb-4">Manage Sections</h1>
         
         <!-- Success/Error Modal -->
@@ -158,47 +164,59 @@ $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         <!-- List All Sections -->
         <div class="bg-white shadow-md rounded p-4">
-            <h2 class="text-xl font-semibold mb-4">Sections List</h2>
-            <table class="min-w-full bg-white">
-                <thead>
-                    <tr>
-                        <th class="py-2">ID</th>
-                        <th class="py-2">Section Name</th>
-                        <th class="py-2">Class</th>
-                        <th class="py-2">Actions</th>
+    <h2 class="text-xl font-semibold mb-4">Sections List</h2>
+    <div class="overflow-x-auto"> <!-- Container to allow horizontal scrolling on small screens -->
+        <table class="min-w-full bg-white">
+        <thead>
+                    <tr class="bg-gray-800 text-white text-left">
+                        <th class="py-3 px-4 uppercase font-semibold text-sm">ID</th>
+                        <th class="py-3 px-4 uppercase font-semibold text-sm">Section Name</th>
+                        <th class="py-3 px-4 uppercase font-semibold text-sm">Class</th>
+                    <th class="py-3 px-4 uppercase font-semibold text-sm flex gap-8 items-center">
+                        <span>Edit Class Name</span>
+                        <span class=""style="margin-left:20rem">Edit Section Name</span>
+                        <span class="ml-10">Update</span>
+                        <span class="">Delete</span>
+                    </th>
                     </tr>
                 </thead>
-                <tbody>
-                    <?php foreach ($sections as $section): ?>
-                    <tr>
-                        <td class="border px-4 py-2"><?php echo htmlspecialchars($section['id']); ?></td>
-                        <td class="border px-4 py-2"><?php echo htmlspecialchars($section['section_name']); ?></td>
-                        <td class="border px-4 py-2"><?php echo htmlspecialchars($section['class_name']); ?></td>
-                        <td class="border px-4 py-2">
-                            <!-- Update Form -->
-                            <form method="POST" class="inline">
-                                <input type="hidden" name="section_id" value="<?php echo $section['id']; ?>">
-                                <select name="class_id" class="border px-2 py-1">
-                                    <?php foreach ($classes as $class): ?>
-                                        <option value="<?php echo $class['id']; ?>" <?php if ($class['id'] == $section['class_id']) echo 'selected'; ?>>
-                                            <?php echo htmlspecialchars($class['name']); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <input type="text" name="section_name" value="<?php echo htmlspecialchars($section['section_name']); ?>" class="border px-2 py-1">
-                                <button type="submit" name="update" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded">Update</button>
-                            </form>
-                            <!-- Delete Form -->
-                            <form method="POST" class="inline">
-                                <input type="hidden" name="section_id" value="<?php echo $section['id']; ?>">
-                                <button type="submit" name="delete" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">Delete</button>
-                            </form>
-                        </td>
-                    </tr>
+            <tbody>
+            <?php foreach ($sections as $section): ?>
+<tr>
+    <td class="border px-4 py-2"><?php echo htmlspecialchars($section['id']); ?></td>
+    <td class="border px-4 py-2"><?php echo htmlspecialchars($section['section_name']); ?></td>
+    <td class="border px-4 py-2"><?php echo htmlspecialchars($section['class_name']); ?></td>
+    <td class="border px-4 py-2">
+        <!-- Container to align forms horizontally -->
+        <div class="flex items-center gap-2">
+            <!-- Update Form -->
+            <form method="POST" class="flex items-center gap-2">
+                <input type="hidden" name="section_id" value="<?php echo $section['id']; ?>">
+                <select name="class_id" class="border px-2 py-1">
+                    <?php foreach ($classes as $class): ?>
+                        <option value="<?php echo $class['id']; ?>" <?php if ($class['id'] == $section['class_id']) echo 'selected'; ?>>
+                            <?php echo htmlspecialchars($class['name']); ?>
+                        </option>
                     <?php endforeach; ?>
-                </tbody>
-            </table>
+                </select>
+                <input type="text" name="section_name" value="<?php echo htmlspecialchars($section['section_name']); ?>" class="border px-2 py-1">
+                <button type="submit" name="update" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded">Update</button>
+            </form>
+            <!-- Delete Form -->
+            <form method="POST" class="flex items-center">
+                <input type="hidden" name="section_id" value="<?php echo $section['id']; ?>">
+                <button type="submit" name="delete" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">Delete</button>
+            </form>
         </div>
+    </td>
+</tr>
+<?php endforeach; ?>
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
     </div>
 </body>
 </html>

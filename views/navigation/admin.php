@@ -1,11 +1,11 @@
 <?php
     $paths = [
-    'registrar' => '../../assets/images/registrar-icons',
+    'admin_icons' => '../../assets/images/admin-icons',
+    'navigation_icons' => '../../assets/images/navigation-icons',
     'schoolLogo' => '../../assets/images/school-logo',
-    'courses' => '../registrar/courses.php',
-    'classes' => '../registrar/classes.php',
-    'sections' => '../registrar/sections.php',
-    'subjects' => '../registrar/subjects.php'
+    'users' => '../admin/users_management.php',
+    'password_reset' => '../admin/password_reset_management.php',
+    'user_registration' => '../admin/user_registration_management.php'
     ];
 ?>
 <!DOCTYPE html>
@@ -13,7 +13,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Responsive Side Navigation Bar</title>
+    <?php include '../../includes/favicon.php'; ?>
+    <title>Bcc / Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
@@ -53,40 +54,40 @@
                 </div>
 
                 <div id="profile-button" class="nav-button flex items-center py-3 px-10 rounded-lg transition duration-200 hover:bg-[#B80000] sm:py-2" 
-                tabindex="2"><img src="<?php echo $paths['registrar'] . '/profile.png'; ?>" alt="Profile Button" class="w-9 h-9 lg:w-10 lg:h-10">
+                tabindex="2"><img src="<?php echo $paths['navigation_icons'] . '/profile.png'; ?>" alt="Profile Button" class="w-9 h-9 lg:w-10 lg:h-10">
                     <button class="ml-5 text-md font-semibold text-white hover:text-gray-200 focus:outline-none lg:text-lg">Profile</button></div>
 
                 <div id="home-button" class="nav-button flex items-center py-3 px-10 rounded-lg transition duration-200 hover:bg-[#B80000] sm:py-2"
-                tabindex="3" ><img src="<?php echo $paths['registrar'] . '/home.png'; ?>" alt="Home Button" class="w-9 h-9 lg:w-10 lg:h-10">
+                tabindex="3" ><img src="<?php echo $paths['navigation_icons'] . '/home.png'; ?>" alt="Home Button" class="w-9 h-9 lg:w-10 lg:h-10">
                 <button class="ml-5 text-md font-semibold text-white hover:text-gray-200 focus:outline-none lg:text-lg">Home</button></div>
 
-                <div id="courses-button" class="nav-button flex items-center py-3 px-10 rounded-lg transition duration-200 hover:bg-[#B80000] sm:py-2"
-                tabindex="4" ><img src="<?php echo $paths['registrar'] . '/courses.png'; ?>" alt="Courses Button" class="w-9 h-9 lg:w-10 lg:h-10">
-                    <button class="ml-5 text-md font-semibold text-white hover:text-gray-200 focus:outline-none lg:text-lg">Courses</button></div>
+                <div id="users-button" class="nav-button flex items-center py-3 px-10 rounded-lg transition duration-200 hover:bg-[#B80000] sm:py-2"
+                tabindex="4" ><img src="<?php echo $paths['admin_icons'] . '/users.png'; ?>" alt="users Button" class="w-9 h-9 lg:w-10 lg:h-10">
+                    <button class="ml-5 text-md font-semibold text-white hover:text-gray-200 focus:outline-none lg:text-lg">Users</button></div>
 
 
-                <div id="classes-button" class="nav-button flex items-center py-3 px-10 rounded-lg transition duration-200 hover:bg-[#B80000] sm:py-2"
-                tabindex="5" ><img src="<?php echo $paths['registrar'] . '/classes.png'; ?>" alt="Classes Button" class="w-9 h-9 lg:w-10 lg:h-10">
-                    <button class="ml-5 text-md font-semibold text-white hover:text-gray-200 focus:outline-none lg:text-lg">Classes</button></div>
+                <div id="user_registration-button" class="nav-button flex items-center py-3 px-10 rounded-lg transition duration-200 hover:bg-[#B80000] sm:py-2"
+                tabindex="5" ><img src="<?php echo $paths['admin_icons'] . '/users_registration.png'; ?>" alt="user_registration Button" class="w-9 h-9 lg:w-10 lg:h-10">
+                    <button class="ml-5 text-md font-semibold text-white hover:text-gray-200 focus:outline-none lg:text-lg">Users Registration</button></div>
 
-                <div id="sections-button" class="nav-button flex items-center py-3 px-10 rounded-lg transition duration-200 hover:bg-[#B80000] sm:py-2"
-                tabindex="6"><img src="<?php echo $paths['registrar'] . '/sections.png'; ?>" alt="Sections Button" class="w-9 h-9 lg:w-10 lg:h-10">
-                    <button class="ml-5 text-md font-semibold text-white hover:text-gray-200 focus:outline-none lg:text-lg">Sections</button></div>
-
+                <div id="password_reset-button" class="nav-button flex items-center py-3 px-10 rounded-lg transition duration-200 hover:bg-[#B80000] sm:py-2"
+                tabindex="6"><img src="<?php echo $paths['admin_icons'] . '/password_reset.png'; ?>" alt="password_reset Button" class="w-9 h-9 lg:w-10 lg:h-10">
+                    <button class="ml-5 text-md font-semibold text-white hover:text-gray-200 focus:outline-none lg:text-lg">Password Resets</button></div>
+<!-- 
                 <div id="subjects-button" class="nav-button flex items-center py-3 px-10 rounded-lg transition duration-200 hover:bg-[#B80000] sm:py-2"
-                tabindex="7"><img src="<?php echo $paths['registrar'] . '/subjects.png'; ?>" alt="Subjects Button" class="w-9 h-9 lg:w-10 lg:h-10">
-                    <button class="ml-5 text-md font-semibold text-white hover:text-gray-200 focus:outline-none lg:text-lg">Subjects</button></div>
+                tabindex="7"><img src="<?php// echo $paths['registrar'] . '/subjects.png'; ?>" alt="Subjects Button" class="w-9 h-9 lg:w-10 lg:h-10">
+                    <button class="ml-5 text-md font-semibold text-white hover:text-gray-200 focus:outline-none lg:text-lg">Subjects</button></div> -->
 
                 <div id="settings-button" class="nav-button flex items-center py-3 px-10 rounded-lg transition duration-200 hover:bg-[#B80000] sm:py-2"
-                tabindex="8"><img src="<?php echo $paths['registrar'] . '/settings.png'; ?>" alt="Settings Button" class="w-9 h-9 lg:w-10 lg:h-10">
+                tabindex="8"><img src="<?php echo $paths['navigation_icons'] . '/settings.png'; ?>" alt="Settings Button" class="w-9 h-9 lg:w-10 lg:h-10">
                     <button class="ml-5 text-md font-semibold text-white hover:text-gray-200 focus:outline-none lg:text-lg">Settings</button></div>
 
                 <div id="messages-button" class="nav-button flex items-center py-3 px-10 rounded-lg transition duration-200 hover:bg-[#B80000] sm:py-2"
-                tabindex="9"><img src="<?php echo $paths['registrar'] . '/messages.png'; ?>" alt="Messages Button" class="w-9 h-9 lg:w-10 lg:h-10">
+                tabindex="9"><img src="<?php echo $paths['navigation_icons'] . '/messages.png'; ?>" alt="Messages Button" class="w-9 h-9 lg:w-10 lg:h-10">
                     <button class="ml-5 text-md font-semibold text-white hover:text-gray-200 focus:outline-none lg:text-lg">Messages</button></div>
 
                 <div id="logout-button" class="nav-button flex items-center py-3 px-10 rounded-lg transition duration-200 hover:bg-[#B80000] sm:py-2"
-                tabindex="10" ><img src="<?php echo $paths['registrar'] . '/logout.png'; ?>" alt="Log out Button" class="w-9 h-9 lg:w-10 lg:h-10">
+                tabindex="10" ><img src="<?php echo $paths['navigation_icons'] . '/logout.png'; ?>" alt="Log out Button" class="w-9 h-9 lg:w-10 lg:h-10">
                     <button class="ml-5 text-md font-semibold text-white hover:text-gray-200 focus:outline-none lg:text-lg">Logout</button></div>
             </nav>
         </div>
@@ -116,22 +117,22 @@
             </div>
 
 
-            <div id="courses" class="content-section hidden">
-                <iframe src="<?php echo $paths['courses']; ?>" class="w-full h-full border-0" frameborder="0"></iframe>
+            <div id="users" class="content-section hidden">
+                <iframe src="<?php echo $paths['users']; ?>" class="w-full h-full border-0" frameborder="0"></iframe>
             </div>
 
 
-            <div id="classes" class="content-section hidden">
-                <iframe src="<?php echo $paths['classes']; ?>" class="w-full h-full border-0" frameborder="0"></iframe>
+            <div id="user_registration" class="content-section hidden">
+                <iframe src="<?php echo $paths['user_registration']; ?>" class="w-full h-full border-0" frameborder="0"></iframe>
             </div>
 
-            <div id="sections" class="content-section hidden">
-                <iframe src="<?php echo $paths['sections']; ?>" class="w-full h-full border-0" frameborder="0"></iframe>
+            <div id="password_reset" class="content-section hidden">
+                <iframe src="<?php echo $paths['password_reset']; ?>" class="w-full h-full border-0" frameborder="0"></iframe>
             </div>
 
-            <div id="subjects" class="content-section hidden">
-                <iframe src="<?php echo $paths['subjects']; ?>" class="w-full h-full border-0" frameborder="0"></iframe>
-            </div>
+            <!-- <div id="subjects" class="content-section hidden">
+                <iframe src="<?php //echo $paths['password_reset']; ?>" class="w-full h-full border-0" frameborder="0"></iframe>
+            </div> -->
 
             <div id="settings" class="content-section hidden">
                 <h1 class="text-3xl font-bold">Settings</h1>
@@ -177,7 +178,7 @@ buttons.forEach(button => {
 // Function to handle button clicks
 function setupButtonClickListener(buttonId, sectionId) {
     document.getElementById(buttonId).addEventListener('click', function() {
-        // Hide all content sections
+        // Hide all content password_reset
         document.querySelectorAll('.content-section').forEach(function(section) {
             section.classList.add('hidden');
         });
@@ -192,7 +193,7 @@ function setupButtonClickListener(buttonId, sectionId) {
 function showActiveSection() {
     const activeSection = localStorage.getItem('activeSection');
     if (activeSection) {
-        // Hide all sections
+        // Hide all password_reset
         document.querySelectorAll('.content-section').forEach(function(section) {
             section.classList.add('hidden');
         });
@@ -204,10 +205,10 @@ function showActiveSection() {
 // Set up event listeners for all buttons
 const buttonSectionMapping = {
     'home-button': 'home',
-    'courses-button': 'courses',
-    'classes-button': 'classes',
-    'sections-button': 'sections',
-    'subjects-button': 'subjects',
+    'users-button': 'users',
+    'user_registration-button': 'user_registration',
+    'password_reset-button': 'password_reset',
+    // 'subjects-button': 'subjects',
     'settings-button': 'settings',
     'messages-button': 'messages',
     'logout-button': 'logout',

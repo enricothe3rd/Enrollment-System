@@ -1,6 +1,6 @@
 <?php
-// Include the database connection file
 require '../../db/db_connection1.php';
+session_start();
 
 // Set number of records per page
 $records_per_page = 10;
@@ -30,6 +30,15 @@ $stmt_users->bindValue(':start', $start_users, PDO::PARAM_INT);
 $stmt_users->bindValue(':records_per_page', $records_per_page, PDO::PARAM_INT);
 $stmt_users->execute();
 $users = $stmt_users->fetchAll(PDO::FETCH_ASSOC);
+
+// Get message from session
+$message = isset($_SESSION['message']) ? $_SESSION['message'] : '';
+$messageType = isset($_SESSION['messageType']) ? $_SESSION['messageType'] : '';
+$customIcon = isset($_SESSION['customIcon']) ? $_SESSION['customIcon'] : '';
+
+unset($_SESSION['message']);
+unset($_SESSION['messageType']);
+unset($_SESSION['customIcon']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -38,10 +47,42 @@ $users = $stmt_users->fetchAll(PDO::FETCH_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Management Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        #messageModal {
+            display: none;
+        }
+    </style>
 </head>
 <body class="bg-gray-100 p-6">
 
     <div class="container mx-auto">
+        
+        <!-- Success/Error Modal -->
+        <?php if ($message): ?>
+            <div id="messageModal" class="fixed inset-0 flex items-center justify-center z-50 <?php echo $messageType == 'success' ? 'animate__bounceIn' : 'animate__shakeX'; ?>">
+                <div class="bg-white p-6 rounded-lg shadow-lg text-center max-w-md w-full sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl">
+                    <?php echo $customIcon; ?>
+                    <div class="<?php echo $messageType == 'success' ? 'text-green-500' : 'text-red-500'; ?> text-lg sm:text-xl font-semibold mb-4">
+                        <span><?php echo htmlspecialchars($message); ?></span>
+                    </div>
+                    <button onclick="closeModal()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                        Close
+                    </button>
+                </div>
+            </div>
+            <script>
+                function closeModal() {
+                    document.getElementById('messageModal').style.display = 'none';
+                }
+                document.addEventListener('DOMContentLoaded', function() {
+                    var messageModal = document.getElementById('messageModal');
+                    if (messageModal) {
+                        messageModal.style.display = 'flex';
+                    }
+                });
+            </script>
+        <?php endif; ?>
+
         <!-- Display Users Table -->
         <h2 class="text-xl font-bold mb-4">User Management</h2>
         <form method="post" action="delete_users.php">
@@ -129,69 +170,55 @@ $users = $stmt_users->fetchAll(PDO::FETCH_ASSOC);
                         </select>
                     </div>
 
-                    <!-- Lock/Unlock Account -->
-                    <div class="mb-4">
-                        <label for="editAccountLocked" class="block text-sm font-semibold">Account Locked</label>
-                        <select name="account_locked" id="editAccountLocked" class="w-full px-4 py-2 border rounded">
-                            <option value="0">Unlocked</option>
-                            <option value="1">Locked</option>
-                        </select>
-                    </div>
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Save Changes</button>
+                    <button type="button" onclick="closeEditModal()" class="bg-gray-500 text-white px-4 py-2 rounded">Cancel</button>
+                </form>
+            </div>
+        </div>
+    </div>
 
-                    <!-- Failed Attempts Dropdown -->
-                    <div class="mb-4">
-                        <label for="editFailedAttempts" class="block text-sm font-semibold">Failed Attempts</label>
-                        <select name="failed_attempts" id="editFailedAttempts" class="w-full px-4 py-2 border rounded">
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                        </select>
-                    </div>
-
-                    <!-- Password Change Section -->
-                    <div class="mb-4">
-                        <label for="newPassword" class="block text-sm font-semibold">New Password</label>
-                        <input type="password" name="new_password" id="newPassword" class="w-full px-4 py-2 border rounded">
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="confirmPassword" class="block text-sm font-semibold">Confirm New Password</label>
-                        <input type="password" name="confirm_password" id="confirmPassword" class="w-full px-4 py-2 border rounded">
-                    </div>
-
-                    <button type="submit" class="bg-blue-600 text-white px-4 py-2">Save</button>
-                    <button type="button" onclick="closeEditModal()" class="bg-gray-600 text-white px-4 py-2">Cancel</button>
+    <!-- Delete Modal -->
+    <div id="deleteModal" class="fixed z-10 inset-0 overflow-y-auto hidden">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-sm p-6">
+                <h2 class="text-xl font-bold mb-4">Confirm Delete</h2>
+                <p class="mb-4">Are you sure you want to delete this user?</p>
+                <form method="POST" action="delete_user.php">
+                    <input type="hidden" name="id" id="deleteUserId">
+                    <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded">Delete</button>
+                    <button type="button" onclick="closeDeleteModal()" class="bg-gray-500 text-white px-4 py-2 rounded">Cancel</button>
                 </form>
             </div>
         </div>
     </div>
 
     <script>
-        // Open and populate the Edit Modal
         function openEditModal(id, email, role, status, failed_attempts) {
             document.getElementById('editUserId').value = id;
             document.getElementById('editEmail').value = email;
             document.getElementById('editRole').value = role;
             document.getElementById('editStatus').value = status;
-            document.getElementById('editAccountLocked').value = document.getElementById('editAccountLocked').options[0].value;
-            
-            // Set selected value for failed_attempts dropdown
-            document.getElementById('editFailedAttempts').value = failed_attempts;
-
-            document.getElementById('editModal').classList.remove('hidden');
+            document.getElementById('editModal').style.display = 'flex';
         }
 
-        // Close the Edit Modal
         function closeEditModal() {
-            document.getElementById('editModal').classList.add('hidden');
+            document.getElementById('editModal').style.display = 'none';
         }
 
-        // Handle select all checkboxes
+        function openDeleteModal(id) {
+            document.getElementById('deleteUserId').value = id;
+            document.getElementById('deleteModal').style.display = 'flex';
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+        }
+
         document.getElementById('select_all_users').addEventListener('change', function() {
-            const checkboxes = document.querySelectorAll('input[name="delete_ids[]"]');
-            checkboxes.forEach(checkbox => {
+            var checkboxes = document.querySelectorAll('input[name="delete_ids[]"]');
+            for (var checkbox of checkboxes) {
                 checkbox.checked = this.checked;
-            });
+            }
         });
     </script>
 </body>

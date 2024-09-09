@@ -1,9 +1,16 @@
 <?php
 require './db_connection1.php';
 
+// Define paths to custom icons
+$icons = [
+    'success' => '../../assets/images/modal-icons/checked.png', // Path to your success icon
+    'error' => '../../assets/images/modal-icons/cancel.png'     // Path to your error icon
+];
+
+// Initialize variables
 $message = '';
 $messageType = '';
-$customIcon = 'checked.png'; // Path to your custom icon
+$customIcon = $icons['success']; // Default icon
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $course_id = $_POST['course_id'] ?? null;
@@ -14,13 +21,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if (empty($course_name)) {
                 $message = 'Please enter a course name.';
                 $messageType = 'error';
-                $customIcon = '<img src="cancel.png" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
+                $customIcon = '<img src="' . $icons['error'] . '" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
             } else {
                 $stmt = $pdo->prepare("INSERT INTO courses (course_name) VALUES (?)");
                 $stmt->execute([$course_name]);
                 $message = 'Course added successfully.';
                 $messageType = 'success';
-                $customIcon = '<img src="checked.png" alt="Success Icon" class="w-12 h-12 mx-auto mb-4">';
+                $customIcon = '<img src="' . $icons['success'] . '" alt="Success Icon" class="w-12 h-12 mx-auto mb-4">';
             }
         } elseif (isset($_POST['update'])) {
             $stmt = $pdo->prepare("SELECT course_name FROM courses WHERE id = ?");
@@ -30,34 +37,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if (empty($course_name)) {
                 $message = 'Please enter a course name.';
                 $messageType = 'error';
-                $customIcon = '<img src="cancel.png" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
+                $customIcon = '<img src="' . $icons['error'] . '" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
             } elseif ($course_name === $existing_course) {
                 $message = 'No changes detected. Please update the course name.';
                 $messageType = 'error';
-                $customIcon = '<img src="cancel.png" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
+                $customIcon = '<img src="' . $icons['error'] . '" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
             } else {
                 $stmt = $pdo->prepare("UPDATE courses SET course_name = ? WHERE id = ?");
                 $stmt->execute([$course_name, $course_id]);
                 $message = 'Course updated successfully.';
                 $messageType = 'success';
-                $customIcon = '<img src="checked.png" alt="Success Icon" class="w-12 h-12 mx-auto mb-4">';
+                $customIcon = '<img src="' . $icons['success'] . '" alt="Success Icon" class="w-12 h-12 mx-auto mb-4">';
             }
         } elseif (isset($_POST['delete']) && $course_id) {
             $stmt = $pdo->prepare("DELETE FROM courses WHERE id = ?");
             $stmt->execute([$course_id]);
             $message = 'Course deleted successfully.';
             $messageType = 'success';
-            $customIcon = '<img src="checked.png" alt="Success Icon" class="w-12 h-12 mx-auto mb-4">';
+            $customIcon = '<img src="' . $icons['success'] . '" alt="Success Icon" class="w-12 h-12 mx-auto mb-4">';
         }
     } catch (PDOException $e) {
         if ($e->getCode() == '23000') { // Handling foreign key constraint violation
             $message = 'Cannot delete this course as it is linked to existing classes. Please remove the related classes first.';
             $messageType = 'error';
-            $customIcon = '<img src="cancel.png" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
+            $customIcon = '<img src="' . $icons['error'] . '" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
         } else {
             $message = 'An error occurred while processing your request. Please try again.';
             $messageType = 'error';
-            $customIcon = '<img src="cancel.png" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
+            $customIcon = '<img src="' . $icons['error'] . '" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
         }
     }
 }
@@ -118,40 +125,47 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </form>
         </div>
 
-        <!-- List All Courses -->
-        <div class="bg-white shadow-md rounded p-4">
-            <h2 class="text-xl font-semibold mb-4">Courses List</h2>
-            <table class="min-w-full bg-white">
-                <thead>
-                    <tr>
-                        <th class="py-2">ID</th>
-                        <th class="py-2">Course Name</th>
-                        <th class="py-2">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($courses as $course): ?>
-                    <tr>
-                        <td class="border px-4 py-2"><?php echo htmlspecialchars($course['id']); ?></td>
-                        <td class="border px-4 py-2"><?php echo htmlspecialchars($course['course_name']); ?></td>
-                        <td class="border px-4 py-2">
-                            <!-- Update Form -->
-                            <form method="POST" class="inline">
-                                <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($course['id']); ?>">
-                                <input type="text" name="course_name" value="<?php echo htmlspecialchars($course['course_name']); ?>" class="border px-2 py-1">
-                                <button type="submit" name="update" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded">Update</button>
-                            </form>
-                            <!-- Delete Form -->
-                            <form method="POST" class="inline">
-                                <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($course['id']); ?>">
-                                <button type="submit" name="delete" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">Delete</button>
-                            </form>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
+  <!-- List All Courses -->
+<div class="bg-white shadow-md rounded p-4 overflow-x-auto">
+    <h2 class="text-xl font-semibold mb-4">Courses List</h2>
+    <table class="min-w-full bg-white whitespace-nowrap">
+        <thead>
+            <tr class="bg-gray-800 text-white text-left">
+                <th class="py-3 px-4 uppercase font-semibold text-sm">ID</th>
+                <th class="py-3 px-4 uppercase font-semibold text-sm">Course Name</th>
+                <th class="py-3 px-4 uppercase font-semibold text-sm">
+                    <div class="flex gap-8 items-center">
+                        <span>Edit Course Name</span>
+                        <span class="ml-12">Update</span>
+                        <span class="">Delete</span>
+                    </div>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($courses as $course): ?>
+            <tr>
+                <td class="border px-4 py-2"><?php echo htmlspecialchars($course['id']); ?></td>
+                <td class="border px-4 py-2"><?php echo htmlspecialchars($course['course_name']); ?></td>
+                <td class="border px-4 py-2">
+                    <!-- Update Form -->
+                    <form method="POST" class="inline">
+                        <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($course['id']); ?>">
+                        <input type="text" name="course_name" value="<?php echo htmlspecialchars($course['course_name']); ?>" class="border px-2 py-1">
+                        <button type="submit" name="update" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded">Update</button>
+                    </form>
+                    <!-- Delete Form -->
+                    <form method="POST" class="inline">
+                        <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($course['id']); ?>">
+                        <button type="submit" name="delete" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>
+
     </div>
 </body>
 </html>

@@ -1,6 +1,7 @@
 <?php
 // Include the database connection file
 require '../../db/db_connection1.php';
+session_start();
 
 // Set number of records per page
 $records_per_page = 10;
@@ -25,6 +26,14 @@ $stmt_password_resets->bindParam(':records_per_page', $records_per_page, PDO::PA
 $stmt_password_resets->execute();
 $password_resets = $stmt_password_resets->fetchAll(PDO::FETCH_ASSOC);
 
+// Get message from session
+$message = isset($_SESSION['message']) ? $_SESSION['message'] : '';
+$messageType = isset($_SESSION['messageType']) ? $_SESSION['messageType'] : '';
+$customIcon = isset($_SESSION['customIcon']) ? $_SESSION['customIcon'] : '';
+
+unset($_SESSION['message']);
+unset($_SESSION['messageType']);
+unset($_SESSION['customIcon']);
 ?>
 
 <!DOCTYPE html>
@@ -39,6 +48,32 @@ $password_resets = $stmt_password_resets->fetchAll(PDO::FETCH_ASSOC);
 <body class="bg-gray-100 p-6">
 
     <div class="container mx-auto">
+        <!-- Success/Error Modal -->
+        <?php if ($message): ?>
+            <div id="messageModal" class="fixed inset-0 flex items-center justify-center z-50 <?php echo $messageType == 'success' ? 'animate__bounceIn' : 'animate__shakeX'; ?>">
+                <div class="bg-white p-6 rounded-lg shadow-lg text-center max-w-md w-full sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl">
+                    <?php echo $customIcon; ?>
+                    <div class="<?php echo $messageType == 'success' ? 'text-green-500' : 'text-red-500'; ?> text-lg sm:text-xl font-semibold mb-4">
+                        <span><?php echo htmlspecialchars($message); ?></span>
+                    </div>
+                    <button onclick="closeModal()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                        Close
+                    </button>
+                </div>
+            </div>
+            <script>
+                function closeModal() {
+                    document.getElementById('messageModal').style.display = 'none';
+                }
+                document.addEventListener('DOMContentLoaded', function() {
+                    var messageModal = document.getElementById('messageModal');
+                    if (messageModal) {
+                        messageModal.style.display = 'flex';
+                    }
+                });
+            </script>
+        <?php endif; ?>
+
         <!-- Display Password Resets Table -->
         <h2 class="text-xl font-bold mt-8 mb-4">Password Resets</h2>
         <form method="post" action="delete_password_resets.php">
@@ -73,7 +108,6 @@ $password_resets = $stmt_password_resets->fetchAll(PDO::FETCH_ASSOC);
             <button type="submit" class="bg-red-600 text-white px-4 py-2 mt-4">Delete Selected</button>
         </form>
 
-
         <!-- Pagination for Password Resets -->
         <div class="flex justify-center items-center mt-6 space-x-2">
             <?php if ($page_password_resets > 1): ?>
@@ -97,6 +131,7 @@ $password_resets = $stmt_password_resets->fetchAll(PDO::FETCH_ASSOC);
     </div>
 </body>
 </html>
+
 <script>
     document.getElementById('select_all').addEventListener('click', function() {
         var checkboxes = document.querySelectorAll('input[name="delete_ids[]"]');
