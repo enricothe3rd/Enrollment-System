@@ -70,27 +70,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $customIcon = '<img src="' . $icons['error'] . '" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
             }
         }
-    } elseif (isset($_POST['delete'])) {
-        $section_id = $_POST['section_id'] ?? null;
-
-        if (!$section_id) {
-            $message = 'Error: Missing section ID.';
+    } else if (isset($_POST['delete_selected']) && !empty($_POST['section_ids'])) {
+        $section_ids = $_POST['section_ids'];
+        $placeholders = implode(',', array_fill(0, count($section_ids), '?'));
+    
+        try {
+            $stmt = $pdo->prepare("DELETE FROM sections WHERE id IN ($placeholders)");
+            $stmt->execute($section_ids);
+            $message = 'Selected sections deleted successfully.';
+            $messageType = 'success';
+            $customIcon = '<img src="' . $icons['success'] . '" alt="Success Icon" class="w-12 h-12 mx-auto mb-4">';
+        } catch (PDOException $e) {
+            $message = '<p class="message">Error: ' . htmlspecialchars($e->getMessage()) . '</p>';
             $messageType = 'error';
             $customIcon = '<img src="' . $icons['error'] . '" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
-        } else {
-            try {
-                $stmt = $pdo->prepare("DELETE FROM sections WHERE id = ?");
-                $stmt->execute([$section_id]);
-                $message = 'Section deleted successfully.'; // Success message
-                $messageType = 'success';
-                $customIcon = '<img src="' . $icons['success'] . '" alt="Success Icon" class="w-12 h-12 mx-auto mb-4">';
-            } catch (PDOException $e) {
-                $message = '<p class="message">Error: ' . htmlspecialchars($e->getMessage()) . '</p>'; // Error message
-                $messageType = 'error';
-                $customIcon = '<img src="' . $icons['error'] . '" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
-            }
         }
+    } else {
+        $message = 'No sections selected for deletion.';
+        $messageType = 'error';
+        $customIcon = '<img src="' . $icons['error'] . '" alt="Error Icon" class="w-12 h-12 mx-auto mb-4">';
     }
+    
 }
 
 // Fetch all sections and classes for dropdowns
@@ -128,140 +128,191 @@ $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </button>
             </div>
         </div>
-
-        <script>
-            function closeModal(modalId) {
-                document.getElementById(modalId).style.display = 'none';
-            }
-            document.getElementById('messageModal').style.display = 'flex';
-        </script>
         <?php endif; ?>
 
-        <!-- Add New Section Modal -->
-        <div id="addSectionModal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
-            <div class="bg-white p-6 rounded-lg shadow-lg text-center max-w-md w-full sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl">
-                <h2 class="text-xl font-semibold mb-4">Add New Section</h2>
-                <form method="POST" class="space-y-4">
-                    <div class="mb-4">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="class_id">Class</label>
-                        <select name="class_id" id="add_class_id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                            <option value="">Select a class</option>
-                            <?php foreach ($classes as $class): ?>
-                                <option value="<?php echo $class['id']; ?>"><?php echo htmlspecialchars($class['name']); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="section_name">Section Name</label>
-                        <input type="text" name="section_name" id="add_section_name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <button type="submit" name="create" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Add Section</button>
-                        <button type="button" onclick="closeModal('addSectionModal')" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
 
-        <!-- Update Section Modal -->
-        <div id="updateSectionModal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
-            <div class="bg-white p-6 rounded-lg shadow-lg text-center max-w-md w-full sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl">
-                <h2 class="text-xl font-semibold mb-4">Update Section</h2>
-                <form id="updateForm" method="POST" class="space-y-4">
-                    <input type="hidden" name="section_id" id="update_section_id">
-                    <div class="mb-4">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="class_id">Class</label>
-                        <select name="class_id" id="update_class_id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+<!-- Add New Section Modal -->
+<div id="addSectionModal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center max-w-md w-full sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl border border-gray-300 relative">
+        <h2 class="text-xl font-semibold mb-4 text-gray-800">Add New Section</h2>
+        <form method="POST" class="space-y-4">
+            <div class="mb-4 relative">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Class</label>
+                <div class="relative">
+                    <button type="button" id="classDropdownBtn" class="block w-full shadow-sm border rounded-lg py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" onclick="toggleClassDropdown()">
+                        <span id="selected_class">Select a class</span>
+                        <svg class="w-5 h-5 inline ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <!-- Custom Scrollable Dropdown -->
+                    <div id="classDropdownMenu" class="absolute w-full bg-white shadow-md border border-gray-300 mt-2 hidden max-h-48 overflow-y-scroll">
+                        <ul>
                             <?php foreach ($classes as $class): ?>
-                                <option value="<?php echo $class['id']; ?>"><?php echo htmlspecialchars($class['name']); ?></option>
+                                <li class="p-2 hover:bg-gray-100 cursor-pointer" onclick="selectClass('<?php echo htmlspecialchars($class['id']); ?>', '<?php echo htmlspecialchars($class['name']); ?>')">
+                                    <?php echo htmlspecialchars($class['name']); ?>
+                                </li>
                             <?php endforeach; ?>
-                        </select>
+                        </ul>
                     </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="section_name">Section Name</label>
-                        <input type="text" name="section_name" id="update_section_name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <button type="submit" name="update" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Update Section</button>
-                        <button type="button" onclick="closeModal('updateSectionModal')" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Cancel</button>
-                    </div>
-                </form>
+                    <!-- Hidden input to store the selected class ID -->
+                    <input type="hidden" name="class_id" id="class_id" value="">
+                </div>
             </div>
-        </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Section Name</label>
+                <input type="text" name="section_name" id="add_section_name" class="block w-full shadow-sm border rounded-lg py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="flex items-center justify-between mt-4">
+                <button type="submit" name="create" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">Add Section</button>
+                <button type="button" onclick="closeModal('addSectionModal')" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-gray-500">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Function to toggle the visibility of the class dropdown menu
+    function toggleClassDropdown() {
+        var dropdown = document.getElementById('classDropdownMenu');
+        dropdown.classList.toggle('hidden');
+    }
+
+    // Function to select a class and update the button's display text
+    function selectClass(classId, className) {
+        document.getElementById('selected_class').innerText = className;
+        document.getElementById('class_id').value = classId; // Set the hidden input value to the class ID
+        toggleClassDropdown(); // Hide the dropdown after selection
+    }
+</script>
+
+
+
+
+<!-- Update Section Modal -->
+<div id="updateSectionModal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center max-w-md w-full sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl">
+        <h2 class="text-xl font-semibold mb-4 text-gray-800">Update Section</h2>
+        <form id="updateForm" method="POST" class="space-y-4">
+            <input type="hidden" name="section_id" id="update_section_id">
+            
+            <!-- Class Selection -->
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="class_id">Class</label>
+                <select name="class_id" id="update_class_id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                    <?php foreach ($classes as $class): ?>
+                        <option value="<?php echo $class['id']; ?>"><?php echo htmlspecialchars($class['name']); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <!-- Section Name Input -->
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="section_name">Section Name</label>
+                <input type="text" name="section_name" id="update_section_name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500">
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex items-center justify-between">
+                <button type="submit" name="update" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-yellow-500">Update Section</button>
+                <button type="button" onclick="closeModal('updateSectionModal')" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-gray-500">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
 
         <!-- Buttons to trigger modals -->
-        <div class="mb-4">
-            <button onclick="openModal('addSectionModal')" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Add New Section</button>
+        <!-- Container for both Add New Section and Delete Selected buttons -->
+        <div class="flex justify-between mb-4">
+            <!-- Add New Section Button -->
+            <button onclick="openModal('addSectionModal')" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                Add New Section
+            </button>
+
+            <!-- Delete Selected Button -->
+            <form method="POST" class="flex items-center">
+                <button type="submit" name="delete_selected" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    Delete Selected
+                </button>
+            </form>
         </div>
 
         <!-- List All Sections -->
         <div class="bg-white shadow-md rounded p-4">
             <h2 class="text-xl font-semibold mb-4">Sections List</h2>
-            <form id="deleteForm" method="POST" class="mb-4">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full bg-white">
-                        <thead>
-                            <tr class="bg-gray-800 text-white text-left">
-                                <th class="py-3 px-4 uppercase font-semibold text-sm">
-                                    <input type="checkbox" id="selectAll" onclick="toggleSelectAll()">
-                                </th>
-                                <th class="py-3 px-4 uppercase font-semibold text-sm">ID</th>
-                                <th class="py-3 px-4 uppercase font-semibold text-sm">Section Name</th>
-                                <th class="py-3 px-4 uppercase font-semibold text-sm">Class</th>
-                                <th class="py-3 px-4 uppercase font-semibold text-sm">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($sections as $section): ?>
-                            <tr>
-                                <td class="border px-4 py-2">
-                                    <input type="checkbox" name="section_ids[]" value="<?php echo $section['id']; ?>">
-                                </td>
-                                <td class="border px-4 py-2"><?php echo htmlspecialchars($section['id']); ?></td>
-                                <td class="border px-4 py-2"><?php echo htmlspecialchars($section['section_name']); ?></td>
-                                <td class="border px-4 py-2"><?php echo htmlspecialchars($section['class_name']); ?></td>
-                                <td class="border px-4 py-2">
-                                    <div class="flex items-center gap-2">
-                                        <!-- Update Button -->
-                                        <button onclick="openUpdateModal(<?php echo $section['id']; ?>, '<?php echo htmlspecialchars($section['section_name']); ?>', <?php echo $section['class_id']; ?>)" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded">Edit</button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="mt-4 flex items-center justify-between">
-                    <button type="submit" name="delete" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Delete Selected</button>
-                </div>
+            <!-- Form with the Delete Selected Button -->
+            <form method="POST" class="space-y-4">
+                <table class="min-w-full table-auto border-collapse border border-gray-400">
+                    <thead>
+                        <tr class="bg-gray-200 text-gray-700">
+                            <th class="px-4 py-2 border border-gray-300">
+                                <input type="checkbox" id="selectAll" onclick="toggleSelectAll()">
+                            </th>
+                            <th class="px-4 py-2 border border-gray-300">Class Name</th>
+                            <th class="px-4 py-2 border border-gray-300">Section Name</th>
+                            <th class="px-4 py-2 border border-gray-300">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($sections as $section): ?>
+                        <tr>
+                            <td class="px-4 py-2 border border-gray-300">
+                                <input type="checkbox" name="section_ids[]" value="<?php echo $section['id']; ?>">
+                            </td>
+                            <td class="px-4 py-2 border border-gray-300"><?php echo htmlspecialchars($section['class_name']); ?></td>
+                            <td class="px-4 py-2 border border-gray-300"><?php echo htmlspecialchars($section['section_name']); ?></td>
+                            <td class="px-4 py-2 border border-gray-300">
+                                <button type="button" onclick="openUpdateModal(<?php echo $section['id']; ?>, '<?php echo addslashes($section['section_name']); ?>')" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-3 rounded focus:outline-none focus:shadow-outline">
+                                    Edit
+                                </button>
+                                <button type="button" onclick="if (confirm('Are you sure you want to delete this section?')) window.location.href='delete_section.php?id=<?php echo $section['id']; ?>'" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded focus:outline-none focus:shadow-outline">
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </form>
         </div>
     </div>
 
     <script>
-        function openModal(modalId) {
-            document.getElementById(modalId).classList.remove('hidden');
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-        }
-
-        function openUpdateModal(id, name, classId) {
-            document.getElementById('update_section_id').value = id;
-            document.getElementById('update_section_name').value = name;
-            document.getElementById('update_class_id').value = classId;
-            openModal('updateSectionModal');
+        function openUpdateModal(sectionId, sectionName) {
+            document.getElementById('updateSectionModal').style.display = 'flex';
+            document.getElementById('update_section_id').value = sectionId;
+            document.getElementById('update_section_name').value = sectionName;
         }
 
         function toggleSelectAll() {
-            const selectAllCheckbox = document.getElementById('selectAll');
-            const checkboxes = document.querySelectorAll('input[name="section_ids[]"]');
-            checkboxes.forEach(checkbox => {
+            var selectAllCheckbox = document.getElementById('selectAll');
+            var checkboxes = document.querySelectorAll('input[name="section_ids[]"]');
+            checkboxes.forEach(function(checkbox) {
                 checkbox.checked = selectAllCheckbox.checked;
             });
+        }
+
+        function openModal(modalId) {
+        var modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'flex';
+        } else {
+            console.error("Modal with ID '" + modalId + "' not found.");
+        }
+    }
+
+        function closeModal(modalId) {
+            var modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+            } else {
+                console.error("Modal with ID '" + modalId + "' not found.");
+            }
+        }
+
+        // Automatically open the message modal if it exists
+        var messageModal = document.getElementById('messageModal');
+        if (messageModal) {
+            messageModal.style.display = 'flex';
         }
     </script>
 </body>
 </html>
-
