@@ -117,7 +117,7 @@
             </div>
 
 
-            <div id="users" class="content-section hidden">
+            <div id="users" class="content-section hidden ">
                 <iframe src="<?php echo $paths['users']; ?>" class="w-full h-full border-0" frameborder="0"></iframe>
             </div>
 

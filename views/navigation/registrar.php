@@ -96,7 +96,7 @@
 
 
         <!-- Main Content -->
-        <div class="flex-1 p-10 lg:ml-4">
+        <div class="flex-1 p-10 bg-gray-200">
             <div class="lg:hidden">
                 <button onclick="toggleSidebar()" class="text-gray-800 focus:outline-none">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -127,7 +127,7 @@
                 <iframe src="<?php echo $paths['classes']; ?>" class="w-full h-full border-0" frameborder="0"></iframe>
             </div>
 
-            <div id="sections" class="content-section hidden">
+            <div id="sections" class="content-section hidden ">
                 <iframe src="<?php echo $paths['sections']; ?>" class="w-full h-full border-0" frameborder="0"></iframe>
             </div>
 
