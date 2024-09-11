@@ -101,6 +101,31 @@ $sections = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $stmt = $pdo->query("SELECT * FROM classes");
 $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+// Pagination variables
+$limit = 10; // Number of results per page
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
+
+// Fetch total number of sections
+$totalStmt = $pdo->query("SELECT COUNT(*) FROM sections");
+$totalSections = $totalStmt->fetchColumn();
+$totalPages = ceil($totalSections / $limit);
+
+// Fetch sections for the current page with limit and offset
+$stmt = $pdo->prepare("SELECT sections.id, sections.section_name, classes.name AS class_name, sections.class_id 
+                     FROM sections 
+                     JOIN classes ON sections.class_id = classes.id 
+                     LIMIT ? OFFSET ?");
+$stmt->bindParam(1, $limit, PDO::PARAM_INT);
+$stmt->bindParam(2, $offset, PDO::PARAM_INT);
+$stmt->execute();
+$sections = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Fetch classes
+$stmt = $pdo->query("SELECT * FROM classes");
+$classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -257,6 +282,7 @@ $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <td class="px-4 py-3 border text-center border-gray-300" style="background-color:#E2CDCD; border-color:#DFB8B8;"> 
                                 <input type="checkbox" name="section_ids[]" value="<?php echo $section['id']; ?>"  class="w-6 h-6">
                             </td>
+                            
                             <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php echo htmlspecialchars($section['class_name']); ?></td>
                             <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php echo htmlspecialchars($section['section_name']); ?></td>
                             <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;">
@@ -274,6 +300,24 @@ $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </form>
         </div>
     </div>
+
+
+    <!-- Pagination Controls -->
+<div class="flex justify-center mt-6">
+    <?php if ($page > 1): ?>
+        <a href="?page=<?php echo $page - 1; ?>" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mx-2">Previous</a>
+    <?php endif; ?>
+    
+    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+        <a href="?page=<?php echo $i; ?>" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mx-1 <?php echo $i == $page ? 'bg-gray-700' : ''; ?>">
+            <?php echo $i; ?>
+        </a>
+    <?php endfor; ?>
+    
+    <?php if ($page < $totalPages): ?>
+        <a href="?page=<?php echo $page + 1; ?>" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mx-2">Next</a>
+    <?php endif; ?>
+</div>
 
     <script>
         function openUpdateModal(sectionId, sectionName) {
