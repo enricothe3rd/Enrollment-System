@@ -219,14 +219,14 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="bg-transparent border-0">
         <h2 class="text-xl font-semibold mb-4">Classes List</h2>
         <div class="overflow-x-auto">
-            <table class="min-w-full table-auto border-collapse border border-gray-400">
+            <table class="min-w-full table-auto border-collapse border border-gray-400" style="box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);">
                 <thead>
                     <tr class="bg-red-900 text-left" style="color:#e8e8e6;">
                         <th class="px-4 py-3 border border-gray-300 text-center">
                                 <input type="checkbox" id="selectAll" onclick="toggleSelectAll()" class="w-6 h-6">
                             </th>
-                        <th class="px-4 py-2 border border-gray-300 text-lg">ID</th>
-                        <th class="px-4 py-2 border border-gray-300 text-lg">Name</th>
+                        <!-- <th class="px-4 py-2 border border-gray-300 text-lg">ID</th> -->
+                        <th class="px-4 py-2 border border-gray-300 text-lg">Class Name</th>
                         <th class="px-4 py-2 border border-gray-300 text-lg">Course</th>
                         <th class="px-4 py-2 border border-gray-300 text-lg">Description</th>
                         <th class="px-4 py-2 border border-gray-300 text-lg">Actions</th>
@@ -238,7 +238,7 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <td class="px-4 py-3 border text-center border-gray-300" style="background-color:#E2CDCD; border-color:#DFB8B8;">
                                 <input type="checkbox" name="class_ids[]" value="<?php echo htmlspecialchars($class['id']); ?> "  class="w-6 h-6">
                             </td>
-                            <td  class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php echo htmlspecialchars($class['id']); ?></td>
+                            <!-- <td  class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php //echo htmlspecialchars($class['id']); ?></td> -->
                             <td  class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php echo htmlspecialchars($class['name']); ?></td>
                             <td  class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php echo htmlspecialchars(trim($class['course_name'])); ?></td>
                             <td  class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php echo htmlspecialchars($class['description']); ?></td>

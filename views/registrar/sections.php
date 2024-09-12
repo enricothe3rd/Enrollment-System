@@ -265,7 +265,7 @@ $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <h2 class="text-xl font-semibold mb-4">Sections List</h2>
             <!-- Form with the Delete Selected Button -->
             <form method="POST" class="space-y-4">
-                <table class="min-w-full table-auto border-collapse border border-gray-400">
+                <table class="min-w-full table-auto border-collapse border border-gray-400" style="box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);">
                     <thead>
                         <tr class="bg-red-900 text-left" style="color:#e8e8e6;">
                             <th class="px-4 py-3 border border-gray-300 text-center">
@@ -302,22 +302,22 @@ $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 
 
-    <!-- Pagination Controls -->
-<div class="flex justify-center mt-6">
-    <?php if ($page > 1): ?>
-        <a href="?page=<?php echo $page - 1; ?>" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mx-2">Previous</a>
-    <?php endif; ?>
-    
-    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-        <a href="?page=<?php echo $i; ?>" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mx-1 <?php echo $i == $page ? 'bg-gray-700' : ''; ?>">
-            <?php echo $i; ?>
-        </a>
-    <?php endfor; ?>
-    
-    <?php if ($page < $totalPages): ?>
-        <a href="?page=<?php echo $page + 1; ?>" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mx-2">Next</a>
-    <?php endif; ?>
-</div>
+            <!-- Pagination Controls -->
+        <div class="flex justify-center mt-6">
+            <?php if ($page > 1): ?>
+                <a href="?page=<?php echo $page - 1; ?>" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mx-2">Previous</a>
+            <?php endif; ?>
+            
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                <a href="?page=<?php echo $i; ?>" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mx-1 <?php echo $i == $page ? 'bg-gray-700' : ''; ?>">
+                    <?php echo $i; ?>
+                </a>
+            <?php endfor; ?>
+            
+            <?php if ($page < $totalPages): ?>
+                <a href="?page=<?php echo $page + 1; ?>" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mx-2">Next</a>
+            <?php endif; ?>
+        </div>
 
     <script>
         function openUpdateModal(sectionId, sectionName) {

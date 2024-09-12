@@ -108,10 +108,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 // Fetch paginated subjects
-$stmt = $pdo->prepare("SELECT subjects.*, sections.section_name 
-                       FROM subjects 
-                       JOIN sections ON subjects.section_id = sections.id
-                       LIMIT :offset, :items_per_page");
+$stmt = $pdo->prepare("
+    SELECT subjects.*, sections.section_name 
+    FROM subjects 
+    JOIN sections ON subjects.section_id = sections.id
+    LIMIT :offset, :items_per_page
+");
 $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->bindValue(':items_per_page', $items_per_page, PDO::PARAM_INT);
 $stmt->execute();
@@ -121,6 +123,9 @@ $subjects = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $total_stmt = $pdo->query("SELECT COUNT(*) FROM subjects");
 $total_items = $total_stmt->fetchColumn();
 $total_pages = ceil($total_items / $items_per_page);
+
+
+
 
 // Fetch all sections for dropdowns
 $stmt = $pdo->query("SELECT * FROM sections");
@@ -149,8 +154,8 @@ $input_values = [
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100 text-gray-900">
-    <div class="container mx-auto p-4">
+<body class="bg-gray-200 text-gray-900">
+    <div class="container mx-auto">
         <h1 class="text-2xl font-bold mb-4">Manage Subjects</h1>
 
         <!-- Success/Error Modal -->
@@ -278,9 +283,9 @@ $input_values = [
 
         <!-- Update Subject Modal -->
         <div id="updateModal" class="fixed inset-0 hidden items-center justify-center z-50">
-            <div class="bg-white p-8 rounded-lg shadow-lg max-w-full sm:max-w-md lg:max-w-lg xl:max-w-xl">
+            <div class="bg-red-900 p-8 rounded-lg shadow-lg max-w-full sm:max-w-md lg:max-w-lg xl:max-w-xl" style="color:#e8e8e6;">
                 <!-- Modal Title -->
-                <h2 class="text-2xl font-semibold mb-6 text-gray-900">Update Subject</h2>
+                <h2 class="text-2xl font-semibold mb-6 uppercase" style="color:#e8e8e6;">Update Subject</h2>
 
                 <!-- Form Section -->
                 <form method="POST" class="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -289,9 +294,9 @@ $input_values = [
 
                     <!-- Section Select Field -->
                     <div>
-                        <label class="block text-gray-700 text-lg font-medium mb-2" for="update_section_id">Section</label>
+                        <label class="block text-gray-700 text-lg font-medium mb-2" for="update_section_id" style="color:#e8e8e6;">Section</label>
                         <select name="section_id" id="update_section_id"
-                            class="shadow border border-gray-300 rounded-lg w-full py-3 px-4 text-base text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            class="shadow border border-gray-300 rounded-lg w-full px-4 py-2 border border-gray-300 text-lg text-base text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             <?php foreach ($sections as $section): ?>
                                 <option value="<?php echo $section['id']; ?>">
                                     <?php echo htmlspecialchars($section['section_name']); ?>
@@ -302,41 +307,41 @@ $input_values = [
 
                     <!-- Code Input Field -->
                     <div>
-                        <label class="block text-gray-700 text-lg font-medium mb-2" for="update_code">Code</label>
+                        <label class="block text-gray-700 text-lg font-medium mb-2" for="update_code" style="color:#e8e8e6;">Code</label>
                         <input type="text" name="code" id="update_code" 
-                            class="shadow border border-gray-300 rounded-lg w-full py-3 px-4 text-base text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                            class="shadow border border-gray-300 rounded-lg w-full px-4 py-2 border border-gray-300 text-lg text-base text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                             required>
                     </div>
 
                     <!-- Subject Title Input Field -->
                     <div>
-                        <label class="block text-gray-700 text-lg font-medium mb-2" for="update_subject_title">Subject Title</label>
+                        <label class="block text-gray-700 text-lg font-medium mb-2" for="update_subject_title" style="color:#e8e8e6;">Subject Title</label>
                         <input type="text" name="subject_title" id="update_subject_title" 
-                            class="shadow border border-gray-300 rounded-lg w-full py-3 px-4 text-base text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                            class="shadow border border-gray-300 rounded-lg w-full px-4 py-2 border border-gray-300 text-lg text-base text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                             required>
                     </div>
 
                     <!-- Units Input Field -->
                     <div>
-                        <label class="block text-gray-700 text-lg font-medium mb-2" for="update_units">Units</label>
+                        <label class="block text-gray-700 text-lg font-medium mb-2" for="update_units" style="color:#e8e8e6;">Units</label>
                         <input type="number" name="units" id="update_units" 
-                            class="shadow border border-gray-300 rounded-lg w-full py-3 px-4 text-base text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                            class="shadow border border-gray-300 rounded-lg w-full px-4 py-2 border border-gray-300 text-lg text-base text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                             required>
                     </div>
 
                     <!-- Room Input Field -->
                     <div>
-                        <label class="block text-gray-700 text-lg font-medium mb-2" for="update_room">Room</label>
+                        <label class="block text-gray-700 text-lg font-medium mb-2" for="update_room" style="color:#e8e8e6;">Room</label>
                         <input type="text" name="room" id="update_room" 
-                            class="shadow border border-gray-300 rounded-lg w-full py-3 px-4 text-base text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                            class="shadow border border-gray-300 rounded-lg w-full px-4 py-2 border border-gray-300 text-lg text-base text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                             required>
                     </div>
 
                     <!-- Day Select Field -->
                     <div>
-                        <label class="block text-gray-700 text-lg font-medium mb-2" for="update_day">Day</label>
+                        <label class="block text-gray-700 text-lg font-medium mb-2" for="update_day" style="color:#e8e8e6;">Day</label>
                         <select name="day" id="update_day" 
-                            class="shadow border border-gray-300 rounded-lg w-full py-3 px-4 text-base text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                            class="shadow border border-gray-300 rounded-lg w-full px-4 py-2 border border-gray-300 text-lg text-base text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                             required>
                             <option value="Monday">Monday</option>
                             <option value="Tuesday">Tuesday</option>
@@ -350,17 +355,17 @@ $input_values = [
 
                     <!-- Start Time Input Field -->
                     <div>
-                        <label class="block text-gray-700 text-lg font-medium mb-2" for="update_start_time">Start Time</label>
+                        <label class="block text-gray-700 text-lg font-medium mb-2" for="update_start_time" style="color:#e8e8e6;">Start Time</label>
                         <input type="time" name="start_time" id="update_start_time" 
-                            class="shadow border border-gray-300 rounded-lg w-full py-3 px-4 text-base text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                            class="shadow border border-gray-300 rounded-lg w-full px-4 py-2 border border-gray-300 text-lg text-base text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                             required>
                     </div>
 
                     <!-- End Time Input Field -->
                     <div>
-                        <label class="block text-gray-700 text-lg font-medium mb-2" for="update_end_time">End Time</label>
+                        <label class="block text-gray-700 text-lg font-medium mb-2" for="update_end_time" style="color:#e8e8e6;">End Time</label>
                         <input type="time" name="end_time" id="update_end_time" 
-                            class="shadow border border-gray-300 rounded-lg w-full py-3 px-4 text-base text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                            class="shadow border border-gray-300 rounded-lg w-full px-4 py-2 border border-gray-300 text-lg text-base text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                             required>
                     </div>
 
@@ -368,13 +373,13 @@ $input_values = [
                     <div class="col-span-2 flex justify-end mt-6">
                         <!-- Cancel Button -->
                         <button type="button" onclick="closeUpdateModal()" 
-                            class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:shadow-outline mr-2">
+                        class="bg-gray-500 hover:bg-gray-700 text-white font-bold mr-2 py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-gray-500">
                             Cancel
                         </button>
 
                         <!-- Update Button -->
                         <button type="submit" name="update" 
-                            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:shadow-outline">
+                        class="bg-yellow-500 hover:bg-yellow-700 font-bold text-lg text-white py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-yellow-500">
                             Update Subject
                         </button>
                     </div>
@@ -384,56 +389,60 @@ $input_values = [
 
 
         <!-- Subject Table -->
+        <div class="bg-transparent border-0" >
+       
+ 
         <form method="POST">
             <div class="flex justify-between items-center mb-4">
-                <button type="button" onclick="openAddModal()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                <button type="button" onclick="openAddModal()" class="bg-red-900 hover:bg-red-800 text-lg font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" style="color:#e8e8e6;">
                     Add New Subject
                 </button>
-                <button type="submit" name="delete_selected" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                <button type="submit" name="delete_selected" class="bg-red-900 hover:bg-red-800 text-lg font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" style="color:#e8e8e6;">
                     Delete Selected
                 </button>
             </div>
+            <h2 class="text-xl font-semibold mb-4">Subject List</h2>
 
-            <table class="table-auto w-full bg-white rounded-lg shadow-lg">
+            <table class="min-w-full table-auto border-collapse border border-gray-400" style="box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);">
                 <thead>
-                    <tr class="bg-gray-800 text-white text-left">
-                        <th class="py-3 px-4">
-                            <input type="checkbox" id="select_all" class="form-checkbox">
+                    <tr class="bg-red-900 text-left" style="color:#e8e8e6;">
+                        <th class="px-4 py-3 border border-gray-300 text-center">
+                            <input type="checkbox" id="select_all" class="form-checkbox w-6 h-6">
                         </th>
-                        <th class="py-3 px-4">Code</th>
-                        <th class="py-3 px-4">Subject Title</th>
-                        <th class="py-3 px-4">Units</th>
-                        <th class="py-3 px-4">Room</th>
-                        <th class="py-3 px-4">Day</th>
-                        <th class="py-3 px-4">Start Time</th>
-                        <th class="py-3 px-4">End Time</th>
-                        <th class="py-3 px-4">Actions</th>
+                        <th class="px-4 py-2 border border-gray-300 text-lg">Code</th>
+                        <th class="px-4 py-2 border border-gray-300 text-lg">Subject Title</th>
+                        <th class="px-4 py-2 border border-gray-300 text-lg">Units</th>
+                        <th class="px-4 py-2 border border-gray-300 text-lg">Room</th>
+                        <th class="px-4 py-2 border border-gray-300 text-lg">Day</th>
+                        <th class="px-4 py-2 border border-gray-300 text-lg">Start Time</th>
+                        <th class="px-4 py-2 border border-gray-300 text-lg">End Time</th>
+                        <th class="px-4 py-2 border border-gray-300 text-lg">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($subjects as $subject): ?>
                     <tr>
-                        <td class="border px-4 py-2">
-                            <input type="checkbox" name="subject_ids[]" value="<?php echo $subject['id']; ?>" class="form-checkbox">
+                        <td class="px-4 py-3 border text-center border-gray-300" style="background-color:#E2CDCD; border-color:#DFB8B8;">
+                            <input type="checkbox" name="subject_ids[]" value="<?php echo $subject['id']; ?>" class="form-checkbox w-6 h-6">
                         </td>
-                        <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['code']); ?></td>
-                        <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['subject_title']); ?></td>
-                        <td class="border px-4 py-2"><?php echo intval($subject['units']); ?></td>
-                        <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['room']); ?></td>
-                        <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['day']); ?></td>
-                        <td class="border px-4 py-2">
+                        <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php echo htmlspecialchars($subject['code']); ?></td>
+                        <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php echo htmlspecialchars($subject['subject_title']); ?></td>
+                        <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php echo intval($subject['units']); ?></td>
+                        <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php echo htmlspecialchars($subject['room']); ?></td>
+                        <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php echo htmlspecialchars($subject['day']); ?></td>
+                        <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;">
                             <?php
                                 $startTime = new DateTime($subject['start_time']);
                                 echo $startTime->format('h:i A'); // Format to 12-hour time with AM/PM
                             ?>
                         </td>
-                        <td class="border px-4 py-2">
+                        <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;">
                             <?php
                                 $endTime = new DateTime($subject['end_time']);
                                 echo $endTime->format('h:i A'); // Format to 12-hour time with AM/PM
                             ?>
                         </td>
-                        <td class="border px-4 py-2">
+                        <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;">
                             <button type="button" onclick="openUpdateModal(<?php echo $subject['id']; ?>, '<?php echo htmlspecialchars($subject['section_id']); ?>', '<?php echo htmlspecialchars($subject['code']); ?>', '<?php echo htmlspecialchars($subject['subject_title']); ?>', '<?php echo htmlspecialchars($subject['units']); ?>', '<?php echo htmlspecialchars($subject['room']); ?>', '<?php echo htmlspecialchars($subject['day']); ?>', '<?php echo htmlspecialchars($subject['start_time']); ?>', '<?php echo htmlspecialchars($subject['end_time']); ?>')" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
                                 Edit
                             </button>
@@ -442,28 +451,26 @@ $input_values = [
                     <?php endforeach; ?>
                 </tbody>
             </table>
-
-
-            
-
-            <!-- Pagination -->
-            <div class="mt-4 flex justify-between items-center">
-                <div>
-                    <span class="text-sm text-gray-700">
-                        Page <?php echo $page; ?> of <?php echo $total_pages; ?>
-                    </span>
-                </div>
-                <div>
-                    <button type="button" onclick="location.href='?page=<?php echo max(1, $page - 1); ?>'" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                        Previous
-                    </button>
-                    <button type="button" onclick="location.href='?page=<?php echo min($total_pages, $page + 1); ?>'" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                        Next
-                    </button>
-                </div>
             </div>
-        </form>
-    </div>
+
+            <!-- Pagination Controls -->
+            <div class="flex justify-center mt-6">
+                <?php if ($page > 1): ?>
+                    <a href="?page=<?= $page - 1; ?>" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mx-2">Previous</a>
+                <?php endif; ?>
+
+                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                    <a href="?page=<?= $i; ?>" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mx-1 <?= $i == $page ? 'bg-gray-700' : ''; ?>">
+                        <?= $i; ?>
+                    </a>
+                <?php endfor; ?>
+
+                <?php if ($page < $total_pages): ?>
+                    <a href="?page=<?= $page + 1; ?>" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mx-2">Next</a>
+                <?php endif; ?>
+            </div>
+                    </form>
+                </div>
 
     <script>
         function openAddModal() {
