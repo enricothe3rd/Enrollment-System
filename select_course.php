@@ -1,11 +1,14 @@
 <?php
-require 'db_connection1.php';
 session_start();
+require 'db/db_connection1.php';
 
-// Check if the user is logged in and has a valid session
-if (!isset($_SESSION['user_id'])) {
-    die('You must be logged in to enroll in subjects.');
+// Check if user is logged in and their role is either 'student' or 'admin'
+if (!isset($_SESSION['user_id']) || ($_SESSION['user_role'] !== 'student' && $_SESSION['user_role'] !== 'admin')) {
+    header("Location: index.php");
+    exit();
 }
+
+$user_id = $_SESSION['user_id']; // Get the logged-in user's ID
 
 // Initialize variables
 $selected_course_id = null;
@@ -31,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['select_course'])) {
                 $stmt = $pdo->prepare("
                     SELECT s.id AS subject_id, s.subject_title, s.code, s.units, s.room, s.day, s.start_time, s.end_time,
                            sec.id AS section_id, sec.section_name,
-                           cl.id AS class_id, cl.name AS class_name, cl.course_id
+                           cl.id AS class_id, cl.name AS class_name
                     FROM subjects s
                     JOIN sections sec ON s.section_id = sec.id
                     JOIN classes cl ON sec.class_id = cl.id
@@ -72,23 +75,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['select_course'])) {
     }
 }
 
-// Handle subject selection
+// Handle subject selection and enrollment
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['enroll'])) {
     $selected_subjects = $_POST['subjects'] ?? [];
-    
+
     if (!empty($selected_subjects)) {
         try {
-            $user_id = $_SESSION['user_id'];
+            // Start a transaction
             $pdo->beginTransaction();
-            
+
+            // Prepare the insert statement for subject enrollments
             $stmt = $pdo->prepare("INSERT INTO subject_enrollments (student_id, subject_id) VALUES (?, ?)");
+
+            // Insert each selected subject for the logged-in user
             foreach ($selected_subjects as $subject_id) {
                 $stmt->execute([$user_id, $subject_id]);
             }
-            
+
+            // Commit the transaction
             $pdo->commit();
-            echo '<p class="text-green-500">You have successfully enrolled in the selected subjects.</p>';
+
+            echo '<p class="text-green-500">Enrollment successful!</p>';
         } catch (PDOException $e) {
+            // Rollback in case of an error
             $pdo->rollBack();
             echo '<p class="text-red-500">Error: ' . htmlspecialchars($e->getMessage()) . '</p>';
         }
@@ -143,6 +152,7 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <thead>
                                 <tr>
                                     <th class="py-2">Select</th>
+                                    <th class="py-2">ID</th>
                                     <th class="py-2">Subject Title</th>
                                     <th class="py-2">Code</th>
                                     <th class="py-2">Units</th>
@@ -158,6 +168,7 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <td class="border px-4 py-2">
                                         <input type="checkbox" name="subjects[]" value="<?php echo htmlspecialchars($subject['id']); ?>">
                                     </td>
+                                    <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['id']); ?></td>
                                     <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['subject_title']); ?></td>
                                     <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['code']); ?></td>
                                     <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['units']); ?></td>

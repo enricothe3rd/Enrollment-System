@@ -1,7 +1,7 @@
 <?php
 session_start();
 require 'session_timeout.php';
-require 'db_connection1.php';
+require 'db/db_connection1.php';
 
 // Check if user is logged in and their role is either 'student' or 'admin'
 if (!isset($_SESSION['user_id']) || ($_SESSION['user_role'] !== 'student' && $_SESSION['user_role'] !== 'admin')) {
@@ -58,7 +58,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $address = filter_input(INPUT_POST, 'address', FILTER_SANITIZE_STRING);
     $contact_no = filter_input(INPUT_POST, 'contact_no', FILTER_SANITIZE_STRING);
     $status = filter_input(INPUT_POST, 'status', FILTER_SANITIZE_STRING);
-    $statusofenrollment = 'verifying'; // Default status for new records
+    $statusofenrollment = 'incomplete'; // Default status for new records
 
     // Insert data into enrollment table
     $sql = "INSERT INTO enrollment (student_id, lastname, firstname, middlename, suffix, year, course_id, sex, dob, address, contact_no, status, email, statusofenrollment) 
@@ -81,11 +81,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         ':statusofenrollment' => $statusofenrollment
     ]);
 
-    header("Location: student_dashboard_verifying.php");
+    header("Location: select_course.php");
     exit();
 }
-?>
-<!DOCTYPE html>
+?><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -93,11 +92,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <title>Student Registration Form</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100">
- <div class="container mx-auto p-8">
-    <div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-lg">
-        <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Student Registration Form</h2>
-        <form method="POST" >
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+<div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-6xl">
+    <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Student Registration Form</h2>
+    <form method="POST">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
             <!-- Last Name -->
             <div class="mb-4">
                 <label for="lastname" class="block text-gray-700 mb-2">Last Name</label>
@@ -134,19 +133,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="mb-4">
                 <label for="year" class="block text-gray-700 mb-2">Year</label>
                 <input type="text" id="year" name="year" class="w-full border border-gray-300 rounded-lg px-3 py-2">
-            </div>
-
-            <!-- Course -->
-            <div class="mb-4">
-                <label for="course" class="block text-gray-700 mb-2">Course</label>
-                <select id="course" name="course" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
-                    <option value="">--Select Course--</option>
-                    <?php foreach ($courses as $course): ?>
-                        <option value="<?php echo htmlspecialchars($course['id']); ?>">
-                            <?php echo htmlspecialchars($course['course_name']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
             </div>
 
             <!-- Sex -->
@@ -192,14 +178,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <?php endforeach; ?>
                 </select>
             </div>
+        </div>
 
-            <!-- Submit Button -->
-            <div>
-                <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-blue-700 transition">Submit</button>
-            </div>
-        </form>
-    </div>
+        <!-- Submit Button -->
+        <div class="mt-6 text-right">
+            <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-blue-700 transition">Submit</button>
+        </div>
+    </form>
 </div>
-
 </body>
 </html>

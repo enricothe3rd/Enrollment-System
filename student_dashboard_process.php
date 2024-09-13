@@ -1,7 +1,7 @@
 <?php
 session_start();
 require 'session_timeout.php'; // Include session timeout mechanism
-require 'db_connection1.php'; // Include your database connection file
+require 'db/db_connection1.php'; // Include your database connection file
 
 // Check if user is logged in and their role is either 'student' or 'admin'
 if (!isset($_SESSION['user_id']) || ($_SESSION['user_role'] !== 'student' && $_SESSION['user_role'] !== 'admin')) {
@@ -22,17 +22,19 @@ try {
 
     if ($status === false) {
         // No record found for this student_id, redirect to enrollment form
-        header("Location: http://localhost/enrollment/token-sample/enrollment_form.php");
+        header("Location: http://localhost/Enrollment-System/enrollment_form.php");
         exit(); // Stop further execution
     }
 
     // Redirect based on the status
     if ($status === 'verifying') {
-        header("Location: http://localhost/enrollment/token-sample/student_dashboard_verifying.php");
+        header("Location: http://localhost/Enrollment-System/student_dashboard_verifying.php");
     } elseif ($status === 'enrolled') {
-        header("Location: http://localhost/enrollment/token-sample/student_dashboard.php");
-    } else {
-        header("Location: http://localhost/enrollment/token-sample/student_dashboard_rejected.php");
+        header("Location: http://localhost/Enrollment-System/student_dashboard.php");
+    } elseif ($status === 'incomplete') {
+        header("Location: http://localhost/Enrollment-System/select_course.php");
+    }  else {
+        header("Location: http://localhost/Enrollment-System/student_dashboard_rejected.php");
     }
     exit(); // Stop further execution
 

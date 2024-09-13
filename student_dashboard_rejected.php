@@ -1,7 +1,7 @@
 <?php
 session_start();
 require 'session_timeout.php'; // Include session timeout mechanism
-require 'db_connection1.php'; // Include your database connection file
+require 'db/db_connection1.php'; // Include your database connection file
 
 if (!isset($_SESSION['user_id']) || ($_SESSION['user_role'] !== 'student' && $_SESSION['user_role'] !== 'admin')) {
     header("Location: index.php"); // Redirect to login page

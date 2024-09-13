@@ -68,7 +68,7 @@ CREATE TABLE enrollment (
     address TEXT,
     email VARCHAR(100),
     contact_no VARCHAR(20),
-    statusofenrollment ENUM('pending', 'verifying', 'enrolled', 'rejected') DEFAULT 'pending',
+    statusofenrollment ENUM('pending', 'verifying', 'enrolled', 'rejected', 'incomplete') DEFAULT 'pending';
     CONSTRAINT fk_student_id FOREIGN KEY (student_id) REFERENCES users(id),
     -- Drop na CONSTRAINT fk_course_id FOREIGN KEY (course_id) REFERENCES courses(id)
 );
@@ -117,4 +117,12 @@ CREATE TABLE subjects (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     KEY (class_id)
+);
+
+CREATE TABLE subject_enrollments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id INT NOT NULL,
+    subject_id INT NOT NULL,
+    FOREIGN KEY (student_id) REFERENCES users(id),
+    FOREIGN KEY (subject_id) REFERENCES subjects(id)
 );
