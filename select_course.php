@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['select_course'])) {
             $course = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($course) {
-                echo '<p class="text-blue-500">Selected Course: ' . htmlspecialchars($course['course_name']) . '</p>';
+                //echo '<p class="text-blue-500">Selected Course: ' . htmlspecialchars($course['course_name']) . '</p>';
 
                 // Fetch sections and subjects related to the selected course
                 $stmt = $pdo->prepare("
@@ -120,11 +120,11 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 text-gray-900">
-    <div class="container mx-auto p-4">
+    <div class="container mx-auto p-4 bg-white">
         <h1 class="text-2xl font-bold mb-4">Select a Course</h1>
 
         <!-- Course Selection Form -->
-        <form method="POST" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <form method="POST" class="  px-8 pt-6 pb-8 mb-4">
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="course_id">Choose Course</label>
                 <select name="course_id" id="course_id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">

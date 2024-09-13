@@ -92,99 +92,103 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <title>Student Registration Form</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-<div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-6xl">
-    <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Student Registration Form</h2>
-    <form method="POST">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-            <!-- Last Name -->
-            <div class="mb-4">
-                <label for="lastname" class="block text-gray-700 mb-2">Last Name</label>
-                <input type="text" id="lastname" name="lastname" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+<body class="">
+    
+    <div class="bg-white p-6">
+        <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 mt-10">Student Registration Form</h2>
+        <form method="POST">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                <!-- Last Name -->
+                <div class="mb-4">
+                    <label for="lastname" class="block text-gray-700 mb-2">Last Name</label>
+                    <input type="text" id="lastname" name="lastname" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+                </div>
+
+                <!-- First Name -->
+                <div class="mb-4">
+                    <label for="firstname" class="block text-gray-700 mb-2">First Name</label>
+                    <input type="text" id="firstname" name="firstname" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+                </div>
+
+                <!-- Middle Name -->
+                <div class="mb-4">
+                    <label for="middlename" class="block text-gray-700 mb-2">Middle Name</label>
+                    <input type="text" id="middlename" name="middlename" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                </div>
+
+                <!-- Suffix -->
+                <div class="mb-4">
+                    <label for="suffix" class="block text-gray-700 mb-2">Suffix (Optional)</label>
+                    <select id="suffix" name="suffix" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                        <option value="">--Select--</option>
+                        <option value="Jr">Jr. (Junior)</option>
+                        <option value="Sr">Sr. (Senior)</option>
+                        <option value="II">II</option>
+                        <option value="III">III</option>
+                        <option value="IV">IV</option>
+                        <option value="Esq">Esq. (Esquire)</option>
+                    </select>
+                </div>
+
+                <!-- Year -->
+                <div class="mb-4">
+                    <label for="year" class="block text-gray-700 mb-2">Year</label>
+                    <input type="text" id="year" name="year" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                </div>
+
+                <!-- Sex -->
+                <div class="mb-4">
+                    <label for="sex" class="block text-gray-700 mb-2">Sex</label>
+                    <select id="sex" name="sex" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+                        <option value="">--Select Sex--</option>
+                        <?php foreach ($sex_options as $sex_option): ?>
+                            <option value="<?php echo htmlspecialchars($sex_option['sex_name']); ?>">
+                                <?php echo htmlspecialchars($sex_option['sex_name']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <!-- Date of Birth -->
+                <div class="mb-4">
+                    <label for="dob" class="block text-gray-700 mb-2">Date of Birth</label>
+                    <input type="date" id="dob" name="dob" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                </div>
+
+                <!-- Address -->
+                <div class="mb-4">
+                    <label for="address" class="block text-gray-700 mb-2">Present Address</label>
+                    <input type="text" id="address" name="address" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                </div>
+
+                <!-- Contact Number -->
+                <div class="mb-4">
+                    <label for="contact_no" class="block text-gray-700 mb-2">Contact Number</label>
+                    <input type="text" id="contact_no" name="contact_no" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                </div>
+
+                <!-- Status -->
+                <div class="mb-4">
+                    <label for="status" class="block text-gray-700 mb-2">Status</label>
+                    <select id="status" name="status" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+                        <option value="">--Select Status--</option>
+                        <?php foreach ($status_options as $status_option): ?>
+                            <option value="<?php echo htmlspecialchars($status_option['status_name']); ?>">
+                                <?php echo htmlspecialchars($status_option['status_name']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
             </div>
 
-            <!-- First Name -->
-            <div class="mb-4">
-                <label for="firstname" class="block text-gray-700 mb-2">First Name</label>
-                <input type="text" id="firstname" name="firstname" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+            <!-- Submit Button -->
+            <div class="mt-6 text-right">
+                <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-blue-700 transition">Submit</button>
             </div>
-
-            <!-- Middle Name -->
-            <div class="mb-4">
-                <label for="middlename" class="block text-gray-700 mb-2">Middle Name</label>
-                <input type="text" id="middlename" name="middlename" class="w-full border border-gray-300 rounded-lg px-3 py-2">
-            </div>
-
-            <!-- Suffix -->
-            <div class="mb-4">
-                <label for="suffix" class="block text-gray-700 mb-2">Suffix (Optional)</label>
-                <select id="suffix" name="suffix" class="w-full border border-gray-300 rounded-lg px-3 py-2">
-                    <option value="">--Select--</option>
-                    <option value="Jr">Jr. (Junior)</option>
-                    <option value="Sr">Sr. (Senior)</option>
-                    <option value="II">II</option>
-                    <option value="III">III</option>
-                    <option value="IV">IV</option>
-                    <option value="Esq">Esq. (Esquire)</option>
-                </select>
-            </div>
-
-            <!-- Year -->
-            <div class="mb-4">
-                <label for="year" class="block text-gray-700 mb-2">Year</label>
-                <input type="text" id="year" name="year" class="w-full border border-gray-300 rounded-lg px-3 py-2">
-            </div>
-
-            <!-- Sex -->
-            <div class="mb-4">
-                <label for="sex" class="block text-gray-700 mb-2">Sex</label>
-                <select id="sex" name="sex" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
-                    <option value="">--Select Sex--</option>
-                    <?php foreach ($sex_options as $sex_option): ?>
-                        <option value="<?php echo htmlspecialchars($sex_option['sex_name']); ?>">
-                            <?php echo htmlspecialchars($sex_option['sex_name']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-
-            <!-- Date of Birth -->
-            <div class="mb-4">
-                <label for="dob" class="block text-gray-700 mb-2">Date of Birth</label>
-                <input type="date" id="dob" name="dob" class="w-full border border-gray-300 rounded-lg px-3 py-2">
-            </div>
-
-            <!-- Address -->
-            <div class="mb-4">
-                <label for="address" class="block text-gray-700 mb-2">Present Address</label>
-                <input type="text" id="address" name="address" class="w-full border border-gray-300 rounded-lg px-3 py-2">
-            </div>
-
-            <!-- Contact Number -->
-            <div class="mb-4">
-                <label for="contact_no" class="block text-gray-700 mb-2">Contact Number</label>
-                <input type="text" id="contact_no" name="contact_no" class="w-full border border-gray-300 rounded-lg px-3 py-2">
-            </div>
-
-            <!-- Status -->
-            <div class="mb-4">
-                <label for="status" class="block text-gray-700 mb-2">Status</label>
-                <select id="status" name="status" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
-                    <option value="">--Select Status--</option>
-                    <?php foreach ($status_options as $status_option): ?>
-                        <option value="<?php echo htmlspecialchars($status_option['status_name']); ?>">
-                            <?php echo htmlspecialchars($status_option['status_name']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-        </div>
-
-        <!-- Submit Button -->
-        <div class="mt-6 text-right">
-            <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-blue-700 transition">Submit</button>
-        </div>
-    </form>
-</div>
+        </form>
+    </div>
 </body>
 </html>
+<script>
+    
+</script>
