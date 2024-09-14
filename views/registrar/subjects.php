@@ -131,6 +131,21 @@ $total_pages = ceil($total_items / $items_per_page);
 $stmt = $pdo->query("SELECT * FROM sections");
 $sections = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+
+// Group subjects by section_id
+$groupedSubjects = [];
+foreach ($subjects as $subject) {
+    $section_id = $subject['section_id'];
+    if (!isset($groupedSubjects[$section_id])) {
+        $groupedSubjects[$section_id] = [
+            'section_name' => $subject['section_name'], // Assuming this is fetched from the query
+            'subjects' => []
+        ];
+    }
+    $groupedSubjects[$section_id]['subjects'][] = $subject;
+}
+
+
 // Retain POST values for form fields
 $input_values = [
     'section_id' => $_POST['section_id'] ?? '',
@@ -189,13 +204,14 @@ $input_values = [
                     <div>
                         <label class="block text-gray-700 text-lg font-medium mb-2" for="section_id">Section</label>
                         <select name="section_id" id="section_id" 
-                            class="shadow border border-gray-300 rounded-lg w-full py-3 px-4 text-base text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <?php foreach ($sections as $section): ?>
-                                <option value="<?php echo $section['id']; ?>">
-                                    <?php echo htmlspecialchars($section['section_name']); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
+    class="shadow border border-gray-300 rounded-lg w-full py-3 px-4 text-base text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+    <?php foreach ($sections as $section): ?>
+        <option value="<?php echo htmlspecialchars($section['id']); ?>">
+            <?php echo htmlspecialchars($section['section_name']); ?>
+        </option>
+    <?php endforeach; ?>
+</select>
+
                     </div>
 
                     <!-- Code Input Field -->
@@ -404,53 +420,63 @@ $input_values = [
             <h2 class="text-xl font-semibold mb-4">Subject List</h2>
 
             <table class="min-w-full table-auto border-collapse border border-gray-400" style="box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);">
-                <thead>
-                    <tr class="bg-red-900 text-left" style="color:#e8e8e6;">
-                        <th class="px-4 py-3 border border-gray-300 text-center">
-                            <input type="checkbox" id="select_all" class="form-checkbox w-6 h-6">
-                        </th>
-                        <th class="px-4 py-2 border border-gray-300 text-lg">Code</th>
-                        <th class="px-4 py-2 border border-gray-300 text-lg">Subject Title</th>
-                        <th class="px-4 py-2 border border-gray-300 text-lg">Units</th>
-                        <th class="px-4 py-2 border border-gray-300 text-lg">Room</th>
-                        <th class="px-4 py-2 border border-gray-300 text-lg">Day</th>
-                        <th class="px-4 py-2 border border-gray-300 text-lg">Start Time</th>
-                        <th class="px-4 py-2 border border-gray-300 text-lg">End Time</th>
-                        <th class="px-4 py-2 border border-gray-300 text-lg">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($subjects as $subject): ?>
-                    <tr>
-                        <td class="px-4 py-3 border text-center border-gray-300" style="background-color:#E2CDCD; border-color:#DFB8B8;">
-                            <input type="checkbox" name="subject_ids[]" value="<?php echo $subject['id']; ?>" class="form-checkbox w-6 h-6">
-                        </td>
-                        <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php echo htmlspecialchars($subject['code']); ?></td>
-                        <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php echo htmlspecialchars($subject['subject_title']); ?></td>
-                        <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php echo intval($subject['units']); ?></td>
-                        <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php echo htmlspecialchars($subject['room']); ?></td>
-                        <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php echo htmlspecialchars($subject['day']); ?></td>
-                        <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;">
-                            <?php
-                                $startTime = new DateTime($subject['start_time']);
-                                echo $startTime->format('h:i A'); // Format to 12-hour time with AM/PM
-                            ?>
-                        </td>
-                        <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;">
-                            <?php
-                                $endTime = new DateTime($subject['end_time']);
-                                echo $endTime->format('h:i A'); // Format to 12-hour time with AM/PM
-                            ?>
-                        </td>
-                        <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;">
-                            <button type="button" onclick="openUpdateModal(<?php echo $subject['id']; ?>, '<?php echo htmlspecialchars($subject['section_id']); ?>', '<?php echo htmlspecialchars($subject['code']); ?>', '<?php echo htmlspecialchars($subject['subject_title']); ?>', '<?php echo htmlspecialchars($subject['units']); ?>', '<?php echo htmlspecialchars($subject['room']); ?>', '<?php echo htmlspecialchars($subject['day']); ?>', '<?php echo htmlspecialchars($subject['start_time']); ?>', '<?php echo htmlspecialchars($subject['end_time']); ?>')" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
-                                Edit
-                            </button>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+    <thead>
+        <tr class="bg-red-900 text-left" style="color:#e8e8e6;">
+            <th class="px-4 py-3 border border-gray-300 text-center">
+                <input type="checkbox" id="select_all" class="form-checkbox w-6 h-6">
+            </th>
+            <th class="px-4 py-2 border border-gray-300 text-lg">Code</th>
+            <th class="px-4 py-2 border border-gray-300 text-lg">Subject Title</th>
+            <th class="px-4 py-2 border border-gray-300 text-lg">Units</th>
+            <th class="px-4 py-2 border border-gray-300 text-lg">Room</th>
+            <th class="px-4 py-2 border border-gray-300 text-lg">Day</th>
+            <th class="px-4 py-2 border border-gray-300 text-lg">Start Time</th>
+            <th class="px-4 py-2 border border-gray-300 text-lg">End Time</th>
+            <th class="px-4 py-2 border border-gray-300 text-lg">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($groupedSubjects as $section_id => $group): ?>
+            <!-- Section Header -->
+            <tr>
+                <td colspan="9" class="px-4 py-2 border bg-gray-300 text-lg font-bold">
+                    <?php echo htmlspecialchars($group['section_name']); ?>
+                </td>
+            </tr>
+            <!-- Subjects Rows -->
+            <?php foreach ($group['subjects'] as $subject): ?>
+            <tr>
+                <td class="px-4 py-3 border text-center border-gray-300" style="background-color:#E2CDCD; border-color:#DFB8B8;">
+                    <input type="checkbox" name="subject_ids[]" value="<?php echo $subject['id']; ?>" class="form-checkbox w-6 h-6">
+                </td>
+                <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php echo htmlspecialchars($subject['code']); ?></td>
+                <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php echo htmlspecialchars($subject['subject_title']); ?></td>
+                <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php echo intval($subject['units']); ?></td>
+                <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php echo htmlspecialchars($subject['room']); ?></td>
+                <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php echo htmlspecialchars($subject['day']); ?></td>
+                <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;">
+                    <?php
+                        $startTime = new DateTime($subject['start_time']);
+                        echo $startTime->format('h:i A'); // Format to 12-hour time with AM/PM
+                    ?>
+                </td>
+                <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;">
+                    <?php
+                        $endTime = new DateTime($subject['end_time']);
+                        echo $endTime->format('h:i A'); // Format to 12-hour time with AM/PM
+                    ?>
+                </td>
+                <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;">
+                    <button type="button" onclick="openUpdateModal(<?php echo $subject['id']; ?>, '<?php echo htmlspecialchars($subject['section_id']); ?>', '<?php echo htmlspecialchars($subject['code']); ?>', '<?php echo htmlspecialchars($subject['subject_title']); ?>', '<?php echo htmlspecialchars($subject['units']); ?>', '<?php echo htmlspecialchars($subject['room']); ?>', '<?php echo htmlspecialchars($subject['day']); ?>', '<?php echo htmlspecialchars($subject['start_time']); ?>', '<?php echo htmlspecialchars($subject['end_time']); ?>')" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+                        Edit
+                    </button>
+                </td>
+            </tr>
+            <?php endforeach; ?>
+        <?php endforeach; ?>
+    </tbody>
+</table>
+
             </div>
 
             <!-- Pagination Controls -->

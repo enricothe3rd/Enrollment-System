@@ -103,6 +103,7 @@ $stmt = $pdo->query("SELECT * FROM classes");
 $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 
+
 // Pagination variables
 $limit = 10; // Number of results per page
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -170,14 +171,15 @@ $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </button>
                     <!-- Custom Scrollable Dropdown -->
                     <div id="classDropdownMenu" class="absolute w-full bg-white shadow-md border border-gray-300 mt-2 hidden max-h-48 overflow-y-scroll">
-                        <ul>
-                            <?php foreach ($classes as $class): ?>
-                                <li class="p-2 hover:bg-gray-100 cursor-pointer" onclick="selectClass('<?php echo htmlspecialchars($class['id']); ?>', '<?php echo htmlspecialchars($class['name']); ?>')">
-                                    <?php echo htmlspecialchars($class['name']); ?>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
+    <ul>
+        <?php foreach ($classes as $class): ?>
+            <li class="p-2 hover:bg-gray-100 cursor-pointer" onclick="selectClass('<?php echo htmlspecialchars($class['id']); ?>', '<?php echo htmlspecialchars($class['name']); ?>')">
+                <?php echo htmlspecialchars($class['name']); ?>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+</div>
+
                     <!-- Hidden input to store the selected class ID -->
                     <input type="hidden" name="class_id" id="class_id" value="">
                 </div>

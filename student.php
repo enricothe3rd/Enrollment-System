@@ -9,13 +9,28 @@
 <body class="bg-gray-100">
 
 <!-- Buttons to trigger modals -->
-<nav class="flex flex-col lg:flex-row lg:justify-center items-center mt-10">
-    <div id="profile-button" class="mb-4 lg:mb-0 lg:mr-4">
+<nav class="">
+    <div id="profile-button" class="">
         <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
             Open Enrollment Form
         </button>
     </div>
-    <div id="account-button" class="lg:ml-4">
+
+</nav>
+
+<!-- Container to center content -->
+<div class="">
+    <!-- Profile Section -->
+    <div id="profile" class="content-section hidden text-center mt-5 relative">
+        <button class="absolute top-3 right-4 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600" onclick="closeSection('profile')">X</button>
+        <iframe src="enrollment_form.php" class="w-full" style="height: 450px; border: 0;" frameborder="0"></iframe>
+    </div>
+
+</div>
+
+<!-- Buttons to trigger modals -->
+<nav class="">
+    <div id="account-button" class="">
         <button class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
             Open Select Course Form
         </button>
@@ -23,15 +38,10 @@
 </nav>
 
 <!-- Container to center content -->
-<div class="flex justify-center items-top min-h-screen">
-    <!-- Profile Section -->
-    <div id="profile" class="content-section hidden text-center mt-5 relative w-[70%]">
-        <button class="absolute top-3 right-4 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600" onclick="closeSection('profile')">X</button>
-        <iframe src="enrollment_form.php" class="w-full" style="height: 600px; border: 0;" frameborder="0"></iframe>
-    </div>
+<div class="">
 
     <!-- Account Section -->
-    <div id="account" class="content-section hidden text-center mt-5 relative w-[70%]">
+    <div id="account" class="content-section hidden text-center mt-5 relative">
         <button class="absolute top-8 right-12 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600" onclick="closeSection('account')">X</button>
         <iframe src="select_course.php" class="w-full" style="height: 600px; border: 0;" frameborder="0"></iframe>
     </div>
