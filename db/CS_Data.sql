@@ -1,201 +1,12 @@
-<!-- 
-
-
-CREATE DATABASE token_db1; 
-
-
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    email VARCHAR(255) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    role VARCHAR(50),
-    status VARCHAR(50) DEFAULT 'inactive',
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    email_confirmed TINYINT(1) NOT NULL DEFAULT 0,
-    failed_attempts INT DEFAULT 0,
-    account_locked TINYINT(1) DEFAULT 0,
-    lock_time DATETIME NULL;
-
-);
-
---     ALTER TABLE users 
--- ADD COLUMN failed_attempts INT DEFAULT 0,
--- ADD COLUMN account_locked TINYINT(1) DEFAULT 0,
--- ADD COLUMN lock_time DATETIME NULL;
-
-CREATE TABLE password_resets (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    email VARCHAR(255) NOT NULL,
-    token VARCHAR(255) NOT NULL,
-    created_at DATETIME NOT NULL,
-    expires_at DATETIME NOT NULL
-);
-
-
-CREATE TABLE user_registration (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    token VARCHAR(255) NOT NULL,
-    type VARCHAR(50) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-); -->
-
-<!-- -- Create the courses table
-CREATE TABLE courses (
-    id INT(11) AUTO_INCREMENT PRIMARY KEY,
-    course_name VARCHAR(50) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
--- Create the enrollment table with a foreign key to courses
-CREATE TABLE enrollment (
-    id INT(11) AUTO_INCREMENT PRIMARY KEY,
-    student_id INT(11) NOT NULL,
-    firstname VARCHAR(50) NOT NULL,
-    middlename VARCHAR(50),
-    lastname VARCHAR(50) NOT NULL,
-    suffix VARCHAR(10),
-    status ENUM('pending','confirmed','rejected','New Student','Old Student','Regular','Irregular','Transferee') DEFAULT 'New Student',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    year VARCHAR(10),
-    -- course_id INT(11),
-    sex VARCHAR(10),
-    dob DATE,
-    address TEXT,
-    email VARCHAR(100),
-    contact_no VARCHAR(20),
-    statusofenrollment ENUM('pending', 'verifying', 'enrolled', 'rejected', 'incomplete') DEFAULT 'pending';
-    CONSTRAINT fk_student_id FOREIGN KEY (student_id) REFERENCES users(id),
-    -- Drop na CONSTRAINT fk_course_id FOREIGN KEY (course_id) REFERENCES courses(id)
-);
-
-latest
-CREATE TABLE enrollment (
-    id INT(11) AUTO_INCREMENT PRIMARY KEY,
-    student_id INT(11) NOT NULL,
-    firstname VARCHAR(50) NOT NULL,
-    middlename VARCHAR(50),
-    lastname VARCHAR(50) NOT NULL,
-    suffix VARCHAR(10),
-    status ENUM('pending','confirmed','rejected','New Student','Old Student','Regular','Irregular','Transferee') DEFAULT 'New Student',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    school_year VARCHAR(10),
-    semester VARCHAR(20),
-    sex VARCHAR(10),
-    dob DATE,
-    address TEXT,
-    email VARCHAR(100),
-    contact_no VARCHAR(20),
-    statusofenrollment ENUM('pending', 'verifying', 'enrolled', 'rejected', 'incomplete') DEFAULT 'pending',
-    CONSTRAINT fk_student_id FOREIGN KEY (student_id) REFERENCES users(id)
-);
-
-
-CREATE TABLE enrollment_statuses (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    status_name VARCHAR(255) NOT NULL
-);
-
--->
-CREATE TABLE courses (
-    id INT(11) AUTO_INCREMENT PRIMARY KEY,
-    course_name VARCHAR(50) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
-CREATE TABLE classes (
-    id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    description TEXT DEFAULT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
-CREATE TABLE sections (
-    id INT(11) NOT NULL AUTO_INCREMENT,
-    class_id INT(11) NOT NULL,
-    section_name VARCHAR(50) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (id),
-    KEY (class_id)
-);
-
-CREATE TABLE subjects (
-    id INT(11) NOT NULL AUTO_INCREMENT,
-    class_id INT(11) NOT NULL,
-    code VARCHAR(20) NOT NULL,
-    subject_title VARCHAR(100) NOT NULL,
-    units DECIMAL(5,2) NOT NULL,
-    room VARCHAR(50) DEFAULT NULL,
-    day VARCHAR(50) DEFAULT NULL,
-    start_time TIME NOT NULL,
-    end_time TIME NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (id),
-    KEY (class_id)
-);
-
-CREATE TABLE subject_enrollments (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    student_id INT NOT NULL,
-    subject_id INT NOT NULL,
-    FOREIGN KEY (student_id) REFERENCES users(id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    FOREIGN KEY (subject_id) REFERENCES subjects(id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
-);
-
-
-
-CREATE TABLE school_years (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    year VARCHAR(255) NOT NULL UNIQUE
-);
-
-CREATE TABLE semesters (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    semester VARCHAR(255) NOT NULL UNIQUE
-);
-
-CREATE TABLE status_options (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    status_name VARCHAR(255) NOT NULL UNIQUE
-);
-
-
-CREATE TABLE sex_options (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    sex_name VARCHAR(255) NOT NULL UNIQUE
-);
+-- COURSE
 
 
 
 
+-- SECTIONS
 
-
-
-
-
-
-
-
-
-
-
-
-
--- Sample data for sections for computer science
-
+--CLASSES_ID = 92
+-- 92 = COMPUTER SCIENCE
 INSERT INTO sections (class_id, section_name) VALUES
 (92, '1-CS1'),
 (92, '1-CS2'),
@@ -214,7 +25,19 @@ INSERT INTO sections (class_id, section_name) VALUES
 (92, '4-CS3'),
 (92, '4-CS4');
 
+-- SUBJECTS
 
+-- 1 = 1ST SEMESTER
+-- 2 = 2ND SEMESTER
+-- S = SUMMER SEMESTER
+
+-- 57 = 1-CS1
+-- 58 = 1-CS2
+-- 59 = 1-CS3
+-- 60 = 1-CS4
+
+
+-- FIRST YEAR
 INSERT INTO subjects (section_id, code, subject_title, units, room, day, start_time, end_time) VALUES
 
 (57, '1ITP', 'Intro to Programming', 3.00, '201', 'Monday', '08:00:00', '10:00:00'),
@@ -291,7 +114,7 @@ INSERT INTO subjects (section_id, code, subject_title, units, room, day, start_t
 (60, 'SAL', 'Data Algorithms', 3.00, '219', 'Thursday', '08:00:00', '10:00:00'),
 (60, 'SNET', 'Advanced Network Design', 3.00, '220', 'Friday', '10:00:00', '12:00:00');
 
----------------------
+-- SECOND YEAR
 
 INSERT INTO subjects (section_id, code, subject_title, units, room, day, start_time, end_time) VALUES
 (61, '1ITP', 'Intermediate Programming', 3.00, '221', 'Monday', '08:00:00', '10:00:00'),
@@ -369,7 +192,7 @@ INSERT INTO subjects (section_id, code, subject_title, units, room, day, start_t
 (64, 'SAL', 'Data Mining', 3.00, '239', 'Thursday', '08:00:00', '10:00:00'),
 (64, 'SNET', 'Networking for Security', 3.00, '240', 'Friday', '10:00:00', '12:00:00');
 
----------------
+-- THIRD YEAR
 
 INSERT INTO subjects (section_id, code, subject_title, units, room, day, start_time, end_time) VALUES
 (65, '1ITP', 'Advanced Programming Techniques', 3.00, '241', 'Monday', '08:00:00', '10:00:00'),
@@ -450,7 +273,7 @@ INSERT INTO subjects (section_id, code, subject_title, units, room, day, start_t
 (68, 'SAL', 'Bioinformatics', 3.00, '259', 'Thursday', '08:00:00', '10:00:00'),
 (68, 'SNET', 'Smart Networks', 3.00, '260', 'Friday', '10:00:00', '12:00:00');
 
--------------------
+-- FOURTH YEAR
 
 INSERT INTO subjects (section_id, code, subject_title, units, room, day, start_time, end_time) VALUES
 (69, '1ITP', 'Advanced Software Engineering', 3.00, '261', 'Monday', '08:00:00', '10:00:00'),

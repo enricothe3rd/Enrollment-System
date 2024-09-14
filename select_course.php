@@ -13,14 +13,26 @@ $user_id = $_SESSION['user_id']; // Get the logged-in user's ID
 // Initialize variables
 $selected_class_id = null;
 $sections = [];
-$subjects = [];
 $selected_subjects = [];
+
+// Fetch the user's school year and semester
+try {
+    $stmt = $pdo->prepare("SELECT school_year, semester FROM enrollment WHERE student_id = ?");
+    $stmt->execute([$user_id]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    $user_school_year = $user['school_year'] ?? null;
+    $user_semester = $user['semester'] ?? null;
+} catch (PDOException $e) {
+    echo '<p class="text-red-500">Error: ' . htmlspecialchars($e->getMessage()) . '</p>';
+    $user_school_year = null;
+    $user_semester = null;
+}
 
 // Handle class selection
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['select_class'])) {
     $selected_class_id = $_POST['class_id'] ?? null;
-    
-    if ($selected_class_id) {
+
+    if ($selected_class_id && $user_school_year && $user_semester) {
         try {
             // Fetch the selected class details
             $stmt = $pdo->prepare("SELECT * FROM classes WHERE id = ?");
@@ -28,15 +40,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['select_class'])) {
             $class = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($class) {
-                // Fetch sections and subjects related to the selected class
+                // Determine the prefix for section names based on the school year
+                $section_prefix = match ($user_school_year) {
+                    '1st Year' => '1',
+                    '2nd Year' => '2',
+                    '3rd Year' => '3',
+                    '4th Year' => '4',
+                    default => '',
+                };
+
+                // Determine the subject code prefix based on the semester
+                $subject_code_prefix = match ($user_semester) {
+                    '1st Semester' => '1',
+                    '2nd Semester' => '2',
+                    'Summer' => 'S',
+                    default => '',
+                };
+
+                // Fetch sections and subjects related to the selected class, user's school year, and semester
                 $stmt = $pdo->prepare("
                     SELECT s.id AS subject_id, s.subject_title, s.code, s.units, s.room, s.day, s.start_time, s.end_time,
                            sec.id AS section_id, sec.section_name
                     FROM subjects s
                     JOIN sections sec ON s.section_id = sec.id
-                    WHERE sec.class_id = ?
+                    WHERE sec.class_id = ? AND sec.section_name LIKE ? AND s.code LIKE ?
                 ");
-                $stmt->execute([$selected_class_id]);
+                $stmt->execute([$selected_class_id, $section_prefix . '%', $subject_code_prefix . '%']);
                 $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                 // Organize sections and subjects
@@ -148,9 +177,8 @@ $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <thead>
                                 <tr>
                                     <th class="py-2">Select</th>
-                                    <th class="py-2">ID</th>
-                                    <th class="py-2">Subject Title</th>
                                     <th class="py-2">Code</th>
+                                    <th class="py-2">Subject Title</th>
                                     <th class="py-2">Units</th>
                                     <th class="py-2">Room</th>
                                     <th class="py-2">Day</th>
@@ -164,9 +192,8 @@ $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <td class="border px-4 py-2">
                                         <input type="checkbox" name="subjects[]" value="<?php echo htmlspecialchars($subject['id']); ?>">
                                     </td>
-                                    <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['id']); ?></td>
-                                    <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['subject_title']); ?></td>
                                     <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['code']); ?></td>
+                                    <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['subject_title']); ?></td>
                                     <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['units']); ?></td>
                                     <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['room']); ?></td>
                                     <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['day']); ?></td>
