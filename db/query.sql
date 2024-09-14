@@ -111,6 +111,7 @@ CREATE TABLE courses (
 
 CREATE TABLE classes (
     id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    course_id INT(11) NOT NULL,
     name VARCHAR(100) NOT NULL,
     description TEXT DEFAULT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -183,18 +184,27 @@ CREATE TABLE sex_options (
 
 
 
+-- 1 INSERTING ON COURSE OR DEPARTMENT
+
+INSERT INTO courses (id, course_name) VALUES 
+(9, 'College of Science'),
+(10, 'College of Engineering'),
+(11, 'College of Education');
+
+-- 2 INSERTING ON CLASSES
+
+-- 10  = COLLEGE OF ENGINEERING
+-- 9 = COLLEGE OF SCIENCE
+-- 11 = COLLEGE OF EDUCATION
+INSERT INTO classes (course_id, name, description) VALUES
+(10, 'Mathematics 101', 'Introduction to basic mathematics.'),
+(9, 'Physics 101', 'Fundamentals of physics.'),
+(11, 'Chemistry 101', 'Basics of chemistry.');
 
 
 
 
-
-
-
-
-
-
-
--- Sample data for sections for computer science
+-- 3 Sample data for sections for computer science
 
 INSERT INTO sections (class_id, section_name) VALUES
 (92, '1-CS1'),
@@ -215,6 +225,7 @@ INSERT INTO sections (class_id, section_name) VALUES
 (92, '4-CS4');
 
 
+-- 4 INSERTING OF SUBJECTS
 INSERT INTO subjects (section_id, code, subject_title, units, room, day, start_time, end_time) VALUES
 
 (57, '1ITP', 'Intro to Programming', 3.00, '201', 'Monday', '08:00:00', '10:00:00'),

@@ -60,7 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['select_class'])) {
                 // Fetch sections and subjects related to the selected class, user's school year, and semester
                 $stmt = $pdo->prepare("
                     SELECT s.id AS subject_id, s.subject_title, s.code, s.units, s.room, s.day, s.start_time, s.end_time,
-                           sec.id AS section_id, sec.section_name
+                           sec.id AS section_id, sec.section_name,
+                           (SELECT COUNT(*) FROM subject_enrollments se WHERE se.subject_id = s.id) AS enrollment_count
                     FROM subjects s
                     JOIN sections sec ON s.section_id = sec.id
                     WHERE sec.class_id = ? AND sec.section_name LIKE ? AND s.code LIKE ?
@@ -88,7 +89,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['select_class'])) {
                         'room' => $row['room'],
                         'day' => $row['day'],
                         'start_time' => $row['start_time'],
-                        'end_time' => $row['end_time']
+                        'end_time' => $row['end_time'],
+                        'enrollment_count' => $row['enrollment_count']
                     ];
                 }
             } else {
@@ -143,13 +145,49 @@ $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Select Class</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .disabled-section {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add event listeners to all "Select All" checkboxes
+            document.querySelectorAll('.select_all').forEach(function(selectAllCheckbox) {
+                selectAllCheckbox.addEventListener('change', function() {
+                    // Get the section ID from the data attribute
+                    const sectionId = this.getAttribute('data-section-id');
+                    // Get all subject checkboxes in this section
+                    const subjectCheckboxes = document.querySelectorAll(`.subject_checkbox[data-section-id="${sectionId}"]`);
+                    // Set all subject checkboxes to the state of the "Select All" checkbox
+                    subjectCheckboxes.forEach(function(checkbox) {
+                        checkbox.checked = selectAllCheckbox.checked;
+                    });
+
+                    // Disable and dim all other sections
+                    if (selectAllCheckbox.checked) {
+                        document.querySelectorAll('.section-container').forEach(function(container) {
+                            if (container.getAttribute('data-section-id') !== sectionId) {
+                                container.classList.add('disabled-section');
+                            }
+                        });
+                    } else {
+                        document.querySelectorAll('.section-container').forEach(function(container) {
+                            container.classList.remove('disabled-section');
+                        });
+                    }
+                });
+            });
+        });
+    </script>
 </head>
 <body class="bg-gray-100 text-gray-900">
-    <div class="container mx-auto p-4 ">
+    <div class="container mx-auto p-4">
         <h1 class="text-2xl font-bold mb-4">Select a Class</h1>
 
         <!-- Class Selection Form -->
-        <form method="POST" class=" px-8 pt-6 pb-8 mb-4">
+        <form method="POST" class="px-8 pt-6 pb-8 mb-4">
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="class_id">Choose Class</label>
                 <select name="class_id" id="class_id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
@@ -168,11 +206,14 @@ $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         <?php if ($selected_class_id && $sections): ?>
             <!-- Display Sections and Subjects -->
-            <form method="POST" class="bg-white shadow-md rounded p-4 mt-4">
+            <form id="enroll_form" method="POST" class="bg-white shadow-md rounded p-4 mt-4">
                 <h2 class="text-xl font-semibold mb-4">Sections and Subjects for Selected Class</h2>
                 <?php foreach ($sections as $section_id => $section): ?>
-                    <div class="mb-4">
-                        <h3 class="text-lg font-semibold">Section: <?php echo htmlspecialchars($section['section_name']); ?></h3>
+                    <div class="section-container mb-4" data-section-id="<?php echo htmlspecialchars($section_id); ?>">
+                        <h3 class="text-lg font-semibold">
+                            Section: <?php echo htmlspecialchars($section['section_name']); ?>
+                            <input type="checkbox" class="select_all" data-section-id="<?php echo htmlspecialchars($section_id); ?>"> Select All
+                        </h3>
                         <table class="min-w-full bg-white mt-2">
                             <thead>
                                 <tr>
@@ -184,13 +225,14 @@ $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <th class="py-2">Day</th>
                                     <th class="py-2">Start Time</th>
                                     <th class="py-2">End Time</th>
+                                    <th class="py-2">Enrolled Students</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach ($section['subjects'] as $subject): ?>
                                 <tr>
                                     <td class="border px-4 py-2">
-                                        <input type="checkbox" name="subjects[]" value="<?php echo htmlspecialchars($subject['id']); ?>">
+                                        <input type="checkbox" name="subjects[]" value="<?php echo htmlspecialchars($subject['id']); ?>" class="subject_checkbox" data-section-id="<?php echo htmlspecialchars($section_id); ?>">
                                     </td>
                                     <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['code']); ?></td>
                                     <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['subject_title']); ?></td>
@@ -199,6 +241,7 @@ $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['day']); ?></td>
                                     <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['start_time']); ?></td>
                                     <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['end_time']); ?></td>
+                                    <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['enrollment_count']); ?></td>
                                 </tr>
                                 <?php endforeach; ?>
                             </tbody>
@@ -207,9 +250,11 @@ $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <?php endforeach; ?>
                 <div class="flex items-center justify-between">
                     <button type="submit" name="enroll" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Enroll</button>
+                    <button type="button" id="reset_button" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" disabled>Reset</button>
                 </div>
             </form>
         <?php endif; ?>
+
     </div>
 </body>
 </html>
