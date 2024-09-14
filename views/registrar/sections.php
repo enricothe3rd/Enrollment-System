@@ -124,6 +124,8 @@ $stmt->bindParam(2, $offset, PDO::PARAM_INT);
 $stmt->execute();
 $sections = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+
+
 // Fetch classes
 $stmt = $pdo->query("SELECT * FROM classes");
 $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);

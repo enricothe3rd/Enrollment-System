@@ -260,7 +260,7 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <th class="px-4 py-3 border border-gray-300 text-center">
                             <input type="checkbox" id="selectAll" onclick="toggleSelectAll()" class="w-6 h-6"> 
                         </th>
-                        <th class="px-4 py-2 border border-gray-300 text-lg">Course Name</th>
+                        <th class="px-4 py-2 border border-gray-300 text-lg">Department Name</th>
                         <th class="px-4 py-2 border border-gray-300 text-lg">Action</th>
                     </tr>
                 </thead>

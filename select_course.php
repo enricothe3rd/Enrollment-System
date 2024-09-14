@@ -11,36 +11,32 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['user_role'] !== 'student' && $_S
 $user_id = $_SESSION['user_id']; // Get the logged-in user's ID
 
 // Initialize variables
-$selected_course_id = null;
+$selected_class_id = null;
 $sections = [];
 $subjects = [];
 $selected_subjects = [];
 
-// Handle course selection
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['select_course'])) {
-    $selected_course_id = $_POST['course_id'] ?? null;
+// Handle class selection
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['select_class'])) {
+    $selected_class_id = $_POST['class_id'] ?? null;
     
-    if ($selected_course_id) {
+    if ($selected_class_id) {
         try {
-            // Fetch the selected course details
-            $stmt = $pdo->prepare("SELECT * FROM courses WHERE id = ?");
-            $stmt->execute([$selected_course_id]);
-            $course = $stmt->fetch(PDO::FETCH_ASSOC);
+            // Fetch the selected class details
+            $stmt = $pdo->prepare("SELECT * FROM classes WHERE id = ?");
+            $stmt->execute([$selected_class_id]);
+            $class = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if ($course) {
-                //echo '<p class="text-blue-500">Selected Course: ' . htmlspecialchars($course['course_name']) . '</p>';
-
-                // Fetch sections and subjects related to the selected course
+            if ($class) {
+                // Fetch sections and subjects related to the selected class
                 $stmt = $pdo->prepare("
                     SELECT s.id AS subject_id, s.subject_title, s.code, s.units, s.room, s.day, s.start_time, s.end_time,
-                           sec.id AS section_id, sec.section_name,
-                           cl.id AS class_id, cl.name AS class_name
+                           sec.id AS section_id, sec.section_name
                     FROM subjects s
                     JOIN sections sec ON s.section_id = sec.id
-                    JOIN classes cl ON sec.class_id = cl.id
-                    WHERE cl.course_id = ?
+                    WHERE sec.class_id = ?
                 ");
-                $stmt->execute([$selected_course_id]);
+                $stmt->execute([$selected_class_id]);
                 $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                 // Organize sections and subjects
@@ -67,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['select_course'])) {
                     ];
                 }
             } else {
-                echo '<p class="text-red-500">Course not found.</p>';
+                echo '<p class="text-red-500">Class not found.</p>';
             }
         } catch (PDOException $e) {
             echo '<p class="text-red-500">Error: ' . htmlspecialchars($e->getMessage()) . '</p>';
@@ -106,9 +102,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['enroll'])) {
     }
 }
 
-// Fetch all courses for selection
-$stmt = $pdo->query("SELECT * FROM courses");
-$courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Fetch all classes for selection
+$stmt = $pdo->query("SELECT * FROM classes");
+$classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -116,35 +112,35 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Select Course</title>
+    <title>Select Class</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 text-gray-900">
     <div class="container mx-auto p-4 ">
-        <h1 class="text-2xl font-bold mb-4">Select a Course</h1>
+        <h1 class="text-2xl font-bold mb-4">Select a Class</h1>
 
-        <!-- Course Selection Form -->
-        <form method="POST" class="  px-8 pt-6 pb-8 mb-4">
+        <!-- Class Selection Form -->
+        <form method="POST" class=" px-8 pt-6 pb-8 mb-4">
             <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="course_id">Choose Course</label>
-                <select name="course_id" id="course_id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                    <option value="">Select a course</option>
-                    <?php foreach ($courses as $course): ?>
-                        <option value="<?php echo htmlspecialchars($course['id']); ?>" <?php echo $selected_course_id == $course['id'] ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($course['course_name']); ?>
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="class_id">Choose Class</label>
+                <select name="class_id" id="class_id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <option value="">Select a class</option>
+                    <?php foreach ($classes as $class): ?>
+                        <option value="<?php echo htmlspecialchars($class['id']); ?>" <?php echo $selected_class_id == $class['id'] ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($class['name']); ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
             </div>
             <div class="flex items-center justify-between">
-                <button type="submit" name="select_course" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Select Course</button>
+                <button type="submit" name="select_class" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Select Class</button>
             </div>
         </form>
 
-        <?php if ($selected_course_id && $sections): ?>
+        <?php if ($selected_class_id && $sections): ?>
             <!-- Display Sections and Subjects -->
             <form method="POST" class="bg-white shadow-md rounded p-4 mt-4">
-                <h2 class="text-xl font-semibold mb-4">Sections and Subjects for Selected Course</h2>
+                <h2 class="text-xl font-semibold mb-4">Sections and Subjects for Selected Class</h2>
                 <?php foreach ($sections as $section_id => $section): ?>
                     <div class="mb-4">
                         <h3 class="text-lg font-semibold">Section: <?php echo htmlspecialchars($section['section_name']); ?></h3>

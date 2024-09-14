@@ -226,8 +226,8 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <input type="checkbox" id="selectAll" onclick="toggleSelectAll()" class="w-6 h-6">
                             </th>
                         <!-- <th class="px-4 py-2 border border-gray-300 text-lg">ID</th> -->
-                        <th class="px-4 py-2 border border-gray-300 text-lg">Class Name</th>
-                        <th class="px-4 py-2 border border-gray-300 text-lg">Course</th>
+                        <th class="px-4 py-2 border border-gray-300 text-lg">Course Name</th>
+                        <th class="px-4 py-2 border border-gray-300 text-lg">Department Name</th>
                         <th class="px-4 py-2 border border-gray-300 text-lg">Description</th>
                         <th class="px-4 py-2 border border-gray-300 text-lg">Actions</th>
                     </tr>
@@ -279,7 +279,7 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             <!-- Class Name Input -->
             <div class="mb-4">
-                <label class="block text-lg font-bold mb-2" for="edit_name" style="color:#e8e8e6;">Class Name</label>
+                <label class="block text-lg font-bold mb-2" for="edit_name" style="color:#e8e8e6;">Course Name</label>
                 <input type="text" name="name" id="edit_name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500">
             </div>
 
