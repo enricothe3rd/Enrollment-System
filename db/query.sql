@@ -20,9 +20,9 @@ CREATE TABLE users (
 );
 
 --     ALTER TABLE users 
--- ADD COLUMN failed_attempts INT DEFAULT 0,
--- ADD COLUMN account_locked TINYINT(1) DEFAULT 0,
--- ADD COLUMN lock_time DATETIME NULL;
+--   failed_attempts INT DEFAULT 0,
+--   account_locked TINYINT(1) DEFAULT 0,
+--   lock_time DATETIME NULL;
 
 CREATE TABLE password_resets (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -155,7 +155,16 @@ CREATE TABLE subject_enrollments (
         ON UPDATE CASCADE,
     FOREIGN KEY (subject_id) REFERENCES subjects(id)
         ON DELETE CASCADE
-        ON UPDATE CASCADE
+        ON UPDATE CASCADE,
+
+     code VARCHAR(20),
+     title VARCHAR(255),
+     units INT,
+     room VARCHAR(50),
+    day VARCHAR(20),
+    start_time TIME,
+    end_time TIME
+
 );
 
 

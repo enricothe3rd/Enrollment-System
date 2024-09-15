@@ -12,7 +12,7 @@ $user_id = $_SESSION['user_id']; // Get the logged-in user's ID
 
 // Fetch the user's student number
 try {
-    $stmt = $pdo->prepare("SELECT student_number FROM enrollment WHERE $user_id = ?");
+    $stmt = $pdo->prepare("SELECT student_number FROM enrollment WHERE student_id = ?");
     $stmt->execute([$user_id]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
     $student_number = $user['student_number'] ?? 'N/A';
@@ -115,9 +115,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['select_class'])) {
     }
 }
 
-// Handle subject selection and enrollment
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['enroll'])) {
     $selected_subjects = $_POST['subjects'] ?? [];
+    $subject_codes = $_POST['subject_codes'] ?? [];
+    $subject_titles = $_POST['subject_titles'] ?? [];
+    $subject_units = $_POST['subject_units'] ?? [];
+    $subject_rooms = $_POST['subject_rooms'] ?? [];
+    $subject_days = $_POST['subject_days'] ?? [];
+    $subject_start_times = $_POST['subject_start_times'] ?? [];
+    $subject_end_times = $_POST['subject_end_times'] ?? [];
+
 
     if (!empty($selected_subjects)) {
         try {
@@ -125,11 +132,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['enroll'])) {
             $pdo->beginTransaction();
 
             // Prepare the insert statement for subject enrollments
-            $stmt = $pdo->prepare("INSERT INTO subject_enrollments (student_id, student_number, subject_id) VALUES (?, ?, ?)");
+            $stmt = $pdo->prepare("INSERT INTO subject_enrollments (student_id, student_number, subject_id, code, title, units, room, day, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
             // Insert each selected subject for the logged-in user
-            foreach ($selected_subjects as $subject_id) {
-                $stmt->execute([$user_id, $student_number, $subject_id]);
+            foreach ($selected_subjects as $index => $subject_id) {
+                $stmt->execute([
+                    $user_id,
+                    $student_number,
+                    $subject_id,
+                    $subject_codes[$index] ?? '',
+                    $subject_titles[$index] ?? '',
+                    $subject_units[$index] ?? '',
+                    $subject_rooms[$index] ?? '',
+                    $subject_days[$index] ?? '',
+                    $subject_start_times[$index] ?? '',
+                    $subject_end_times[$index] ?? '',
+                ]);
             }
 
             // Commit the transaction
@@ -146,12 +164,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['enroll'])) {
     }
 }
 
-
 // Fetch all classes for selection
 $stmt = $pdo->query("SELECT * FROM classes");
 $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -199,8 +215,7 @@ $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body class="bg-gray-100 text-gray-900">
     <div class="container mx-auto p-4">
-    <p class="text-lg font-semibold">Student Number: <?php echo htmlspecialchars($student_number); ?></p>
-
+        <p class="text-lg font-semibold">Student Number: <?php echo htmlspecialchars($student_number); ?></p>
 
         <h1 class="text-2xl font-bold mb-4">Select a Class</h1>
 
@@ -248,19 +263,29 @@ $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             </thead>
                             <tbody>
                                 <?php foreach ($section['subjects'] as $subject): ?>
-                                <tr>
-                                    <td class="border px-4 py-2">
-                                        <input type="checkbox" name="subjects[]" value="<?php echo htmlspecialchars($subject['id']); ?>" class="subject_checkbox" data-section-id="<?php echo htmlspecialchars($section_id); ?>">
-                                    </td>
-                                    <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['code']); ?></td>
-                                    <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['subject_title']); ?></td>
-                                    <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['units']); ?></td>
-                                    <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['room']); ?></td>
-                                    <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['day']); ?></td>
-                                    <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['start_time']); ?></td>
-                                    <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['end_time']); ?></td>
-                                    <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['enrollment_count']); ?></td>
-                                </tr>
+                                    <tr>
+                                        <td class="border px-4 py-2">
+                                            <input type="checkbox" name="subjects[]" value="<?php echo htmlspecialchars($subject['id']); ?>" class="subject_checkbox" data-section-id="<?php echo htmlspecialchars($section_id); ?>">
+                                        </td>
+                                        <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['code']); ?></td>
+                                        <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['subject_title']); ?></td>
+                                        <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['units']); ?></td>
+                                        <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['room']); ?></td>
+                                        <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['day']); ?></td>
+                                        <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['start_time']); ?></td>
+                                        <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['end_time']); ?></td>
+                                        <td class="border px-4 py-2"><?php echo htmlspecialchars($subject['enrollment_count']); ?></td>
+
+                                        <!-- Hidden inputs for subject details -->
+                                        <input type="hidden" name="subject_codes[]" value="<?php echo htmlspecialchars($subject['code']); ?>">
+                                        <input type="hidden" name="subject_titles[]" value="<?php echo htmlspecialchars($subject['subject_title']); ?>">
+                                        <input type="hidden" name="subject_units[]" value="<?php echo htmlspecialchars($subject['units']); ?>">
+                                        <input type="hidden" name="subject_rooms[]" value="<?php echo htmlspecialchars($subject['room']); ?>">
+                                        <input type="hidden" name="subject_days[]" value="<?php echo htmlspecialchars($subject['day']); ?>">
+                                        <input type="hidden" name="subject_start_times[]" value="<?php echo htmlspecialchars($subject['start_time']); ?>">
+                                        <input type="hidden" name="subject_end_times[]" value="<?php echo htmlspecialchars($subject['end_time']); ?>">
+                                        <input type="hidden" name="subject_enrollment_counts[]" value="<?php echo htmlspecialchars($subject['enrollment_count']); ?>">
+                                    </tr>
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
