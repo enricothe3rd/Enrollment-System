@@ -10,6 +10,19 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['user_role'] !== 'student' && $_S
 
 $user_id = $_SESSION['user_id']; // Get the logged-in user's ID
 
+// Fetch the user's student number
+try {
+    $stmt = $pdo->prepare("SELECT student_number FROM enrollment WHERE $user_id = ?");
+    $stmt->execute([$user_id]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    $student_number = $user['student_number'] ?? 'N/A';
+    $_SESSION['student_number'] = $student_number;
+} catch (PDOException $e) {
+    echo '<p class="text-red-500">Error: ' . htmlspecialchars($e->getMessage()) . '</p>';
+    $student_number = 'N/A';
+    $_SESSION['student_number'] = $student_number;
+}
+
 // Initialize variables
 $selected_class_id = null;
 $sections = [];
@@ -112,11 +125,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['enroll'])) {
             $pdo->beginTransaction();
 
             // Prepare the insert statement for subject enrollments
-            $stmt = $pdo->prepare("INSERT INTO subject_enrollments (student_id, subject_id) VALUES (?, ?)");
+            $stmt = $pdo->prepare("INSERT INTO subject_enrollments (student_id, student_number, subject_id) VALUES (?, ?, ?)");
 
             // Insert each selected subject for the logged-in user
             foreach ($selected_subjects as $subject_id) {
-                $stmt->execute([$user_id, $subject_id]);
+                $stmt->execute([$user_id, $student_number, $subject_id]);
             }
 
             // Commit the transaction
@@ -133,10 +146,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['enroll'])) {
     }
 }
 
+
 // Fetch all classes for selection
 $stmt = $pdo->query("SELECT * FROM classes");
 $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -184,6 +199,9 @@ $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body class="bg-gray-100 text-gray-900">
     <div class="container mx-auto p-4">
+    <p class="text-lg font-semibold">Student Number: <?php echo htmlspecialchars($student_number); ?></p>
+
+
         <h1 class="text-2xl font-bold mb-4">Select a Class</h1>
 
         <!-- Class Selection Form -->

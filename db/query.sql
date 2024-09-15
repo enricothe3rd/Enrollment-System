@@ -54,6 +54,7 @@ CREATE TABLE courses (
 CREATE TABLE enrollment (
     id INT(11) AUTO_INCREMENT PRIMARY KEY,
     student_id INT(11) NOT NULL,
+    student_number VARCHAR(255) NOT NULL,
     firstname VARCHAR(50) NOT NULL,
     middlename VARCHAR(50),
     lastname VARCHAR(50) NOT NULL,
@@ -77,6 +78,7 @@ latest
 CREATE TABLE enrollment (
     id INT(11) AUTO_INCREMENT PRIMARY KEY,
     student_id INT(11) NOT NULL,
+    student_number VARCHAR(20) UNIQUE,
     firstname VARCHAR(50) NOT NULL,
     middlename VARCHAR(50),
     lastname VARCHAR(50) NOT NULL,

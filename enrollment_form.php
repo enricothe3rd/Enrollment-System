@@ -11,6 +11,7 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['user_role'] !== 'student' && $_S
 
 $user_id = $_SESSION['user_id'];
 
+
 // Fetch user email and student_id
 $sql = "SELECT u.email, u.id AS student_id 
         FROM users u 
@@ -35,30 +36,37 @@ $enrollment_stmt->bindParam(':student_id', $student_id);
 $enrollment_stmt->execute();
 $enrollment_data = $enrollment_stmt->fetch(PDO::FETCH_ASSOC);
 
+// Generate or fetch student number
+if ($enrollment_data) {
+    $student_number = $enrollment_data['student_number'];
+} else {
+    // Generate a new student number if the student is not already enrolled
+    $student_number = 'SN-' . str_pad($student_id, 6, '0', STR_PAD_LEFT); // Example format: SN-000001
+}
+
 // Fetch School Years
-$school_years_sql = "SELECT year FROM school_years";
-$school_years_stmt = $pdo->prepare($school_years_sql);
-$school_years_stmt->execute();
-$school_years = $school_years_stmt->fetchAll(PDO::FETCH_ASSOC);
+$school_year_sql = "SELECT DISTINCT year FROM school_years";
+$school_year_stmt = $pdo->prepare($school_year_sql);
+$school_year_stmt->execute();
+$school_years = $school_year_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch Semesters
-$semesters_sql = "SELECT semester FROM semesters";
-$semesters_stmt = $pdo->prepare($semesters_sql);
-$semesters_stmt->execute();
-$semesters = $semesters_stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Fetch Status Options
-$status_sql = "SELECT status_name FROM status_options";
-$status_stmt = $pdo->prepare($status_sql);
-$status_stmt->execute();
-$status_options = $status_stmt->fetchAll(PDO::FETCH_ASSOC);
+$semester_sql = "SELECT DISTINCT semester FROM semesters";
+$semester_stmt = $pdo->prepare($semester_sql);
+$semester_stmt->execute();
+$semesters = $semester_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch Sex Options
-$sex_sql = "SELECT sex_name FROM sex_options";
+$sex_sql = "SELECT DISTINCT sex_name FROM sex_options";
 $sex_stmt = $pdo->prepare($sex_sql);
 $sex_stmt->execute();
 $sex_options = $sex_stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Fetch Status Options
+$status_sql = "SELECT DISTINCT status_name FROM status_options";
+$status_stmt = $pdo->prepare($status_sql);
+$status_stmt->execute();
+$status_options = $status_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // If form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -79,14 +87,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $update_sql = "UPDATE enrollment 
                        SET lastname = :lastname, firstname = :firstname, middlename = :middlename, suffix = :suffix, 
                            school_year = :school_year, semester = :semester, sex = :sex, dob = :dob, 
-                           address = :address, contact_no = :contact_no, status = :status 
+                           address = :address, contact_no = :contact_no, status = :status, student_number = :student_number,
+                           email = :email
                        WHERE student_id = :student_id";
         $stmt = $pdo->prepare($update_sql);
     } else {
         // Insert a new record if no existing enrollment found
         $insert_sql = "INSERT INTO enrollment (student_id, lastname, firstname, middlename, suffix, school_year, 
-                        semester, sex, dob, address, contact_no, status) 
-                       VALUES (:student_id, :lastname, :firstname, :middlename, :suffix, :school_year, :semester, :sex, :dob, :address, :contact_no, :status)";
+                        semester, sex, dob, address, contact_no, status, student_number, email) 
+                       VALUES (:student_id, :lastname, :firstname, :middlename, :suffix, :school_year, :semester, 
+                               :sex, :dob, :address, :contact_no, :status, :student_number, :email)";
         $stmt = $pdo->prepare($insert_sql);
     }
 
@@ -103,16 +113,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':address', $address);
     $stmt->bindParam(':contact_no', $contact_no);
     $stmt->bindParam(':status', $status);
+    $stmt->bindParam(':student_number', $student_number);
+    $stmt->bindParam(':email', $email); // Bind email parameter
 
     if ($stmt->execute()) {
         echo "Data successfully saved.";
-        header("Location: enrollment_form.php");  // Redirect to a success page after saving
+        header("Location: select_course.php?student_id=" . $student_id);  // Redirect to preview page with student_id
         exit();
     } else {
         echo "Error saving data. Please try again.";
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -126,25 +139,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 mt-10">Student Registration Form</h2>
         <form method="POST">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                
+                <!-- Student Number (Readonly) -->
+                <div class="mb-4">
+                    <label for="student_number" class="block text-gray-700 mb-2">Student Number</label>
+                    <input type="text" id="student_number" name="student_number" class="w-full border border-gray-300 rounded-lg px-3 py-2" 
+                           value="<?php echo htmlspecialchars($student_number); ?>" readonly>
+                </div>
+                
+                <!-- Email (Readonly) -->
+                <div class="mb-4">
+                    <label for="email" class="block text-gray-700 mb-2">Email</label>
+                    <input type="email" id="email" name="email" class="w-full border border-gray-300 rounded-lg px-3 py-2"
+                           value="<?php echo htmlspecialchars($email); ?>" readonly>
+                </div>
+
                 <!-- Last Name -->
                 <div class="mb-4">
                     <label for="lastname" class="block text-gray-700 mb-2">Last Name</label>
                     <input type="text" id="lastname" name="lastname" class="w-full border border-gray-300 rounded-lg px-3 py-2" 
-                    value="<?php echo isset($enrollment_data['lastname']) ? htmlspecialchars($enrollment_data['lastname']) : ''; ?>" required>
+                           value="<?php echo isset($enrollment_data['lastname']) ? htmlspecialchars($enrollment_data['lastname']) : ''; ?>" required>
                 </div>
 
                 <!-- First Name -->
                 <div class="mb-4">
                     <label for="firstname" class="block text-gray-700 mb-2">First Name</label>
                     <input type="text" id="firstname" name="firstname" class="w-full border border-gray-300 rounded-lg px-3 py-2" 
-                    value="<?php echo isset($enrollment_data['firstname']) ? htmlspecialchars($enrollment_data['firstname']) : ''; ?>" required>
+                           value="<?php echo isset($enrollment_data['firstname']) ? htmlspecialchars($enrollment_data['firstname']) : ''; ?>" required>
                 </div>
 
                 <!-- Middle Name -->
                 <div class="mb-4">
                     <label for="middlename" class="block text-gray-700 mb-2">Middle Name</label>
                     <input type="text" id="middlename" name="middlename" class="w-full border border-gray-300 rounded-lg px-3 py-2" 
-                    value="<?php echo isset($enrollment_data['middlename']) ? htmlspecialchars($enrollment_data['middlename']) : ''; ?>">
+                           value="<?php echo isset($enrollment_data['middlename']) ? htmlspecialchars($enrollment_data['middlename']) : ''; ?>">
                 </div>
 
                 <!-- Suffix -->
@@ -161,87 +189,88 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </select>
                 </div>
 
-<!-- School Year -->
-<div class="mb-4">
-    <label for="school_year" class="block text-gray-700 mb-2">School Year</label>
-    <select id="school_year" name="school_year" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
-        <option value="">--Select School Year--</option>
-        <?php foreach ($school_years as $year) : ?>
-            <option value="<?php echo htmlspecialchars($year['year']); ?>" 
-                <?php echo isset($enrollment_data['school_year']) && $enrollment_data['school_year'] == $year['year'] ? 'selected' : ''; ?>>
-                <?php echo htmlspecialchars($year['year']); ?>
-            </option>
-        <?php endforeach; ?>
-    </select>
-</div>
+                <!-- School Year -->
+                <div class="mb-4">
+                    <label for="school_year" class="block text-gray-700 mb-2">School Year</label>
+                    <select id="school_year" name="school_year" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+                        <option value="">--Select School Year--</option>
+                        <?php foreach ($school_years as $year) : ?>
+                            <option value="<?php echo htmlspecialchars($year['year']); ?>" 
+                                <?php echo isset($enrollment_data['school_year']) && $enrollment_data['school_year'] == $year['year'] ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($year['year']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
 
-<!-- Semester -->
-<div class="mb-4">
-    <label for="semester" class="block text-gray-700 mb-2">Semester</label>
-    <select id="semester" name="semester" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
-        <option value="">--Select Semester--</option>
-        <?php foreach ($semesters as $semester) : ?>
-            <option value="<?php echo htmlspecialchars($semester['semester']); ?>" 
-                <?php echo isset($enrollment_data['semester']) && $enrollment_data['semester'] == $semester['semester'] ? 'selected' : ''; ?>>
-                <?php echo htmlspecialchars($semester['semester']); ?>
-            </option>
-        <?php endforeach; ?>
-    </select>
-</div>
+                <!-- Semester -->
+                <div class="mb-4">
+                    <label for="semester" class="block text-gray-700 mb-2">Semester</label>
+                    <select id="semester" name="semester" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+                        <option value="">--Select Semester--</option>
+                        <?php foreach ($semesters as $semester) : ?>
+                            <option value="<?php echo htmlspecialchars($semester['semester']); ?>" 
+                                <?php echo isset($enrollment_data['semester']) && $enrollment_data['semester'] == $semester['semester'] ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($semester['semester']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
 
-<!-- Sex -->
-<div class="mb-4">
-    <label for="sex" class="block text-gray-700 mb-2">Sex</label>
-    <select id="sex" name="sex" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
-        <option value="">--Select Sex--</option>
-        <?php foreach ($sex_options as $sex) : ?>
-            <option value="<?php echo htmlspecialchars($sex['sex_name']); ?>" 
-                <?php echo isset($enrollment_data['sex']) && $enrollment_data['sex'] == $sex['sex_name'] ? 'selected' : ''; ?>>
-                <?php echo htmlspecialchars($sex['sex_name']); ?>
-            </option>
-        <?php endforeach; ?>
-    </select>
-</div>
+                <!-- Sex -->
+                <div class="mb-4">
+                    <label for="sex" class="block text-gray-700 mb-2">Sex</label>
+                    <select id="sex" name="sex" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+                        <option value="">--Select Sex--</option>
+                        <?php foreach ($sex_options as $sex) : ?>
+                            <option value="<?php echo htmlspecialchars($sex['sex_name']); ?>" 
+                                <?php echo isset($enrollment_data['sex']) && $enrollment_data['sex'] == $sex['sex_name'] ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($sex['sex_name']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
 
-<!-- Status -->
-<div class="mb-4">
-    <label for="status" class="block text-gray-700 mb-2">Status</label>
-    <select id="status" name="status" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
-        <option value="">--Select Status--</option>
-        <?php foreach ($status_options as $status) : ?>
-            <option value="<?php echo htmlspecialchars($status['status_name']); ?>" 
-                <?php echo isset($enrollment_data['status']) && $enrollment_data['status'] == $status['status_name'] ? 'selected' : ''; ?>>
-                <?php echo htmlspecialchars($status['status_name']); ?>
-            </option>
-        <?php endforeach; ?>
-    </select>
-</div>
-
+                <!-- Status -->
+                <div class="mb-4">
+                    <label for="status" class="block text-gray-700 mb-2">Status</label>
+                    <select id="status" name="status" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+                        <option value="">--Select Status--</option>
+                        <?php foreach ($status_options as $status) : ?>
+                            <option value="<?php echo htmlspecialchars($status['status_name']); ?>" 
+                                <?php echo isset($enrollment_data['status']) && $enrollment_data['status'] == $status['status_name'] ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($status['status_name']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
 
                 <!-- Date of Birth -->
                 <div class="mb-4">
                     <label for="dob" class="block text-gray-700 mb-2">Date of Birth</label>
                     <input type="date" id="dob" name="dob" class="w-full border border-gray-300 rounded-lg px-3 py-2" 
-                    value="<?php echo isset($enrollment_data['dob']) ? htmlspecialchars($enrollment_data['dob']) : ''; ?>" required>
+                           value="<?php echo isset($enrollment_data['dob']) ? htmlspecialchars($enrollment_data['dob']) : ''; ?>" required>
                 </div>
 
                 <!-- Address -->
                 <div class="mb-4">
                     <label for="address" class="block text-gray-700 mb-2">Address</label>
                     <input type="text" id="address" name="address" class="w-full border border-gray-300 rounded-lg px-3 py-2" 
-                    value="<?php echo isset($enrollment_data['address']) ? htmlspecialchars($enrollment_data['address']) : ''; ?>" required>
+                           value="<?php echo isset($enrollment_data['address']) ? htmlspecialchars($enrollment_data['address']) : ''; ?>" required>
                 </div>
 
                 <!-- Contact Number -->
                 <div class="mb-4">
                     <label for="contact_no" class="block text-gray-700 mb-2">Contact Number</label>
                     <input type="text" id="contact_no" name="contact_no" class="w-full border border-gray-300 rounded-lg px-3 py-2" 
-                    value="<?php echo isset($enrollment_data['contact_no']) ? htmlspecialchars($enrollment_data['contact_no']) : ''; ?>" required>
+                           value="<?php echo isset($enrollment_data['contact_no']) ? htmlspecialchars($enrollment_data['contact_no']) : ''; ?>" required>
                 </div>
-
+                
                 <!-- Submit Button -->
-                <div class="mb-4">
-                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Save</button>
+                <div class="mb-4 flex items-end">
+                    <button type="submit" name="register_student" class="w-full bg-blue-500 text-white font-bold py-3 px-2 rounded-lg hover:bg-blue-600">
+                        Save & Select Course
+                    </button>
                 </div>
             </div>
         </form>
