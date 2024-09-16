@@ -1,11 +1,15 @@
 <?php
 session_start();
-require 'session_timeout.php';
+
 require 'db/db_connection1.php';
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+// Print session variables to check if they are being stored
+echo "<pre>";
+print_r($_SESSION);  // This will display all session variables
+echo "</pre>";
 class User {
     private $pdo;
     private $user_id;
@@ -21,6 +25,7 @@ class User {
         if (!isset($_SESSION['user_id']) || ($_SESSION['user_role'] !== 'student' && $_SESSION['user_role'] !== 'admin')) {
             header("Location: index.php");
             exit();
+            
         }
     }
 
@@ -64,7 +69,12 @@ class Enrollment {
         } else {
             $this->student_number = 'SN-' . str_pad($this->student_id, 6, '0', STR_PAD_LEFT); // Generate a new student number
         }
+
+        // Store the student_number in the session
+        $_SESSION['student_number'] = $this->student_number;
     }
+
+    
 
     public function saveEnrollmentData($post_data, $email) {
         // Basic server-side validation
@@ -245,7 +255,7 @@ $suffixes = $optionsFetcher->fetchSuffixes();
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($enrollment->saveEnrollmentData($_POST, $user->email)) {
      //   echo "Data successfully saved.";
-        header("Location: select_course.php?student_id=" . $user->student_id);
+        header("Location: select_course1.php?student_id=" . $user->student_id);
         exit();
     } else {
      //   echo "Error saving data. Please try again.";

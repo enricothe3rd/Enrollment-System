@@ -163,7 +163,8 @@ CREATE TABLE subject_enrollments (
      room VARCHAR(50),
     day VARCHAR(20),
     start_time TIME,
-    end_time TIME
+    end_time TIME,
+    payment_status ENUM('pending', 'completed') DEFAULT 'pending'
 
 );
 
