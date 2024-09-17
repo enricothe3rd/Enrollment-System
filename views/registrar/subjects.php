@@ -132,13 +132,10 @@ $stmt = $pdo->query("SELECT * FROM sections");
 $sections = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 
-// Fetch subjects with class and section information
+// Fetch subjects without class and section information
 $stmt = $pdo->prepare("
-    SELECT subjects.*, sections.section_name, classes.name AS class_name, courses.course_name 
+    SELECT subjects.* 
     FROM subjects 
-    JOIN sections ON subjects.section_id = sections.id 
-    JOIN classes ON sections.class_id = classes.id
-    JOIN courses ON classes.course_id = courses.id
     LIMIT :offset, :items_per_page
 ");
 $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
@@ -146,28 +143,7 @@ $stmt->bindValue(':items_per_page', $items_per_page, PDO::PARAM_INT);
 $stmt->execute();
 $subjects = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Group subjects by class and section
-$groupedSubjects = [];
-foreach ($subjects as $subject) {
-    $class_name = $subject['class_name'];
-    $section_id = $subject['section_id'];
-    
-    if (!isset($groupedSubjects[$class_name])) {
-        $groupedSubjects[$class_name] = [
-            'course_name' => $subject['course_name'],
-            'sections' => []
-        ];
-    }
-    
-    if (!isset($groupedSubjects[$class_name]['sections'][$section_id])) {
-        $groupedSubjects[$class_name]['sections'][$section_id] = [
-            'section_name' => $subject['section_name'],
-            'subjects' => []
-        ];
-    }
-    
-    $groupedSubjects[$class_name]['sections'][$section_id]['subjects'][] = $subject;
-}
+// No grouping needed, just pass the subjects array directly
 
 
 
@@ -427,7 +403,6 @@ $input_values = [
                 </form>
             </div>
         </div>
-
 <!-- Subject Table -->
 <div class="bg-transparent border-0">
 
@@ -459,71 +434,40 @@ $input_values = [
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($groupedSubjects as $class_name => $class_data): ?>
-                    <!-- Class Header -->
+                <?php foreach ($subjects as $subject): ?>
                     <tr>
-                        <td colspan="9" class="px-4 py-2 border bg-gray-200 text-lg font-bold">
-                            <?php echo htmlspecialchars($class_name); ?> - <?php echo htmlspecialchars($class_data['course_name']); ?>
+                        <td class="px-2 py-1 border text-center border-gray-300" style=" border-color:#DFB8B8;">
+                            <input type="checkbox" name="subject_ids[]" value="<?php echo $subject['id']; ?>" class="form-checkbox w-6 h-6">
+                        </td>
+                        <td class="px-2 py-1 border border-gray-300 text-lg" style=" border-color:#DFB8B8;"><?php echo htmlspecialchars($subject['code']); ?></td>
+                        <td class="px-2 py-1 border border-gray-300 text-lg" style=" border-color:#DFB8B8;"><?php echo htmlspecialchars($subject['subject_title']); ?></td>
+                        <td class="px-2 py-1 border border-gray-300 text-lg" style=" border-color:#DFB8B8;"><?php echo intval($subject['units']); ?></td>
+                        <td class="px-2 py-1 border border-gray-300 text-lg" style=" border-color:#DFB8B8;"><?php echo htmlspecialchars($subject['room']); ?></td>
+                        <td class="px-2 py-1 border border-gray-300 text-lg" style=" border-color:#DFB8B8;"><?php echo htmlspecialchars($subject['day']); ?></td>
+                        <td class="px-2 py-1 border border-gray-300 text-lg" style=" border-color:#DFB8B8;">
+                            <?php
+                                $startTime = new DateTime($subject['start_time']);
+                                echo $startTime->format('h:i A'); // Format to 12-hour time with AM/PM
+                            ?>
+                        </td>
+                        <td class="px-4 py-3 border border-gray-300 text-lg" style=" border-color:#DFB8B8;">
+                            <?php
+                                $endTime = new DateTime($subject['end_time']);
+                                echo $endTime->format('h:i A'); // Format to 12-hour time with AM/PM
+                            ?>
+                        </td>
+                        <td class="px-4 py-3 border border-gray-300 text-lg" style=" border-color:#DFB8B8;">
+                            <button type="button" onclick="openUpdateModal(<?php echo $subject['id']; ?>, '<?php echo htmlspecialchars($subject['code']); ?>', '<?php echo htmlspecialchars($subject['subject_title']); ?>', '<?php echo htmlspecialchars($subject['units']); ?>', '<?php echo htmlspecialchars($subject['room']); ?>', '<?php echo htmlspecialchars($subject['day']); ?>', '<?php echo htmlspecialchars($subject['start_time']); ?>', '<?php echo htmlspecialchars($subject['end_time']); ?>')" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+                                Edit
+                            </button>
                         </td>
                     </tr>
-                    <?php foreach ($class_data['sections'] as $section_id => $section_data): ?>
-                        <!-- Section Header -->
-                        <tr>
-                            <td colspan="9" class="px-4 py-2 border bg-gray-300 text-lg font-bold">
-                                <div class="flex justify-between items-center">
-                                    <!-- Section Checkbox -->
-                                    <input type="checkbox" id="section-checkbox-<?php echo $section_id; ?>" class="form-checkbox w-6 h-6" onclick="toggleSectionSubjects(<?php echo $section_id; ?>, this)">
-                                    <!-- Section Name -->
-                                    <span><?php echo htmlspecialchars($section_data['section_name']); ?></span>
-                                    <!-- Toggle Button (Icon) on Right -->
-                                    <button type="button" class="ml-4 bg-blue-500 text-white px-2 py-1 rounded focus:outline-none" onclick="toggleSubjects('section-<?php echo $section_id; ?>', this)">
-                                        _
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        <!-- Subjects Rows (Hidden/Shown by JavaScript) -->
-                        <tr id="section-<?php echo $section_id; ?>" style="display: none;">
-                            <td colspan="9">
-                                <table class="min-w-full table-auto">
-                                    <?php foreach ($section_data['subjects'] as $subject): ?>
-                                        <tr>
-                                            <td class="px-4 py-3 border text-center border-gray-300" style="background-color:#E2CDCD; border-color:#DFB8B8;">
-                                                <input type="checkbox" name="subject_ids[]" value="<?php echo $subject['id']; ?>" class="form-checkbox w-6 h-6" data-section-id="<?php echo $section_id; ?>">
-                                            </td>
-                                            <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php echo htmlspecialchars($subject['code']); ?></td>
-                                            <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php echo htmlspecialchars($subject['subject_title']); ?></td>
-                                            <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php echo intval($subject['units']); ?></td>
-                                            <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php echo htmlspecialchars($subject['room']); ?></td>
-                                            <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php echo htmlspecialchars($subject['day']); ?></td>
-                                            <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;">
-                                                <?php
-                                                    $startTime = new DateTime($subject['start_time']);
-                                                    echo $startTime->format('h:i A'); // Format to 12-hour time with AM/PM
-                                                ?>
-                                            </td>
-                                            <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;">
-                                                <?php
-                                                    $endTime = new DateTime($subject['end_time']);
-                                                    echo $endTime->format('h:i A'); // Format to 12-hour time with AM/PM
-                                                ?>
-                                            </td>
-                                            <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;">
-                                                <button type="button" onclick="openUpdateModal(<?php echo $subject['id']; ?>, '<?php echo htmlspecialchars($subject['section_id']); ?>', '<?php echo htmlspecialchars($subject['code']); ?>', '<?php echo htmlspecialchars($subject['subject_title']); ?>', '<?php echo htmlspecialchars($subject['units']); ?>', '<?php echo htmlspecialchars($subject['room']); ?>', '<?php echo htmlspecialchars($subject['day']); ?>', '<?php echo htmlspecialchars($subject['start_time']); ?>', '<?php echo htmlspecialchars($subject['end_time']); ?>')" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
-                                                    Edit
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </table>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
                 <?php endforeach; ?>
             </tbody>
         </table>
     </form>
 </div>
+
 
 <script>
     function toggleSubjects(sectionId, button) {

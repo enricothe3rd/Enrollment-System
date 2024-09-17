@@ -257,21 +257,21 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <table class="min-w-full table-auto border-collapse border border-gray-400" style="box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);">
                 <thead>
                     <tr class="bg-red-900 text-left" style="color:#e8e8e6;">
-                        <th class="px-4 py-3 border border-gray-300 text-center">
+                        <th class="px-3 py-3 border border-gray-300 text-center">
                             <input type="checkbox" id="selectAll" onclick="toggleSelectAll()" class="w-6 h-6"> 
                         </th>
-                        <th class="px-4 py-2 border border-gray-300 text-lg">Department Name</th>
-                        <th class="px-4 py-2 border border-gray-300 text-lg">Action</th>
+                        <th class="px-3 py-2 border border-gray-300 text-lg">Department Name</th>
+                        <th class="px-3 py-2 border border-gray-300 text-lg">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($courses as $course): ?>
                     <tr>
-                        <td class="px-4 py-3 border text-center border-gray-300" style="background-color:#E2CDCD; border-color:#DFB8B8;">
+                        <td class="px-3 py-1 border text-center border-gray-300" style=" border-color:#DFB8B8;">
                             <input type="checkbox" name="selected_courses[]" value="<?php echo htmlspecialchars($course['id']); ?>" class="w-6 h-6">
                         </td>
-                        <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;"><?php echo htmlspecialchars($course['course_name']); ?></td>
-                        <td class="px-4 py-3 border border-gray-300 text-lg" style="background-color:#E2CDCD; border-color:#DFB8B8;">
+                        <td class="px-3 py-1 border border-gray-300 text-lg" style="border-color:#DFB8B8;"><?php echo htmlspecialchars($course['course_name']); ?></td>
+                        <td class="px-3 py-1 border border-gray-300 text-lg" style=" border-color:#DFB8B8;">
                             <button type="button" onclick="openUpdateModal(<?php echo htmlspecialchars($course['id']); ?>, '<?php echo htmlspecialchars($course['course_name']); ?>')" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded">Edit</button>
                         </td>
                     </tr>

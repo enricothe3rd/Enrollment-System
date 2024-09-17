@@ -2,14 +2,7 @@
 session_start();
 
 require 'db/db_connection1.php';
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
-// Print session variables to check if they are being stored
-echo "<pre>";
-print_r($_SESSION);  // This will display all session variables
-echo "</pre>";
 class User {
     private $pdo;
     private $user_id;

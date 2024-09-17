@@ -2,13 +2,13 @@
 session_start();
 require 'db/db_connection1.php';
 
-// Check if user is logged in and their role is either 'student' or 'admin'
-if (!isset($_SESSION['user_id']) || ($_SESSION['user_role'] !== 'student' && $_SESSION['user_role'] !== 'admin')) {
-    header("Location: index.php");
-    exit();
-}
+// // Check if user is logged in and their role is either 'student' or 'admin'
+// if (!isset($_SESSION['user_id']) || ($_SESSION['user_role'] !== 'student' && $_SESSION['user_role'] !== 'admin')) {
+//     header("Location: index.php");
+//     exit();
+// }
 
-$user_id = $_SESSION['user_id']; // Get the logged-in user's ID
+// $user_id = $_SESSION['user_id']; // Get the logged-in user's ID
 
 // Fetch the user's student number
 try {

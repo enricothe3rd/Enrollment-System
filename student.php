@@ -36,7 +36,7 @@
 
     <div class="flex h-screen">
         <!-- Sidebar -->
-        <div id="sidebar" class="fixed inset-y-0 left-0 z-30 w-60 h-[160vh] bg-[#820300] text-white transform -translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0">
+        <div id="sidebar" class="fixed inset-y-0 left-0 z-30 w-60 h-[160vh]  text-white transform -translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0">
             <div class="p-4 flex justify-between items-center lg:hidden">
                 <h2 class="text-2xl font-semibold">Dashboard</h2>
                 <button onclick="toggleSidebar()" class="text-white focus:outline-none">
@@ -55,20 +55,20 @@
                 </div>
 
                 <div id="profile-button" class="nav-button flex items-center py-3 px-10 rounded-lg transition duration-200 hover:bg-[#B80000] sm:py-2" 
-                tabindex="2"><img src="<?php echo $paths['navigation_icons'] . '/profile.png'; ?>" alt="Profile Button" class="w-9 h-9 lg:w-10 lg:h-10">
-                    <button class="ml-5 text-md font-semibold text-white hover:text-gray-200 focus:outline-none lg:text-lg">Profile</button></div>
+                tabindex="2"><img src="<?php echo $paths['navigation_icons'] . '/home1.png'; ?>" alt="Profile Button" class="w-9 h-9 lg:w-10 lg:h-10">
+                    <button class="ml-5 text-md font-semibold text-[#C40C0C] hover:text-gray-200 focus:outline-none lg:text-lg">Profile</button></div>
 
                 <div id="home-button" class="nav-button flex items-center py-3 px-10 rounded-lg transition duration-200 hover:bg-[#B80000] sm:py-2"
-                tabindex="3" ><img src="<?php echo $paths['navigation_icons'] . '/home.png'; ?>" alt="Home Button" class="w-9 h-9 lg:w-10 lg:h-10">
-                <button class="ml-5 text-md font-semibold text-white hover:text-gray-200 focus:outline-none lg:text-lg">Home</button></div>
+                tabindex="3" ><img src="<?php echo $paths['navigation_icons'] . '/home1.png'; ?>" alt="Home Button" class="w-9 h-9 lg:w-10 lg:h-10">
+                <button class="ml-5 text-md font-semibold text-[#C40C0C] hover:text-gray-200 focus:outline-none lg:text-lg">Home</button></div>
 
                 <div id="messages-button" class="nav-button flex items-center py-3 px-10 rounded-lg transition duration-200 hover:bg-[#B80000] sm:py-2"
-                tabindex="9"><img src="<?php echo $paths['navigation_icons'] . '/messages.png'; ?>" alt="Messages Button" class="w-9 h-9 lg:w-10 lg:h-10">
-                    <button class="ml-5 text-md font-semibold text-white hover:text-gray-200 focus:outline-none lg:text-lg">Messages</button></div>
+                tabindex="9"><img src="<?php echo $paths['navigation_icons'] . '/home1.png'; ?>" alt="Messages Button" class="w-9 h-9 lg:w-10 lg:h-10">
+                    <button class="ml-5 text-md font-semibold text-[#C40C0C] hover:text-gray-200 focus:outline-none lg:text-lg">Messages</button></div>
 
                 <div id="logout-button" class="nav-button flex items-center py-3 px-10 rounded-lg transition duration-200 hover:bg-[#B80000] sm:py-2"
-                tabindex="10" ><img src="<?php echo $paths['navigation_icons'] . '/logout.png'; ?>" alt="Log out Button" class="w-9 h-9 lg:w-10 lg:h-10">
-                    <button class="ml-5 text-md font-semibold text-white hover:text-gray-200 focus:outline-none lg:text-lg">Logout</button></div>
+                tabindex="10" ><img src="<?php echo $paths['navigation_icons'] . '/home1.png'; ?>" alt="Log out Button" class="w-9 h-9 lg:w-10 lg:h-10">
+                    <button class="ml-5 text-md font-semibold text-[#C40C0C] hover:text-gray-200 focus:outline-none lg:text-lg">Logout</button></div>
             </nav>
         </div>
 
