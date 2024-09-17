@@ -1,13 +1,14 @@
 <?php
+
 require 'Course.php';
 
-if (isset($_GET['id']) && !empty($_GET['id'])) {
-    $id = $_GET['id'];
-    $course = new Course();
-    $course->delete($id);
-    header('Location: read_courses.php');
-    exit();
+$course = new Course();
+$id = $_GET['id'];
+
+if ($course->deleteCourse($id)) {
+    header('Location: view_courses.php');
+    exit;
 } else {
-    echo 'No course ID provided.';
+    echo "Error deleting course";
 }
 ?>

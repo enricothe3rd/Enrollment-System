@@ -1,26 +1,19 @@
 <?php
+
 require 'Course.php';
 
 $course = new Course();
+$id = $_GET['id'];
+$currentCourse = $course->getCourseById($id);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $id = $_POST['id'];
-    $name = $_POST['name'];
-    $course->update($id, $name);
-    header('Location: read_courses.php');
-    exit();
-} else {
-    if (isset($_GET['id']) && !empty($_GET['id'])) {
-        $id = $_GET['id'];
-        $courseData = $course->find($id);
-
-        if (!$courseData) {
-            echo 'Course not found.';
-            exit();
-        }
+    $name = $_POST['course_name'];
+    $department_id = $_POST['department_id'];
+    if ($course->updateCourse($id, $name, $department_id)) {
+        header('Location: view_courses.php');
+        exit;
     } else {
-        echo 'No course ID provided.';
-        exit();
+        echo "Error updating course";
     }
 }
 ?>
@@ -28,21 +21,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update Course</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="tailwind.css" rel="stylesheet">
+    <title>Edit Course</title>
 </head>
-<body class="bg-gray-100 font-sans leading-normal tracking-normal">
-    <div class="container mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg max-w-md">
-        <h1 class="text-2xl font-semibold text-gray-800 mb-4">Update Course</h1>
-        <form action="update_course.php" method="post" class="space-y-4">
-            <input type="hidden" name="id" value="<?php echo htmlspecialchars($courseData['id']); ?>">
-            <div>
-                <label for="name" class="block text-gray-700 font-medium">Course Name:</label>
-                <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($courseData['name']); ?>" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+<body class="bg-gray-100">
+    <div class="max-w-lg mx-auto mt-10">
+        <h1 class="text-2xl font-bold mb-4">Edit Course</h1>
+        <form method="POST" action="edit_course.php?id=<?= $id ?>">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="course_name">Course Name</label>
+                <input type="text" name="course_name" value="<?= $currentCourse['course_name'] ?>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" required>
             </div>
-            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Update Course</button>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="department_id">Department</label>
+                <select name="department_id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700">
+                    <!-- Fetch departments and set selected -->
+                </select>
+            </div>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Update</button>
         </form>
     </div>
 </body>
