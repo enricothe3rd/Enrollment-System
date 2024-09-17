@@ -1,14 +1,16 @@
 <?php
 require 'Section.php';
 
+// Create an instance of Section
+$section = new Section();
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = $_POST['name'];
-    $course_id = $_POST['course_id'];
-    $section = new Section();
-    $section->create($name, $course_id);
-    header('Location: read_sections.php');
-    exit();
+    // Handle section creation
+    $section->handleCreateSectionRequest();
 }
+
+// Fetch all courses for the dropdown
+$courses = $section->getAllCourses(); // Fetch all courses using the method from Section class
 ?>
 
 <!DOCTYPE html>
@@ -28,8 +30,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="text" id="name" name="name" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
             </div>
             <div>
-                <label for="course_id" class="block text-gray-700 font-medium">Course ID:</label>
-                <input type="number" id="course_id" name="course_id" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                <label for="course_id" class="block text-gray-700 font-medium">Course:</label>
+                <select id="course_id" name="course_id" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <option value="" disabled selected>Select a course</option>
+                    <?php foreach ($courses as $course): ?>
+                        <option value="<?php echo htmlspecialchars($course['id']); ?>">
+                            <?php echo htmlspecialchars($course['course_name']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
             </div>
             <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Create Section</button>
         </form>

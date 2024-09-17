@@ -8,6 +8,21 @@ class Course {
         $this->db = Database::connect();
     }
 
+    // Method to handle the course creation request
+    public function handleCreateCourseRequest() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $course_name = $_POST['course_name'];
+            $department_id = $_POST['department_id'];
+
+            if ($this->createCourse($course_name, $department_id)) {
+                header('Location: read_courses.php'); // Redirect to a success page
+                exit();
+            } else {
+                echo 'Failed to create course.';
+            }
+        }
+    }
+
     public function createCourse($name, $department_id) {
         try {
             $sql = "INSERT INTO courses (course_name, department_id) VALUES (:name, :department_id)";
@@ -17,6 +32,28 @@ class Course {
             echo "Error: " . $e->getMessage();
             return false;
         }
+    }
+    
+
+    // Method to handle the course update request
+    public function handleUpdateCourseRequest($id) {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $course_name = $_POST['course_name'];
+            $department_id = $_POST['department_id'];
+
+            if ($this->updateCourse($id, $course_name, $department_id)) {
+                header('Location: read_courses.php'); // Redirect to a success page
+                exit();
+            } else {
+                echo 'Failed to update course.';
+            }
+        }
+    }
+
+    public function updateCourse($id, $name, $department_id) {
+        $sql = "UPDATE courses SET course_name = :name, department_id = :department_id WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([':name' => $name, ':department_id' => $department_id, ':id' => $id]);
     }
 
     public function getCourses() {
@@ -34,11 +71,6 @@ class Course {
         return $stmt->fetch();
     }
 
-    public function updateCourse($id, $name, $department_id) {
-        $sql = "UPDATE courses SET course_name = :name, department_id = :department_id WHERE id = :id";
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([':name' => $name, ':department_id' => $department_id, ':id' => $id]);
-    }
 
     public function deleteCourse($id) {
         $sql = "DELETE FROM courses WHERE id = :id";

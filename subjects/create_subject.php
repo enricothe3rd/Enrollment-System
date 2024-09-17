@@ -1,16 +1,13 @@
 <?php
 require 'Subject.php';
 
+$subject = new Subject();
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $code = $_POST['code'];
-    $title = $_POST['title'];
-    $course_id = $_POST['course_id'];
-    $units = $_POST['units'];
-    $subject = new Subject();
-    $subject->create($code, $title, $course_id, $units);
-    header('Location: read_subjects.php');
-    exit();
+    // Handle section creation
+    $subject->handleCreateSubjectRequest();
 }
+$sections = $subject->getAllSections(); // Get all sections
 ?>
 
 <!DOCTYPE html>
@@ -34,8 +31,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="text" id="title" name="title" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
             </div>
             <div>
-                <label for="course_id" class="block text-gray-700 font-medium">Course ID:</label>
-                <input type="number" id="course_id" name="course_id" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                <label for="section_id" class="block text-gray-700 font-medium">Section:</label>
+                <select id="section_id" name="section_id" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <?php foreach ($sections as $section): ?>
+                        <option value="<?php echo htmlspecialchars($section['id']); ?>">
+                            <?php echo htmlspecialchars($section['name']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
             </div>
             <div>
                 <label for="units" class="block text-gray-700 font-medium">Units:</label>

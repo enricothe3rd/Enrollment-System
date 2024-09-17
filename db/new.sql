@@ -17,17 +17,27 @@ CREATE TABLE courses (
 
 CREATE TABLE subjects (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    code VARCHAR(10) NOT NULL,
+    code VARCHAR(50) NOT NULL,
     title VARCHAR(255) NOT NULL,
-    course_id INT,
+    section_id INT,
     units INT,
-    CONSTRAINT fk_subject_course FOREIGN KEY (course_id) REFERENCES courses(id)
+    FOREIGN KEY (section_id) REFERENCES sections(id)
 );
-
 
 CREATE TABLE sections (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     course_id INT,
     CONSTRAINT fk_section_course FOREIGN KEY (course_id) REFERENCES courses(id)
+);
+
+
+CREATE TABLE schedules (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    subject_id INT NOT NULL,
+    day_of_week VARCHAR(10) NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    room VARCHAR(50) NOT NULL,
+    FOREIGN KEY (subject_id) REFERENCES subjects(id)
 );
