@@ -82,7 +82,7 @@
                 <iframe src="sections/read_sections.php" title="Courses"></iframe>
             </div>
             <div id="schedule" class="content-section">
-                <iframe src="schedule.php" title="Schedule"></iframe>
+                <iframe src="schedule/read_schedules.php" title="Schedule"></iframe>
             </div>
             <div id="students" class="content-section">
                 <iframe src="students.php" title="Students"></iframe>

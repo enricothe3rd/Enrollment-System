@@ -5,7 +5,7 @@ class Database {
     public static function connect() {
         if (!self::$pdo) {
             $host = 'localhost';
-            $dbname = 'enrollment_system';
+            $dbname = 'token_db1';
             $username = 'root';
             $password = '';
 

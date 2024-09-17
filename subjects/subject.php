@@ -1,5 +1,5 @@
 <?php
-require '../db/db_connection2.php';
+require '../db/db_connection3.php';
 
 class Subject {
     private $pdo;

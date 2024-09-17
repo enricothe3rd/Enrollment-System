@@ -1,5 +1,5 @@
 <?php
-require '../db/db_connection2.php'; // Ensure this path is correct
+require '../db/db_connection3.php'; // Ensure this path is correct
 
 class Department {
     private $pdo;
