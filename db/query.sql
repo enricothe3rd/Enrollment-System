@@ -104,47 +104,57 @@ CREATE TABLE enrollment_statuses (
 );
 
 -->
-CREATE TABLE courses (
-    id INT(11) AUTO_INCREMENT PRIMARY KEY,
-    course_name VARCHAR(50) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+CREATE TABLE departments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE classes (
-    id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    course_id INT(11) NOT NULL,
-    name VARCHAR(100) NOT NULL,
-    description TEXT DEFAULT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+CREATE TABLE courses (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    course_name VARCHAR(255) NOT NULL,  -- Changed to course_name to match your code
+    department_id INT,
+    CONSTRAINT fk_department FOREIGN KEY (department_id) REFERENCES departments(id)
 );
 
 CREATE TABLE sections (
-    id INT(11) NOT NULL AUTO_INCREMENT,
-    class_id INT(11) NOT NULL,
-    section_name VARCHAR(50) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (id),
-    KEY (class_id)
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    course_id INT,
+    CONSTRAINT fk_section_course FOREIGN KEY (course_id) REFERENCES courses(id)
 );
 
 CREATE TABLE subjects (
-    id INT(11) NOT NULL AUTO_INCREMENT,
-    class_id INT(11) NOT NULL,
-    code VARCHAR(20) NOT NULL,
-    subject_title VARCHAR(100) NOT NULL,
-    units DECIMAL(5,2) NOT NULL,
-    room VARCHAR(50) DEFAULT NULL,
-    day VARCHAR(50) DEFAULT NULL,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    code VARCHAR(50) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    section_id INT,
+    units INT,
+    course_id INT;
+
+);
+
+
+
+CREATE TABLE schedules (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    subject_id INT NOT NULL,
+    day_of_week VARCHAR(10) NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (id),
-    KEY (class_id)
+    room VARCHAR(50) NOT NULL,
+    FOREIGN KEY (subject_id) REFERENCES subjects(id)
 );
+
+CREATE TABLE semesters (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    semester_name VARCHAR(255) NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
 
 CREATE TABLE subject_enrollments (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -167,6 +177,71 @@ CREATE TABLE subject_enrollments (
     payment_status ENUM('pending', 'completed') DEFAULT 'pending'
 
 );
+
+CREATE TABLE instructors (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    email VARCHAR(100) UNIQUE,
+    department_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE classrooms (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    room_number VARCHAR(50) NOT NULL,
+    capacity INT NOT NULL,
+    building VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE enrollments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_number VARCHAR(255) NOT NULL UNIQUE,
+    firstname VARCHAR(255) NOT NULL,
+    middlename VARCHAR(255),
+    lastname VARCHAR(255) NOT NULL,
+    suffix VARCHAR(50),
+    student_type ENUM('regular', 'new student', 'irregular', 'summer') NOT NULL,
+    sex ENUM('male', 'female') NOT NULL,
+    dob DATE NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    contact_no VARCHAR(255),
+    course_id INT NOT NULL,
+    section_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
+    FOREIGN KEY (section_id) REFERENCES sections(id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE students (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_number VARCHAR(20) NOT NULL UNIQUE,
+    first_name VARCHAR(100) NOT NULL,
+    middle_name VARCHAR(100),
+    last_name VARCHAR(100) NOT NULL,
+    suffix VARCHAR(10),
+    student_type ENUM('Regular', 'New', 'Irregular', 'Summer') NOT NULL,
+    sex ENUM('Male', 'Female') NOT NULL,
+    dob DATE NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    contact_no VARCHAR(20),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
+
+
+
+
+
+
+
+
 
 
 

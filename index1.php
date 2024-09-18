@@ -36,7 +36,7 @@
 <body class="bg-gray-100">
     <div class="flex h-screen">
         <!-- Sidebar -->
-        <aside class="w-64 bg-gray-800 text-red-500 flex-shrink-0">
+        <aside class="w-64 bg-gray-200 text-red-500 flex-shrink-0">
             <!-- Logo -->
             <div class="p-4 text-center">
                 <img src="https://via.placeholder.com/150x50.png?text=Logo" alt="Logo" class="mx-auto">
@@ -46,18 +46,19 @@
             <!-- Navigation -->
             <nav class="mt-4">
                 <ul>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-700" onclick="showContent('home')"><i class="fas fa-home mr-3"></i> Home</a></li>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-700" onclick="showContent('enrollment')"><i class="fas fa-user-plus mr-3"></i> New Enrollments</a></li>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-700" onclick="showContent('department')"><i class="fas fa-building mr-3"></i> Department</a></li>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-700" onclick="showContent('courses')"><i class="fas fa-graduation-cap mr-3"></i> Courses <i  ></i></a></li>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-700" onclick="showContent('sections')"><i class="fas fa-graduation-cap mr-3"></i> Sections <i  ></i></a></li>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-700" onclick="showContent('subjects')"><i class="fas fa-book mr-3"></i> Subjects</a></li>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-700" onclick="showContent('schedule')"><i class="fas fa-calendar-alt mr-3"></i> Schedule</a></li>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-700" onclick="showContent('students')"><i class="fas fa-users mr-3"></i> Students</a></li>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-700" onclick="showContent('instructor')"><i class="fas fa-chalkboard-teacher mr-3"></i> Instructor</a></li>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-700" onclick="showContent('set-semester')"><i class="fas fa-calendar-check mr-3"></i> Set Semester</a></li>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-700" onclick="showContent('classroom')"><i class="fas fa-school mr-3"></i> Classroom</a></li>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-700" onclick="showContent('report')"><i class="fas fa-file-alt mr-3"></i> Report</a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('home')"><i class="fas fa-home mr-3"></i> Home</a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('enrollment')"><i class="fas fa-user-plus mr-3"></i> New Enrollments</a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('student')"><i class="fas fa-user-plus mr-3"></i> Student</a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('department')"><i class="fas fa-building mr-3"></i> Department</a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('courses')"><i class="fas fa-graduation-cap mr-3"></i> Courses <i  ></i></a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('sections')"><i class="fas fa-graduation-cap mr-3"></i> Sections <i  ></i></a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('subjects')"><i class="fas fa-book mr-3"></i> Subjects</a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('schedule')"><i class="fas fa-calendar-alt mr-3"></i> Schedule</a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('students')"><i class="fas fa-users mr-3"></i> Students</a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('instructor')"><i class="fas fa-chalkboard-teacher mr-3"></i> Instructor</a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('set-semester')"><i class="fas fa-calendar-check mr-3"></i> Set Semester</a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('classroom')"><i class="fas fa-school mr-3"></i> Classroom</a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('report')"><i class="fas fa-file-alt mr-3"></i> Report</a></li>
                 </ul>
             </nav>
         </aside>
@@ -67,7 +68,7 @@
                 <iframe src="home.php" title="Home"></iframe>
             </div>
             <div id="enrollment" class="content-section">
-                <iframe src="enrollment_form.php" title="New Enrollments"></iframe>
+                <iframe src="studentEnrollments/read_enrollments.php" title="New Enrollments"></iframe>
             </div>
             <div id="department" class="content-section">
                 <iframe src="departments/read_departments.php" title="Department"></iframe>
@@ -88,13 +89,16 @@
                 <iframe src="students.php" title="Students"></iframe>
             </div>
             <div id="instructor" class="content-section">
-                <iframe src="instructor.php" title="Instructor"></iframe>
+                <iframe src="instructor/read_instructor.php" title="Instructor"></iframe>
             </div>
             <div id="set-semester" class="content-section">
-                <iframe src="set-semester.php" title="Set Semester"></iframe>
+                <iframe src="semesters/read_semesters.php" title="Set Semester"></iframe>
             </div>
             <div id="classroom" class="content-section">
-                <iframe src="classroom.php" title="Classroom"></iframe>
+                <iframe src="classrooms/read_classrooms.php" title="Classroom"></iframe>
+            </div>
+            <div id="student" class="content-section">
+                <iframe src="students/read_students.php" title="student"></iframe>
             </div>
             <div id="report" class="content-section">
                 <iframe src="report.php" title="Report"></iframe>
