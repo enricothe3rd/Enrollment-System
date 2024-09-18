@@ -67,8 +67,11 @@
             <div id="home" class="content-section">
                 <iframe src="home.php" title="Home"></iframe>
             </div>
+            <!-- <div id="enrollment" class="content-section">
+                <iframe src="studentEnrollments/index.php" title="New Enrollments"></iframe>
+            </div> -->
             <div id="enrollment" class="content-section">
-                <iframe src="studentEnrollments/read_enrollments.php" title="New Enrollments"></iframe>
+                <iframe src="enrollment1/index.php" title="New Enrollments"></iframe>
             </div>
             <div id="department" class="content-section">
                 <iframe src="departments/read_departments.php" title="Department"></iframe>
