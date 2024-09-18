@@ -109,6 +109,15 @@ CREATE TABLE departments (
     name VARCHAR(255) NOT NULL
 );
 
+CREATE TABLE semesters (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    semester_name VARCHAR(255) NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 CREATE TABLE courses (
     id INT AUTO_INCREMENT PRIMARY KEY,
     course_name VARCHAR(255) NOT NULL,  -- Changed to course_name to match your code
@@ -116,10 +125,15 @@ CREATE TABLE courses (
     CONSTRAINT fk_department FOREIGN KEY (department_id) REFERENCES departments(id)
 );
 
+
+
+
 CREATE TABLE sections (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     course_id INT,
+   section_id INT;
+
     CONSTRAINT fk_section_course FOREIGN KEY (course_id) REFERENCES courses(id)
 );
 
@@ -129,7 +143,8 @@ CREATE TABLE subjects (
     title VARCHAR(255) NOT NULL,
     section_id INT,
     units INT,
-    course_id INT;
+    semester_id INT;
+
 
 );
 
@@ -145,14 +160,6 @@ CREATE TABLE schedules (
     FOREIGN KEY (subject_id) REFERENCES subjects(id)
 );
 
-CREATE TABLE semesters (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    semester_name VARCHAR(255) NOT NULL,
-    start_date DATE NOT NULL,
-    end_date DATE NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
 
 
 

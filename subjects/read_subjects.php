@@ -2,7 +2,7 @@
 require 'Subject.php';
 
 $subject = new Subject();
-$subjects = $subject->read();
+$subjects = $subject->read(); // Get all subjects
 ?>
 
 <!DOCTYPE html>
@@ -24,6 +24,7 @@ $subjects = $subject->read();
                     <th class="px-4 py-2 border-b text-left text-gray-600">Code</th>
                     <th class="px-4 py-2 border-b text-left text-gray-600">Title</th>
                     <th class="px-4 py-2 border-b text-left text-gray-600">Section Name</th>
+                    <th class="px-4 py-2 border-b text-left text-gray-600">Semester</th>
                     <th class="px-4 py-2 border-b text-left text-gray-600">Units</th>
                     <th class="px-4 py-2 border-b text-left text-gray-600">Actions</th>
                 </tr>
@@ -35,10 +36,11 @@ $subjects = $subject->read();
                     <td class="px-4 py-2"><?php echo htmlspecialchars($sub['code']); ?></td>
                     <td class="px-4 py-2"><?php echo htmlspecialchars($sub['title']); ?></td>
                     <td class="px-4 py-2"><?php echo htmlspecialchars($sub['section_name']); ?></td>
+                    <td class="px-4 py-2"><?php echo htmlspecialchars($sub['semester_name']); ?></td>
                     <td class="px-4 py-2"><?php echo htmlspecialchars($sub['units']); ?></td>
                     <td class="px-4 py-2">
-                        <a href="update_subject.php?id=<?php echo $sub['id']; ?>" class="text-blue-500 hover:text-blue-700">Edit</a>
-                        <a href="delete_subject.php?id=<?php echo $sub['id']; ?>" onclick="return confirm('Are you sure?');" class="ml-4 text-red-500 hover:text-red-700">Delete</a>
+                        <a href="update_subject.php?id=<?php echo htmlspecialchars($sub['id']); ?>" class="text-blue-500 hover:text-blue-700">Edit</a>
+                        <a href="delete_subject.php?id=<?php echo htmlspecialchars($sub['id']); ?>" onclick="return confirm('Are you sure?');" class="ml-4 text-red-500 hover:text-red-700">Delete</a>
                     </td>
                 </tr>
                 <?php endforeach; ?>
@@ -47,5 +49,3 @@ $subjects = $subject->read();
     </div>
 </body>
 </html>
-
-    

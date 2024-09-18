@@ -4,10 +4,13 @@ require 'Subject.php';
 $subject = new Subject();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Handle section creation
+    // Handle subject creation
     $subject->handleCreateSubjectRequest();
 }
-$sections = $subject->getAllSections(); // Get all sections
+
+// Get all sections and semesters
+$sections = $subject->getAllSections();
+$semesters = $subject->getAllSemesters();
 ?>
 
 <!DOCTYPE html>
@@ -29,6 +32,16 @@ $sections = $subject->getAllSections(); // Get all sections
             <div>
                 <label for="title" class="block text-gray-700 font-medium">Subject Title:</label>
                 <input type="text" id="title" name="title" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
+            <div>
+                <label for="semester_id" class="block text-gray-700 font-medium">Semester:</label>
+                <select id="semester_id" name="semester_id" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <?php foreach ($semesters as $semester): ?>
+                        <option value="<?php echo htmlspecialchars($semester['id']); ?>">
+                            <?php echo htmlspecialchars($semester['semester_name']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
             </div>
             <div>
                 <label for="section_id" class="block text-gray-700 font-medium">Section:</label>

@@ -24,6 +24,7 @@ $schedules = $schedule->getAllSchedules();
             <thead class="bg-gray-200 text-gray-600">
                 <tr>
                     <th class="px-4 py-2 border-b text-left text-xs font-medium uppercase tracking-wider">ID</th>
+                    <th class="px-4 py-2 border-b text-left text-xs font-medium uppercase tracking-wider">Section</th>
                     <th class="px-4 py-2 border-b text-left text-xs font-medium uppercase tracking-wider">Subject</th>
                     <th class="px-4 py-2 border-b text-left text-xs font-medium uppercase tracking-wider">Day of Week</th>
                     <th class="px-4 py-2 border-b text-left text-xs font-medium uppercase tracking-wider">Start Time</th>
@@ -36,19 +37,11 @@ $schedules = $schedule->getAllSchedules();
             <?php foreach ($schedules as $sched): ?>
                 <tr class="border-b hover:bg-gray-100">
                     <td class="px-4 py-2"><?php echo htmlspecialchars($sched['id'] ?? ''); ?></td>
+                    <td class="px-4 py-2"><?php echo htmlspecialchars($sched['section_name'] ?? ''); ?></td>
                     <td class="px-4 py-2"><?php echo htmlspecialchars($sched['subject_name'] ?? ''); ?></td>
                     <td class="px-4 py-2"><?php echo htmlspecialchars($sched['day_of_week'] ?? ''); ?></td>
-                    
-                    <!-- Format start_time to 12-hour format with AM/PM -->
-                    <td class="px-4 py-2">
-                        <?php echo htmlspecialchars(date('h:i A', strtotime($sched['start_time']))); ?>
-                    </td>
-
-                    <!-- Format end_time to 12-hour format with AM/PM -->
-                    <td class="px-4 py-2">
-                        <?php echo htmlspecialchars(date('h:i A', strtotime($sched['end_time']))); ?>
-                    </td>
-                    
+                    <td class="px-4 py-2"><?php echo htmlspecialchars(date('h:i A', strtotime($sched['start_time']))); ?></td>
+                    <td class="px-4 py-2"><?php echo htmlspecialchars(date('h:i A', strtotime($sched['end_time']))); ?></td>
                     <td class="px-4 py-2"><?php echo htmlspecialchars($sched['room'] ?? ''); ?></td>
                     <td class="px-4 py-2 flex space-x-2">
                         <a href="update_schedule.php?id=<?php echo $sched['id']; ?>" class="bg-yellow-500 hover:bg-yellow-700 text-white font-semibold py-1 px-2 rounded transition duration-150">Edit</a>

@@ -1,8 +1,6 @@
 <?php
 require 'Subject.php';
 
-// Create an instance of Subject, passing the PDO instance if required
-
 $subject = new Subject();
 
 // Fetch subject data based on the provided ID in the URL
@@ -11,8 +9,9 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     $sub = $subject->find($_GET['id']);
 }
 
-// Fetch all sections for the dropdown
+// Fetch all sections and semesters for the dropdowns
 $sections = $subject->getAllSections();
+$semesters = $subject->getAllSemesters();
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -53,6 +52,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php foreach ($sections as $section) { ?>
                             <option value="<?php echo htmlspecialchars($section['id']); ?>" <?php echo ($section['id'] == $sub['section_id']) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($section['name']); ?>
+                            </option>
+                        <?php } ?>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="semester_id" class="block text-gray-700 font-medium">Semester:</label>
+                    <select id="semester_id" name="semester_id" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
+                        <?php foreach ($semesters as $semester) { ?>
+                            <option value="<?php echo htmlspecialchars($semester['id']); ?>" <?php echo ($semester['id'] == $sub['semester_id']) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($semester['semester_name']); ?>
                             </option>
                         <?php } ?>
                     </select>

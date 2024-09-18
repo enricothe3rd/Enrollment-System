@@ -9,8 +9,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $schedule->handleCreateScheduleRequest();
 }
 
-// Fetch all subjects for the dropdown
-$subjects = $schedule->getAllSubjects(); // Fetch all subjects using the method from Schedule class
+// Fetch all sections for the dropdown
+$sections = $schedule->getAllSections();
+
+// Initialize variables
+$selectedSectionId = isset($_POST['section_id']) ? intval($_POST['section_id']) : null;
+$subjects = [];
+
+// Fetch subjects based on selected section
+if ($selectedSectionId) {
+    $subjects = $schedule->getSubjectsBySection($selectedSectionId);
+} else {
+    // Fetch all subjects initially (if no section selected)
+    $subjects = $schedule->getAllSubjects();
+}
 ?>
 
 <!DOCTYPE html>
@@ -25,6 +37,17 @@ $subjects = $schedule->getAllSubjects(); // Fetch all subjects using the method 
     <div class="container mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg max-w-md">
         <h1 class="text-2xl font-semibold text-gray-800 mb-4">Add New Schedule</h1>
         <form action="create_schedule.php" method="post" class="space-y-4">
+            <div>
+                <label for="section_id" class="block text-gray-700 font-medium">Section:</label>
+                <select id="section_id" name="section_id" onchange="this.form.submit()" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <option value="" disabled selected>Select a section</option>
+                    <?php foreach ($sections as $section): ?>
+                        <option value="<?php echo htmlspecialchars($section['id']); ?>" <?php echo $selectedSectionId == $section['id'] ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($section['name']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
             <div>
                 <label for="subject_id" class="block text-gray-700 font-medium">Subject:</label>
                 <select id="subject_id" name="subject_id" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
@@ -49,7 +72,6 @@ $subjects = $schedule->getAllSubjects(); // Fetch all subjects using the method 
                     <option value="Sunday">Sunday</option>
                 </select>
             </div>
-
             <div>
                 <label for="start_time" class="block text-gray-700 font-medium">Start Time:</label>
                 <input type="time" id="start_time" name="start_time" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
