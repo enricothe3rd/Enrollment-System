@@ -92,7 +92,7 @@
                 <iframe src="students.php" title="Students"></iframe>
             </div>
             <div id="instructor" class="content-section">
-                <iframe src="instructor/read_instructor.php" title="Instructor"></iframe>
+                <iframe src="instructor/read_instructor_subject.php" title="Instructor"></iframe>
             </div>
             <div id="set-semester" class="content-section">
                 <iframe src="semesters/read_semesters.php" title="Set Semester"></iframe>
