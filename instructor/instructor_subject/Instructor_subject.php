@@ -1,5 +1,5 @@
 <?php
-require '../db/db_connection3.php'; // Adjust the path if necessary
+require '../../db/db_connection3.php'; // Adjust the path if necessary
 
 class InstructorSubject {
     private $db;

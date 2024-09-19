@@ -1,11 +1,11 @@
 <?php
-require 'Instructor_subject.php';
+require 'Instructor.php';
+$pdo = Database::connect();
+$instructor = new Instructor($pdo);
 
-$course_id = $_GET['course_id'];
-$instructor = new InstructorSubject();
-$sections = $instructor->getSectionsByCourse($course_id);
-
-echo json_encode($sections);
-
-
+if (isset($_GET['course_id'])) {
+    $courseId = intval($_GET['course_id']);
+    $sections = $instructor->getSectionsByCourse($courseId);
+    echo json_encode($sections);
+}
 ?>

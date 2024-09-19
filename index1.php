@@ -50,14 +50,19 @@
                     <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('enrollment')"><i class="fas fa-user-plus mr-3"></i> New Enrollments</a></li>
                     <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('student')"><i class="fas fa-user-plus mr-3"></i> Student</a></li>
                     <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('department')"><i class="fas fa-building mr-3"></i> Department</a></li>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('courses')"><i class="fas fa-graduation-cap mr-3"></i> Courses <i  ></i></a></li>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('sections')"><i class="fas fa-graduation-cap mr-3"></i> Sections <i  ></i></a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('courses')"><i class="fas fa-graduation-cap mr-3"></i> Courses <i class="fas fa-chevron-right arrow-icon"></i></a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('sections')"><i class="fas fa-graduation-cap mr-3"></i> Sections <i class="fas fa-chevron-right arrow-icon"></i></a></li>
                     <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('subjects')"><i class="fas fa-book mr-3"></i> Subjects</a></li>
                     <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('schedule')"><i class="fas fa-calendar-alt mr-3"></i> Schedule</a></li>
                     <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('students')"><i class="fas fa-users mr-3"></i> Students</a></li>
                     <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('instructor')"><i class="fas fa-chalkboard-teacher mr-3"></i> Instructor</a></li>
+                    <li class="pl-8 additional-buttons">
+                        <a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('instructor-details')"><i class="fas fa-info-circle mr-3"></i> Instructor Subject Assignment</a>
+                    </li>
                     <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('set-semester')"><i class="fas fa-calendar-check mr-3"></i> Set Semester</a></li>
                     <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('classroom')"><i class="fas fa-school mr-3"></i> Classroom</a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('payment')"><i class="fas fa-school mr-3"></i> Payments</a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('subjectamount')"><i class="fas fa-file-alt mr-3"></i> Add Subject Amount</a></li>
                     <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('report')"><i class="fas fa-file-alt mr-3"></i> Report</a></li>
                 </ul>
             </nav>
@@ -67,9 +72,6 @@
             <div id="home" class="content-section">
                 <iframe src="home.php" title="Home"></iframe>
             </div>
-            <!-- <div id="enrollment" class="content-section">
-                <iframe src="studentEnrollments/index.php" title="New Enrollments"></iframe>
-            </div> -->
             <div id="enrollment" class="content-section">
                 <iframe src="enrollment1/index.php" title="New Enrollments"></iframe>
             </div>
@@ -92,7 +94,10 @@
                 <iframe src="students.php" title="Students"></iframe>
             </div>
             <div id="instructor" class="content-section">
-                <iframe src="instructor/read_instructor_subject.php" title="Instructor"></iframe>
+                <iframe src="instructor/read_instructors.php" title="Instructor"></iframe>
+            </div>
+            <div id="instructor-details" class="content-section">
+                <iframe src="instructor/instructor_subject/read_instructor_subject.php" title="Instructor Details"></iframe>
             </div>
             <div id="set-semester" class="content-section">
                 <iframe src="semesters/read_semesters.php" title="Set Semester"></iframe>
@@ -101,10 +106,17 @@
                 <iframe src="classrooms/read_classrooms.php" title="Classroom"></iframe>
             </div>
             <div id="student" class="content-section">
-                <iframe src="students/read_students.php" title="student"></iframe>
+                <iframe src="students/read_students.php" title="Student"></iframe>
+            </div>
+            <div id="payment" class="content-section">
+                <iframe src="payments/read_payments.php" title="payment"></iframe>
+            </div>
+
+            <div id="subjectamount" class="content-section">
+                <iframe src="payments/subjectAmount/SubjectAmounts.php" title="subjectamount"></iframe>
             </div>
             <div id="report" class="content-section">
-                <iframe src="report.php" title="Report"></iframe>
+                <iframe src="instructor/instructor_subject/read_instructor_subject.php" title="Report"></iframe>
             </div>
         </main>
     </div>
@@ -119,20 +131,25 @@
         // Show the selected content section
         document.getElementById(id).style.display = 'block';
 
+        // Toggle additional buttons visibility if instructor section is selected
+        document.querySelectorAll('.additional-buttons').forEach(button => {
+            if (id === 'instructor') {
+                button.style.display = 'block';
+            } else {
+                button.style.display = 'none';
+            }
+        });
+
         // Store the currently selected section in localStorage
         localStorage.setItem('currentSection', id);
-
-        // Hide additional buttons when switching sections
-
     }
-
 
     // On page load, show the last opened section from localStorage
     document.addEventListener('DOMContentLoaded', function() {
         const lastSection = localStorage.getItem('currentSection') || 'home';
         showContent(lastSection);
     });
-</script>
+    </script>
 
 </body>
 </html>
