@@ -7,8 +7,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-8">
+        <!-- <div class="w-full h-full" style="height:90vh;">
+            <iframe src="enrollments/create_enrollment.php" title="Embedded Page" class="w-full h-full border-none"></iframe>
+        </div> -->
 
     <div class="max-w-3xl mx-auto bg-white shadow-lg p-8 rounded-lg">
+    
+
         <h2 class="text-2xl font-bold text-center mb-8 text-blue-700">Select Department and Course</h2>
 
         <!-- Department Dropdown -->
