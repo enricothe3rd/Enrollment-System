@@ -3,119 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Payment</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"> <!-- Updated CDN URL -->
+    <title>Course & Sections Selection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+
+    <div class="max-w-3xl mx-auto bg-white shadow-lg p-8 rounded-lg">
+        <h2 class="text-2xl font-bold text-center mb-8 text-blue-700">Select Department and Course</h2>
+
+        <!-- Department Dropdown -->
+        <label for="department" class="block mb-2 font-medium">Select Department</label>
+        <select id="department" class="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">Select Department</option>
+            <!-- Department options will be populated dynamically -->
+        </select>
+
+        <!-- Course Dropdown -->
+        <label for="course" class="block mb-2 font-medium">Select Course</label>
+        <select id="course" class="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" disabled>
+            <option value="">Select Course</option>
+        </select>
+
+        <!-- Semester Dropdown -->
+        <label for="semester" class="block mb-2 font-medium">Select Semester</label>
+        <select id="semester" class="w-full p-3 mb-6 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" disabled>
+            <option value="">Select Semester</option>
+        </select>
+
+        <!-- Table for Sections, Subjects, and Schedule -->
+        <div id="result" class="mt-6">
+            <!-- Sections and Subjects will be displayed here dynamically -->
+        </div>
+    </div>
 
     <script>
-        function toggleFields() {
-            const paymentType = document.querySelector('select[name="payment_type"]').value;
-            document.getElementById('installment_fields').style.display = paymentType === 'installment' ? 'block' : 'none';
-            document.getElementById('bank_number').style.display = paymentType === 'installment' ? 'block' : 'none';
-        }
+        // Fetch departments on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            fetch('fetch_departments.php')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('department').innerHTML += data;
+                });
+        });
 
-        function toggleInstallmentType() {
-            const installmentType = document.querySelector('select[name="installment_type"]').value;
-            document.getElementById('monthly_fields').style.display = installmentType === 'monthly' ? 'block' : 'none';
-            document.getElementById('quarterly_fields').style.display = installmentType === 'quarterly' ? 'block' : 'none';
-            document.getElementById('flexible_fields').style.display = installmentType === 'flexible' ? 'block' : 'none';
-        }
+        // Fetch courses when a department is selected
+        document.getElementById('department').addEventListener('change', function () {
+            const departmentId = this.value;
+            const courseDropdown = document.getElementById('course');
+
+            if (departmentId) {
+                fetch('fetch_courses.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'department_id=' + departmentId
+                })
+                .then(response => response.text())
+                .then(data => {
+                    courseDropdown.innerHTML = data;
+                    courseDropdown.disabled = false;
+                    document.getElementById('semester').innerHTML = '<option value="">Select Semester</option>'; // Reset semester options
+                    document.getElementById('semester').disabled = true; // Disable semester dropdown
+                });
+            } else {
+                courseDropdown.innerHTML = '<option value="">Select Course</option>';
+                courseDropdown.disabled = true;
+                document.getElementById('semester').innerHTML = '<option value="">Select Semester</option>';
+                document.getElementById('semester').disabled = true;
+                document.getElementById('result').innerHTML = '';
+            }
+        });
+
+        // Fetch semesters when a course is selected
+        document.getElementById('course').addEventListener('change', function () {
+            const semesterDropdown = document.getElementById('semester');
+            semesterDropdown.disabled = !this.value;
+
+            if (this.value) {
+                fetch('fetch_semesters.php')
+                    .then(response => response.text())
+                    .then(data => {
+                        semesterDropdown.innerHTML = '<option value="">Select Semester</option>' + data;
+                        semesterDropdown.disabled = false; // Enable dropdown if semesters are available
+                    });
+            } else {
+                semesterDropdown.innerHTML = '<option value="">Select Semester</option>';
+                semesterDropdown.disabled = true;
+            }
+        });
+
+        // Fetch sections, subjects, and schedule when a semester is selected
+        document.getElementById('semester').addEventListener('change', function () {
+            const courseId = document.getElementById('course').value;
+            const semesterId = this.value;
+
+            if (courseId && semesterId) {
+                fetch('fetch_sections.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'course_id=' + courseId + '&semester_id=' + semesterId
+                })
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('result').innerHTML = data;
+                });
+            } else {
+                document.getElementById('result').innerHTML = '';
+            }
+        });
     </script>
-</head>
-<body class="bg-gray-100">
-    <div class="container mx-auto p-6 bg-white rounded-lg shadow-md">
-        <h2 class="text-2xl font-bold mb-6 text-gray-800">Create Payment</h2>
-        <form action="process_payment.php" method="POST" class="space-y-4">
-            <div>
-                <label class="block text-gray-700 mb-2">Student ID:</label>
-                <input type="text" name="student_id" required class="border border-gray-300 p-3 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
 
-            <div>
-                <label class="block text-gray-700 mb-2">Subject ID:</label>
-                <input type="text" name="subject_id" required class="border border-gray-300 p-3 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-
-            <div>
-                <label class="block text-gray-700 mb-2">Subject Price:</label>
-                <input type="text" name="subject_price" class="border border-gray-300 p-3 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500" readonly>
-            </div>
-
-            <div>
-                <label class="block text-gray-700 mb-2">Payment Type:</label>
-                <select name="payment_type" onchange="toggleFields()" class="border border-gray-300 p-3 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="cash">Cash</option>
-                    <option value="installment">Installment</option>
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-gray-700 mb-2">Amount:</label>
-                <input type="text" name="amount_paid" required class="border border-gray-300 p-3 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-
-            <div>
-                <label class="block text-gray-700 mb-2">Miscellaneous Fee:</label>
-                <input type="text" name="miscellaneous_fee" class="border border-gray-300 p-3 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-
-            <div>
-                <label class="block text-gray-700 mb-2">Research Fee:</label>
-                <input type="text" name="research_fee" class="border border-gray-300 p-3 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-
-            <div>
-                <label class="block text-gray-700 mb-2">Transfer Fee:</label>
-                <input type="text" name="transfer_fee" class="border border-gray-300 p-3 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-
-            <div>
-                <label class="block text-gray-700 mb-2">Overload Subjects Fee:</label>
-                <input type="text" name="overload_fee" class="border border-gray-300 p-3 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-
-            <div id="installment_fields" style="display: none;">
-                <div>
-                    <label class="block text-gray-700 mb-2">Installment Type:</label>
-                    <select name="installment_type" onchange="toggleInstallmentType()" class="border border-gray-300 p-3 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="monthly">Monthly</option>
-                        <option value="quarterly">Quarterly</option>
-                        <option value="flexible">Flexible</option>
-                    </select>
-                </div>
-
-                <div id="monthly_fields" style="display: none;">
-                    <label class="block text-gray-700 mb-2">Monthly Installment Amount:</label>
-                    <input type="text" name="monthly_amount" class="border border-gray-300 p-3 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-
-                <div id="quarterly_fields" style="display: none;">
-                    <label class="block text-gray-700 mb-2">Quarterly Installment Amount:</label>
-                    <input type="text" name="quarterly_amount" class="border border-gray-300 p-3 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-
-                <div id="flexible_fields" style="display: none;">
-                    <label class="block text-gray-700 mb-2">Flexible Payment Details:</label>
-                    <input type="text" name="flexible_details" class="border border-gray-300 p-3 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-            </div>
-
-            <div id="bank_number" style="display: none;">
-                <label class="block text-gray-700 mb-2">Bank Number:</label>
-                <input type="text" name="bank_number" class="border border-gray-300 p-3 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-
-            <div>
-                <label class="block text-gray-700 mb-2">Payment Status:</label>
-                <select name="payment_status" class="border border-gray-300 p-3 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="paid">Paid</option>
-                    <option value="pending">Pending</option>
-                </select>
-            </div>
-
-            <div>
-                <input type="submit" value="Submit" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
-            </div>
-        </form>
-    </div>
 </body>
 </html>

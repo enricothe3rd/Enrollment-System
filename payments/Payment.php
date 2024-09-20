@@ -1,6 +1,6 @@
 <?php
 // Payment.php
-include_once '../db_connection3.php';
+include_once '../db/db_connection3.php';
 
 
 
