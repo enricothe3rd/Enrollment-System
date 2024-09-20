@@ -113,7 +113,7 @@
             </div>
 
             <div id="subjectamount" class="content-section">
-                <iframe src="payments/subjectAmount/SubjectAmounts.php" title="subjectamount"></iframe>
+                <iframe src="payments/subjectAmount/manage_subject_amount.php" title="subjectamount"></iframe>
             </div>
             <div id="report" class="content-section">
                 <iframe src="instructor/instructor_subject/read_instructor_subject.php" title="Report"></iframe>
