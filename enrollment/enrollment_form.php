@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-require 'db/db_connection1.php';
+require '../db/db_connection1.php';
 
 class User {
     private $pdo;

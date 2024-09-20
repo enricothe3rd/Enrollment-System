@@ -8,8 +8,8 @@ $course_id = isset($_POST['course_id']) ? $_POST['course_id'] : null;
 $semester_id = isset($_POST['semester_id']) ? $_POST['semester_id'] : null;
 
 // Debugging: Output selected course and semester IDs
-echo "Selected Course ID: " . htmlspecialchars($course_id) . "<br>";
-echo "Selected Semester ID: " . htmlspecialchars($semester_id) . "<br>";
+// echo "Selected Course ID: " . htmlspecialchars($course_id) . "<br>";
+// echo "Selected Semester ID: " . htmlspecialchars($semester_id) . "<br>";
 
 // Fetch sections if course ID and semester ID are provided
 $sections = [];
@@ -54,7 +54,7 @@ if ($course_id && $semester_id) {
                         $subjects = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                         // Debugging: Output the number of subjects fetched
-                        echo "Subjects fetched for section ID " . htmlspecialchars($section['id']) . ": " . count($subjects) . "<br>";
+                        // echo "Subjects fetched for section ID " . htmlspecialchars($section['id']) . ": " . count($subjects) . "<br>";
                         ?>
 
                         <?php if ($subjects): ?>
