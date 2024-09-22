@@ -15,7 +15,7 @@
         }
         .content-section {
             display: none;
-            height: 100%;
+            height: calc(100% - 64px); /* Adjust height considering sidebar header */
         }
         iframe {
             width: 100%;
@@ -38,37 +38,37 @@
         <!-- Sidebar -->
         <aside class="w-64 bg-gray-200 text-red-500 flex-shrink-0">
             <!-- Logo -->
-            <div class="p-4 text-center">
-                <img src="https://via.placeholder.com/150x50.png?text=Logo" alt="Logo" class="mx-auto">
+            <div class="p-6 text-center">
+                <img src="assets/images/school-logo/bcc-icon.png" alt="Logo" class="mx-auto">
             </div>
-            <!-- Sidebar Header -->
-            <div class="p-4 text-center text-xl font-bold text-white">My Sidebar</div>
+
             <!-- Navigation -->
             <nav class="mt-4">
                 <ul>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('home')"><i class="fas fa-home mr-3"></i> Home</a></li>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('enrollment')"><i class="fas fa-user-plus mr-3"></i> New Enrollments</a></li>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('student')"><i class="fas fa-user-plus mr-3"></i> Student</a></li>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('department')"><i class="fas fa-building mr-3"></i> Department</a></li>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('courses')"><i class="fas fa-graduation-cap mr-3"></i> Courses <i class="fas fa-chevron-right arrow-icon"></i></a></li>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('sections')"><i class="fas fa-graduation-cap mr-3"></i> Sections <i class="fas fa-chevron-right arrow-icon"></i></a></li>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('subjects')"><i class="fas fa-book mr-3"></i> Subjects</a></li>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('schedule')"><i class="fas fa-calendar-alt mr-3"></i> Schedule</a></li>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('students')"><i class="fas fa-users mr-3"></i> Students</a></li>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('instructor')"><i class="fas fa-chalkboard-teacher mr-3"></i> Instructor</a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-300" onclick="showContent('home')"><i class="fas fa-home mr-3"></i> Home</a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-300" onclick="showContent('enrollment')"><i class="fas fa-user-plus mr-3"></i> New Enrollments</a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-300" onclick="showContent('student')"><i class="fas fa-user mr-3"></i> Student</a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-300" onclick="showContent('department')"><i class="fas fa-building mr-3"></i> Department</a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-300" onclick="showContent('courses')"><i class="fas fa-graduation-cap mr-3"></i> Courses <i class="fas fa-chevron-right arrow-icon"></i></a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-300" onclick="showContent('sections')"><i class="fas fa-list mr-3"></i> Sections <i class="fas fa-chevron-right arrow-icon"></i></a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-300" onclick="showContent('subjects')"><i class="fas fa-book mr-3"></i> Subjects</a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-300" onclick="showContent('schedule')"><i class="fas fa-calendar-alt mr-3"></i> Schedule</a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-300" onclick="showContent('students')"><i class="fas fa-users mr-3"></i> Students</a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-300" onclick="showContent('instructor')"><i class="fas fa-chalkboard-teacher mr-3"></i> Instructor</a></li>
                     <li class="pl-8 additional-buttons">
-                        <a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('instructor-details')"><i class="fas fa-info-circle mr-3"></i> Instructor Subject Assignment</a>
+                        <a href="#" class="flex items-center py-2 px-4 hover:bg-gray-300" onclick="showContent('instructor-details')"><i class="fas fa-info-circle mr-3"></i> Instructor Subject Assignment</a>
                     </li>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('set-semester')"><i class="fas fa-calendar-check mr-3"></i> Set Semester</a></li>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('classroom')"><i class="fas fa-school mr-3"></i> Classroom</a></li>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('payment')"><i class="fas fa-school mr-3"></i> Payments</a></li>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('subjectamount')"><i class="fas fa-file-alt mr-3"></i> Add Subject Amount</a></li>
-                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-400" onclick="showContent('report')"><i class="fas fa-file-alt mr-3"></i> Report</a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-300" onclick="showContent('set-semester')"><i class="fas fa-calendar-check mr-3"></i> Set Semester</a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-300" onclick="showContent('classroom')"><i class="fas fa-school mr-3"></i> Classroom</a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-300" onclick="showContent('payment')"><i class="fas fa-money-check-alt mr-3"></i> Payments</a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-300" onclick="showContent('subjectamount')"><i class="fas fa-file-alt mr-3"></i> Add Subject Amount</a></li>
+                    <li><a href="#" class="flex items-center py-2 px-4 hover:bg-gray-300" onclick="showContent('report')"><i class="fas fa-file-alt mr-3"></i> Report</a></li>
                 </ul>
             </nav>
         </aside>
+
         <!-- Main Content -->
-        <main class="flex-1 p-6 overflow-hidden">
+        <main class="flex-1 p-6 overflow-hidden  rounded-lg shadow-lg">
             <div id="home" class="content-section">
                 <iframe src="home.php" title="Home"></iframe>
             </div>
@@ -109,11 +109,10 @@
                 <iframe src="students/read_students.php" title="Student"></iframe>
             </div>
             <div id="payment" class="content-section">
-                <iframe src="payments/read_payments.php" title="payment"></iframe>
+                <iframe src="payments/read_payments.php" title="Payment"></iframe>
             </div>
-
             <div id="subjectamount" class="content-section">
-                <iframe src="payments/subjectAmount/manage_subject_amount.php" title="subjectamount"></iframe>
+                <iframe src="payments/subjectAmount/manage_subject_amount.php" title="Subject Amount"></iframe>
             </div>
             <div id="report" class="content-section">
                 <iframe src="instructor/instructor_subject/read_instructor_subject.php" title="Report"></iframe>
@@ -144,12 +143,11 @@
         localStorage.setItem('currentSection', id);
     }
 
-    // On page load, show the last opened section from localStorage
-    document.addEventListener('DOMContentLoaded', function() {
-        const lastSection = localStorage.getItem('currentSection') || 'home';
-        showContent(lastSection);
-    });
+    // Load the last viewed section from localStorage on page load
+    window.onload = function() {
+        const lastViewedSection = localStorage.getItem('currentSection') || 'home';
+        showContent(lastViewedSection);
+    };
     </script>
-
 </body>
 </html>

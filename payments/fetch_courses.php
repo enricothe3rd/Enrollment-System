@@ -1,20 +1,28 @@
 <?php
-require '../db/db_connection3.php'; // Adjust the path as needed
+require '../db/db_connection3.php'; // Adjust the filename as needed
 
+if (isset($_GET['department_id'])) {
+    $departmentId = $_GET['department_id'];
 
-$pdo = Database::connect();
+    try {
+        // Create a new PDO instance
+        $db = Database::connect();
 
-if (isset($_POST['department_id'])) {
-    $department_id = $_POST['department_id'];
+        // Prepare and execute the query to fetch courses by department
+        $stmt = $db->prepare("SELECT id, course_name FROM courses WHERE department_id = :department_id");
+        $stmt->bindParam(':department_id', $departmentId, PDO::PARAM_INT);
+        $stmt->execute();
 
-    $query = "SELECT id, course_name FROM courses WHERE department_id = ?";
-    $stmt = $pdo->prepare($query);
-    $stmt->execute([$department_id]);
-    $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Fetch all courses
+        $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    echo '<option value="">Select Course</option>';
-    foreach ($courses as $course) {
-        echo '<option value="' . $course['id'] . '">' . $course['course_name'] . '</option>';
+        // Return courses as JSON
+        echo json_encode($courses);
+    } catch (PDOException $e) {
+        echo json_encode(['error' => $e->getMessage()]);
+        exit;
     }
+} else {
+    echo json_encode(['error' => 'No department ID provided']);
 }
 ?>

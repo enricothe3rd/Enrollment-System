@@ -55,7 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 header("Location: college_department_dashboard.php");
                                 break;
                             case 'student':
-                                header("Location: student.php");
+                                header("Location: student_enrollment_dashboard.php");
                                 break;
                             case 'registrar':
                                 header("Location: registrar_dashboard.php");

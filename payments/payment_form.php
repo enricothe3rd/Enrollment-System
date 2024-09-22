@@ -10,14 +10,17 @@
             const paymentMethod = document.querySelector('select[name="payment_method"]').value;
             const installmentFields = document.getElementById('installmentFields');
             const installmentSuggestion = document.getElementById('installmentSuggestion');
+            const interestRateField = document.getElementById('interestRateField');
 
             if (paymentMethod === 'installment') {
                 installmentFields.style.display = 'block';
                 installmentSuggestion.style.display = 'block';
+                interestRateField.style.display = 'block'; // Show interest rate input
                 calculateTotal(); 
             } else {
                 installmentFields.style.display = 'none';
                 installmentSuggestion.style.display = 'none';
+                interestRateField.style.display = 'none'; // Hide interest rate input
                 calculateTotal(); 
             }
         }
@@ -30,12 +33,12 @@
             const numSubjects = parseInt(document.querySelector('input[name="number_of_subjects"]').value) || 0;
             const numUnits = parseInt(document.querySelector('input[name="number_of_units"]').value) || 0;
             const amountPerUnit = parseFloat(document.querySelector('input[name="amount_per_unit"]').value) || 0;
-            const interestRate = parseFloat(document.querySelector('input[name="interest_rate"]').value) / 100 || 0;
+            const interestRate = parseFloat(document.querySelector('input[name="interest_rate"]').value) || 0;
 
             const totalFees = enrollmentFee + miscellaneousFee + researchFee + overloadFee;
             const totalUnitsFee = numSubjects * numUnits * amountPerUnit;
             const totalAmount = totalFees + totalUnitsFee;
-            const totalAmountWithInterest = totalAmount * (1 + interestRate);
+            const totalAmountWithInterest = totalAmount * (1 + interestRate / 100); // Ensure interest rate is applied correctly
 
             document.getElementById('totalAmount').innerText = `Total Amount (Cash): ₱${totalAmount.toFixed(2)}`;
             document.getElementById('totalAmountWithInterest').innerText = `Total Amount (with Interest): ₱${totalAmountWithInterest.toFixed(2)}`;
@@ -47,8 +50,9 @@
 
         function calculateInstallmentPayment(totalAmount) {
             const frequency = document.querySelector('select[name="installment_frequency"]').value;
-
             let installmentCount = 1;
+            let breakdown = '';
+
             if (frequency === 'monthly') {
                 installmentCount = 12;
             } else if (frequency === 'quarterly') {
@@ -59,6 +63,17 @@
 
             const paymentPerInstallment = (totalAmount / installmentCount).toFixed(2);
             document.getElementById('suggestionText').innerText = `Suggested ${frequency} payment: ₱${paymentPerInstallment}`;
+
+            // Generate breakdown table
+            for (let i = 1; i <= installmentCount; i++) {
+                breakdown += `<tr>
+                    <td>${i}${frequency === 'monthly' ? ' Month' : frequency === 'quarterly' ? ' Quarter' : ''}</td>
+                    <td>₱${paymentPerInstallment}</td>
+                    <td>₱${(paymentPerInstallment * i).toFixed(2)}</td>
+                </tr>`;
+            }
+            document.getElementById('breakdownTableBody').innerHTML = breakdown;
+            document.getElementById('breakdownTable').style.display = 'table'; // Show the breakdown table
         }
     </script>
 </head>
@@ -109,17 +124,17 @@
                 </div>
 
                 <div>
-                    <label for="interest_rate" class="block text-sm font-medium text-gray-700">Interest Rate (%):</label>
-                    <input type="number" name="interest_rate" required oninput="calculateTotal()" class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500" step="0.01">
-                </div>
-
-                <div>
                     <label for="payment_method" class="block text-sm font-medium text-gray-700">Payment Method:</label>
                     <select name="payment_method" required onchange="toggleInstallmentFields()" class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500">
                         <option value="cash">Cash</option>
                         <option value="installment">Installment</option>
                     </select>
                 </div>
+            </div>
+
+            <div id="interestRateField" style="display: none;">
+                <label for="interest_rate" class="block text-sm font-medium text-gray-700">Interest Rate (%):</label>
+                <input type="number" name="interest_rate" oninput="calculateTotal()" class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500" step="0.01">
             </div>
 
             <div id="installmentFields" class="mt-4 hidden">
@@ -131,14 +146,30 @@
                 </select>
             </div>
 
-            <div id="installmentSuggestion" class="mt-4 hidden">
-                <p id="totalAmount" class="text-lg font-bold">Total Amount (Cash): ₱0.00</p>
-                <p id="totalAmountWithInterest" class="text-lg font-bold">Total Amount (with Interest): ₱0.00</p>
-                <p id="suggestionText" class="text-lg text-green-500"></p>
+            <div class="mt-4">
+                <h3 class="font-bold">Total Amount (Cash):</h3>
+                <p id="totalAmount" class="text-lg">₱0.00</p>
+                <h3 class="font-bold">Total Amount (with Interest):</h3>
+                <p id="totalAmountWithInterest" class="text-lg">₱0.00</p>
             </div>
 
-            <div class="mt-6 text-center">
-                <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-blue-600">Submit Payment</button>
+            <div id="installmentSuggestion" style="display: none;">
+                <h3 class="font-bold mt-4" id="suggestionText"></h3>
+            </div>
+
+            <table id="breakdownTable" class="mt-4 w-full hidden" style="border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th class="border px-4 py-2">Installment</th>
+                        <th class="border px-4 py-2">Amount per Installment</th>
+                        <th class="border px-4 py-2">Total Paid</th>
+                    </tr>
+                </thead>
+                <tbody id="breakdownTableBody"></tbody>
+            </table>
+
+            <div class="mt-6">
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Submit Payment</button>
             </div>
         </form>
     </div>

@@ -17,7 +17,7 @@
         </div>
 
         <div class="w-full h-full" style="height:90vh;">
-            <iframe src="create_payment.php" title="Embedded Page" class="w-full h-full border-none"></iframe>
+            <iframe src="payment_form.php" title="Embedded Page" class="w-full h-full border-none"></iframe>
         </div>
 </body>
 </html>
