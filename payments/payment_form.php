@@ -1,3 +1,82 @@
+<?php
+session_start();
+$user_email = $_SESSION['user_email'] ?? '';
+$student_number = $_SESSION['student_number'] ?? null;
+
+if (empty($user_email) || empty($student_number)) {
+    echo "User email or student number is not set in the session.";
+    exit;
+}
+
+// Database connection
+require_once '../db/db_connection3.php';
+
+try {
+    $db = Database::connect();
+
+    // Get the number of subjects for the student
+    $stmt = $db->prepare("SELECT COUNT(*) AS subject_count FROM subject_enrollments WHERE student_number = :student_number");
+    $stmt->bindParam(':student_number', $student_number);
+    $stmt->execute();
+
+    // Fetch the result
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $subject_count = $result['subject_count'] ?? 0;
+
+    // Prepare and execute the query to get subject IDs for the student
+    $stmt = $db->prepare("SELECT subject_id FROM subject_enrollments WHERE student_number = :student_number");
+    $stmt->bindParam(':student_number', $student_number);
+    $stmt->execute();
+
+    // Fetch all subject IDs
+    $subject_ids = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+    $total_units = 0;
+
+    // If there are subjects, fetch their unit counts
+    if (!empty($subject_ids)) {
+        // Prepare to get the number of units for each subject
+        $placeholders = implode(',', array_fill(0, count($subject_ids), '?'));
+        $unitStmt = $db->prepare("SELECT SUM(units) AS total_units FROM subjects WHERE id IN ($placeholders)");
+        $unitStmt->execute($subject_ids);
+
+        // Fetch the total units
+        $unitResult = $unitStmt->fetch(PDO::FETCH_ASSOC);
+        $total_units = $unitResult['total_units'] ?? 0;
+    }
+
+    // Output the results
+    // echo "Number of subjects for student number $student_number: $subject_count<br>";
+    // echo "Total units for student number $student_number: $total_units";
+
+} catch (PDOException $e) {
+    echo "Error: " . $e->getMessage();
+}
+
+
+
+// CREATE TABLE enrollment_payment_summaries (
+//     id INT AUTO_INCREMENT PRIMARY KEY,
+//     student_number VARCHAR(255) NOT NULL,
+//     subject_count INT NOT NULL,
+//     total_units INT NOT NULL,
+//     enrollment_fee DECIMAL(10, 2) NOT NULL,
+//     miscellaneous_fee DECIMAL(10, 2) NOT NULL,
+//     research_fee DECIMAL(10, 2) NOT NULL,
+//     overload_fee DECIMAL(10, 2) NOT NULL,
+//     total_amount DECIMAL(10, 2) NOT NULL,
+//     payment_method ENUM('cash', 'installment') NOT NULL,
+//     interest_rate DECIMAL(5, 2) DEFAULT 0,
+//     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+//     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+//     FOREIGN KEY (student_number) REFERENCES users(student_number) ON DELETE CASCADE
+// );
+
+
+?>
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -85,22 +164,23 @@
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label for="student_id" class="block text-sm font-medium text-gray-700">Student ID:</label>
-                    <input type="text" name="student_id" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500">
+                    <input type="text" name="student_id" value="<?php echo htmlspecialchars($student_number); ?>" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500" readonly>
                 </div>
 
                 <div>
                     <label for="number_of_subjects" class="block text-sm font-medium text-gray-700">Number of Subjects:</label>
-                    <input type="number" name="number_of_subjects" required oninput="calculateTotal()" class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500">
+                    <input type="number" name="number_of_subjects" value="<?php echo htmlspecialchars($subject_count); ?>" required oninput="calculateTotal()" class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500" readonly>
                 </div>
+
 
                 <div>
                     <label for="number_of_units" class="block text-sm font-medium text-gray-700">Number of Units per Subject:</label>
-                    <input type="number" name="number_of_units" required oninput="calculateTotal()" class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500">
+                    <input type="number" name="number_of_units" value="<?php echo htmlspecialchars($total_units); ?>" required oninput="calculateTotal()" class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500">
                 </div>
 
                 <div>
                     <label for="amount_per_unit" class="block text-sm font-medium text-gray-700">Amount per Unit:</label>
-                    <input type="number" name="amount_per_unit" required oninput="calculateTotal()" class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500">
+                    <input type="number" name="amount_per_unit"  required oninput="calculateTotal()" class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500">
                 </div>
 
                 <div>
@@ -138,38 +218,36 @@
             </div>
 
             <div id="installmentFields" class="mt-4 hidden">
-                <label for="installment_frequency" class="block text-sm font-medium text-gray-700 mt-4">Installment Frequency:</label>
-                <select name="installment_frequency" class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500" onchange="calculateInstallmentPayment()">
+                <label for="installment_frequency" class="block text-sm font-medium text-gray-700">Installment Frequency:</label>
+                <select name="installment_frequency" onchange="calculateInstallmentPayment(parseFloat(document.getElementById('totalAmountWithInterest').innerText.split('₱')[1]))" class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500">
                     <option value="monthly">Monthly</option>
                     <option value="quarterly">Quarterly</option>
                     <option value="yearly">Yearly</option>
                 </select>
             </div>
 
-            <div class="mt-4">
-                <h3 class="font-bold">Total Amount (Cash):</h3>
-                <p id="totalAmount" class="text-lg">₱0.00</p>
-                <h3 class="font-bold">Total Amount (with Interest):</h3>
-                <p id="totalAmountWithInterest" class="text-lg">₱0.00</p>
-            </div>
-
             <div id="installmentSuggestion" style="display: none;">
-                <h3 class="font-bold mt-4" id="suggestionText"></h3>
+                <p id="suggestionText" class="text-lg font-bold mt-4"></p>
             </div>
 
-            <table id="breakdownTable" class="mt-4 w-full hidden" style="border-collapse: collapse;">
+            <div class="mt-4">
+                <p id="totalAmount" class="text-lg font-bold"></p>
+                <p id="totalAmountWithInterest" class="text-lg font-bold"></p>
+            </div>
+
+            <table id="breakdownTable" style="display: none;" class="mt-4 w-full border border-gray-300">
                 <thead>
                     <tr>
-                        <th class="border px-4 py-2">Installment</th>
-                        <th class="border px-4 py-2">Amount per Installment</th>
-                        <th class="border px-4 py-2">Total Paid</th>
+                        <th class="border border-gray-300 px-4 py-2">Installment</th>
+                        <th class="border border-gray-300 px-4 py-2">Amount</th>
+                        <th class="border border-gray-300 px-4 py-2">Cumulative</th>
                     </tr>
                 </thead>
                 <tbody id="breakdownTableBody"></tbody>
             </table>
 
             <div class="mt-6">
-                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Submit Payment</button>
+                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700">Submit Payment</button>
             </div>
         </form>
     </div>

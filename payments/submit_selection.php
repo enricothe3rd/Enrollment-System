@@ -1,71 +1,94 @@
 <?php
 session_start();
-require '../db/db_connection3.php'; // Adjust the filename as needed
+require '../db/db_connection3.php';
 
+// Check if the user email and student number are set in the session
 $user_email = $_SESSION['user_email'] ?? '';
 if (empty($user_email)) {
     echo "User email is not set in the session.";
     exit;
 }
 
-// Check if student_number is set in the session
-if (isset($_SESSION['student_number'])) {
-    $student_number = $_SESSION['student_number'];
-} else {
+$student_number = $_SESSION['student_number'] ?? null;
+if (empty($student_number)) {
     echo "Student number is not set in the session.";
     exit;
 }
 
+// Check if the request method is POST
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $departmentId = $_POST['department'];
-    $courseId = $_POST['course'];
-    $sectionId = $_POST['section']; // Capture the selected section
+    // Retrieve the submitted department, course, sections, subjects, and schedules
+    $departmentId = $_POST['department'] ?? null;
+    $courseId = $_POST['course'] ?? null;
+    $selectedSections = $_POST['sections'] ?? [];
+    $selectedSubjects = $_POST['subjects'] ?? [];
+    $selectedSchedules = $_POST['schedules'] ?? [];
 
-    // Validate input
-    if (empty($departmentId) || empty($courseId) || empty($sectionId)) {
-        echo "Please select a department, a course, and a section.";
+    // Validate inputs
+    if (empty($departmentId) || empty($courseId)) {
+        echo "Please select both a department and a course.";
         exit;
     }
+
+    // Prepare data for console log
+    $alertData = [];
 
     try {
         $db = Database::connect();
 
-        // Prepare an SQL statement to insert the selection
-        $stmt = $db->prepare("INSERT INTO enrollments (student_number, department_id, course_id, section_id) VALUES (:student_number, :department_id, :course_id, :section_id)");
-        $stmt->bindParam(':student_number', $student_number, PDO::PARAM_STR); // Bind the student number
-        $stmt->bindParam(':department_id', $departmentId, PDO::PARAM_INT);
-        $stmt->bindParam(':course_id', $courseId, PDO::PARAM_INT);
-        $stmt->bindParam(':section_id', $sectionId, PDO::PARAM_INT); // Bind the section ID
+        foreach ($selectedSections as $sectionId) {
+            $subjectIds = $selectedSubjects[$sectionId] ?? [];
 
-        try {
-            // Attempt to execute the insert
-            if ($stmt->execute()) {
-                // Redirect to prevent resubmission
-                header("Location: enrollments/create_enrollment.php?message=Selection saved successfully!");
-                exit();
-            }
-        } catch (PDOException $e) {
-            // Check if the error is a duplicate entry error
-            if ($e->getCode() == 23000) {
-                // Prepare an SQL statement to update the existing record
-                $updateStmt = $db->prepare("UPDATE enrollments SET department_id = :department_id, course_id = :course_id, section_id = :section_id WHERE student_number = :student_number");
-                $updateStmt->bindParam(':student_number', $student_number, PDO::PARAM_STR);
-                $updateStmt->bindParam(':department_id', $departmentId, PDO::PARAM_INT);
-                $updateStmt->bindParam(':course_id', $courseId, PDO::PARAM_INT);
-                $updateStmt->bindParam(':section_id', $sectionId, PDO::PARAM_INT); // Bind the section ID
+            foreach ($subjectIds as $subject_id) {
+                // Fetch the corresponding schedule ID based on the subject ID
+                $schedule_id = $selectedSchedules[$subject_id][0] ?? null; // Assuming it's an array
 
-                if ($updateStmt->execute()) {
-                    header("Location: enrollments/create_enrollment.php?message=Selection updated successfully!");
-                    exit();
-                } else {
-                    echo "Error updating selection.";
+                // If no schedule ID is found for the subject, skip the insertion
+                if (is_null($schedule_id)) {
+                    echo "Warning: No schedule ID found for subject ID: $subject_id<br>";
+                    continue;
                 }
-            } else {
-                echo "Error: " . htmlspecialchars($e->getMessage()); // Securely display the error message
+
+                // Add data to alert array for console logging
+                $alertData[] = [
+                    'student_number' => $student_number,
+                    'department_id' => $departmentId,
+                    'course_id' => $courseId,
+                    'section_id' => $sectionId,
+                    'subject_id' => $subject_id,
+                    'schedule_id' => $schedule_id,
+                ];
+
+                // Prepare the insert statement
+                $sectionStmt = $db->prepare("
+                    INSERT INTO subject_enrollments (student_number, department_id, course_id, section_id, subject_id, schedule_id)
+                    VALUES (:student_number, :department_id, :course_id, :section_id, :subject_id, :schedule_id)
+                    ON DUPLICATE KEY UPDATE 
+                        department_id = VALUES(department_id), 
+                        course_id = VALUES(course_id),
+                        section_id = VALUES(section_id),
+                        subject_id = VALUES(subject_id),
+                        schedule_id = VALUES(schedule_id)
+                ");
+
+                // Bind parameters
+                $sectionStmt->bindParam(':student_number', $student_number, PDO::PARAM_STR);
+                $sectionStmt->bindParam(':department_id', $departmentId, PDO::PARAM_INT);
+                $sectionStmt->bindParam(':course_id', $courseId, PDO::PARAM_INT);
+                $sectionStmt->bindParam(':section_id', $sectionId, PDO::PARAM_INT);
+                $sectionStmt->bindParam(':subject_id', $subject_id, PDO::PARAM_INT);
+                $sectionStmt->bindParam(':schedule_id', $schedule_id, PDO::PARAM_INT);
+
+                // Execute the query
+                $sectionStmt->execute();
             }
         }
+
+        header("Location: enrollments/create_enrollment.php");
+        exit;
+
     } catch (PDOException $e) {
-        echo "Error: " . htmlspecialchars($e->getMessage()); // Securely display the error message
+        echo "Error: " . htmlspecialchars($e->getMessage());
     }
 } else {
     echo "Invalid request method.";
