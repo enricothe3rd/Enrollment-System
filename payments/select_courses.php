@@ -185,6 +185,7 @@ function fetchSubjects(sectionId, subjectsContainer) {
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
             try {
+                console.log("Subjects response:", xhr.responseText); // Log response for debugging
                 const subjects = JSON.parse(xhr.responseText);
                 subjectsContainer.innerHTML = ''; // Clear loading text
 
@@ -220,10 +221,13 @@ function fetchSubjects(sectionId, subjectsContainer) {
                 console.error("Error parsing JSON:", e);
                 subjectsContainer.innerHTML = 'Error loading subjects';
             }
+        } else if (xhr.readyState === 4 && xhr.status !== 200) {
+            subjectsContainer.innerHTML = 'Error loading subjects';
         }
     };
     xhr.send("section_id=" + sectionId);
 }
+
 function fetchSchedule(subjectId, container) {
     const xhr = new XMLHttpRequest();
     xhr.open("POST", "fetch_schedule.php", true);
@@ -231,6 +235,7 @@ function fetchSchedule(subjectId, container) {
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
             try {
+                console.log("Schedule response:", xhr.responseText); // Log response for debugging
                 const schedules = JSON.parse(xhr.responseText);
                 const scheduleContainer = document.createElement('div');
                 scheduleContainer.className = "ml-4 mt-2"; // Indentation for schedules
@@ -266,6 +271,10 @@ function fetchSchedule(subjectId, container) {
                 errorMessage.textContent = 'Error loading schedule';
                 container.appendChild(errorMessage);
             }
+        } else if (xhr.readyState === 4 && xhr.status !== 200) {
+            const errorMessage = document.createElement('p');
+            errorMessage.textContent = 'Error loading schedule';
+            container.appendChild(errorMessage);
         }
     };
     xhr.send("subject_id=" + subjectId); // Ensure subject ID is sent

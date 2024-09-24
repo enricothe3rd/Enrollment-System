@@ -49,6 +49,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     continue;
                 }
 
+                // Check for existing enrollment to prevent duplication
+                $checkStmt = $db->prepare("
+                    SELECT COUNT(*) FROM subject_enrollments 
+                    WHERE student_number = :student_number 
+                    AND section_id = :section_id 
+                    AND department_id = :department_id 
+                    AND course_id = :course_id 
+                    AND subject_id = :subject_id
+                    AND schedule_id = :schedule_id
+                ");
+                
+                // Bind parameters for the check statement
+                $checkStmt->bindParam(':student_number', $student_number, PDO::PARAM_STR);
+                $checkStmt->bindParam(':section_id', $sectionId, PDO::PARAM_INT);
+                $checkStmt->bindParam(':department_id', $departmentId, PDO::PARAM_INT);
+                $checkStmt->bindParam(':course_id', $courseId, PDO::PARAM_INT);
+                $checkStmt->bindParam(':subject_id', $subject_id, PDO::PARAM_INT);
+                $checkStmt->bindParam(':schedule_id', $schedule_id, PDO::PARAM_INT);
+
+                // Execute the check statement
+                $checkStmt->execute();
+                $exists = $checkStmt->fetchColumn() > 0;
+
+                if ($exists) {
+                    echo "This student is already enrolled in the specified section and subject.<br>";
+                    continue; // Skip to the next subject if a duplicate is found
+                }
+
                 // Add data to alert array for console logging
                 $alertData[] = [
                     'student_number' => $student_number,
@@ -63,15 +91,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $sectionStmt = $db->prepare("
                     INSERT INTO subject_enrollments (student_number, department_id, course_id, section_id, subject_id, schedule_id)
                     VALUES (:student_number, :department_id, :course_id, :section_id, :subject_id, :schedule_id)
-                    ON DUPLICATE KEY UPDATE 
-                        department_id = VALUES(department_id), 
-                        course_id = VALUES(course_id),
-                        section_id = VALUES(section_id),
-                        subject_id = VALUES(subject_id),
-                        schedule_id = VALUES(schedule_id)
                 ");
 
-                // Bind parameters
+                // Bind parameters for the insert statement
                 $sectionStmt->bindParam(':student_number', $student_number, PDO::PARAM_STR);
                 $sectionStmt->bindParam(':department_id', $departmentId, PDO::PARAM_INT);
                 $sectionStmt->bindParam(':course_id', $courseId, PDO::PARAM_INT);
@@ -84,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         }
 
-        header("Location: enrollments/create_enrollment.php");
+        header("Location: payment_form.php");
         exit;
 
     } catch (PDOException $e) {
