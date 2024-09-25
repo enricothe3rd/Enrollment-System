@@ -20,7 +20,11 @@ try {
             SELECT e.*, 
                    c.course_name, 
                    s.name AS section_name, 
-                   d.name AS department_name
+                   d.name AS department_name,
+                   e.firstname,
+                   e.middlename,
+                   e.lastname,
+                   e.suffix
             FROM enrollments e
             LEFT JOIN courses c ON e.course_id = c.id
             LEFT JOIN sections s ON e.section_id = s.id
@@ -40,6 +44,16 @@ try {
 
 // Check if enrollment data was retrieved successfully
 if ($enrollmentData) {
+    // Combine first name, middle name, last name, and suffix
+    $fullname = htmlspecialchars($enrollmentData['firstname']);
+    if (!empty($enrollmentData['middlename'])) {
+        $fullname .= ' ' . htmlspecialchars($enrollmentData['middlename']);
+    }
+    $fullname .= ' ' . htmlspecialchars($enrollmentData['lastname']);
+    if (!empty($enrollmentData['suffix'])) {
+        $fullname .= ' ' . htmlspecialchars($enrollmentData['suffix']);
+    }
+
     // Create new PDF document
     $pdf = new FPDF();
     $pdf->AddPage();
@@ -50,46 +64,53 @@ if ($enrollmentData) {
     // Set title
     $pdf->SetFont('Arial', 'B', 15);
     $pdf->Cell(0, 10, 'Binangonan Catholic College', 0, 1, 'C');
-    // $pdf->Ln(8); // Add a line break
-
-    // Set title
+    
+    // Add school details
     $pdf->SetFont('Arial', '', 8);
     $pdf->Cell(0, 4, 'Binangonan Rizal', 0, 1, 'C');
     $pdf->Ln(8); // Add a line break
 
-    // Add the Algerian font files
-    $pdf->AddFont('Algerian', '', 'Algerian.ttf'); // Add Algerian font
-    $pdf->AddFont('Algerian', 'B', 'Algerian.ttf'); // Add Algerian Bold font if available
+    // Add the custom font (Algerian)
+    $pdf->AddFont('Algerian', '', 'Algerian.php');
+    $pdf->SetFont('Algerian', '', 12);
     
-    // Check if the font is added correctly
-    if ($pdf->FontExists('Algerian')) {
-        $pdf->SetFont('Algerian', 'B', 15); // Use the font
-    } else {
-        die("Failed to add Algerian font");
-    }
+    $text = 'Certificate of Registration';
+    $letter_spacing = 2; // Adjust this value to increase/decrease spacing
+    $character_width = 2; // Width of each character in the current font
+    $text_length = strlen($text);
     
-    $pdf->Cell(0, 10, 'Certificate of Registration', 0, 1, 'C');
-    $pdf->Ln(8); // Add a line break
+    // Calculate total width of the text including the spacing
+    $total_text_width = ($character_width * $text_length) + ($letter_spacing * ($text_length - 1));
+    
+    // Get the current page width
+    $page_width = $pdf->GetPageWidth();
+    
+    // Calculate starting X position to center the text
+    $x_start = ($page_width - $total_text_width) / 2;
+    
+    $pdf->SetY(35); // Set Y position (optional)
+    $pdf->SetX($x_start); // Set starting X position for centered text
+    
+    // Loop through each letter in the string
+    for ($i = 0; $i < strlen($text); $i++) {
+        $pdf->Cell($character_width, 5, $text[$i], 0, 0, 'C'); // Print each character
+        $pdf->Cell($letter_spacing); // Add the space between characters
+    }    
+    $pdf->Ln(12); // Add a line break
 
     // Add the font files for Times New Roman
-    $pdf->AddFont('TimesNewRoman', '', 'times.php'); // Add Times New Roman
-    $pdf->AddFont('TimesNewRoman', 'B', 'times.php'); // Add Times New Roman Bold
+    $pdf->AddFont('TimesNewRoman', '', 'times.php'); // Regular Times New Roman
+    $pdf->AddFont('TimesNewRoman', 'B', 'timesb.php'); // Bold Times New Roman
 
-    // Set font to bold and increase the size
-    $pdf->SetFont('TimesNewRoman', 'B', 9); // Use the newly added font
+    // Set font to bold for the labels and increase the size
+    $pdf->SetFont('TimesNewRoman', 'B', 9); // Use the newly added bold font
 
-    // Define fields to display
+    // Define fields to display (with combined full name)
     $fields = [
         'Student Number' => htmlspecialchars($student_number),
+        'Full Name' => $fullname, // Combined full name
         'Department' => htmlspecialchars($enrollmentData['department_name']),
         'School Year' => htmlspecialchars($enrollmentData['school_year']),
-        'First Name' => htmlspecialchars($enrollmentData['firstname']),
-        'Middle Name' => htmlspecialchars($enrollmentData['middlename']),
-        'Last Name' => htmlspecialchars($enrollmentData['lastname']),
-        'Suffix' => htmlspecialchars($enrollmentData['suffix']),
-        'Student Type' => htmlspecialchars($enrollmentData['student_type']),
-        'Sex' => htmlspecialchars($enrollmentData['sex']),
-        'Date of Birth' => htmlspecialchars($enrollmentData['dob']),
         'Email' => htmlspecialchars($enrollmentData['email']),
         'Contact No' => htmlspecialchars($enrollmentData['contact_no']),
         'Address' => htmlspecialchars($enrollmentData['address']),
@@ -99,11 +120,11 @@ if ($enrollmentData) {
     ];
 
     // Define line height
-    $lineHeight = 2; // Height of each line (increased for better readability)
+    $lineHeight = 3; // Height of each line (increased for better readability)
     $pdf->SetY($pdf->GetY() + 5); // Start Y position with some space
 
     // Define width for labels and values
-    $labelWidth = 24; // Width for labels
+    $labelWidth = 25; // Width for labels (increased for better readability)
     $valueWidth = 35; // Width for values
     $xStart = 10; // Starting X position
 
@@ -113,11 +134,17 @@ if ($enrollmentData) {
         // Calculate the X position based on the field count
         $xLabel = $xStart + ($fieldCount % 3) * ($labelWidth + $valueWidth + 10); // Total spacing
         $pdf->SetX($xLabel);
+
+        // Set font to bold for the label
+        $pdf->SetFont('TimesNewRoman', 'B', 9);
         $pdf->Cell($labelWidth, $lineHeight, "$label:", 0);
 
         // Set the X position for the value
         $xValue = $xLabel + $labelWidth; // Value starts right after the label
         $pdf->SetX($xValue);
+        
+        // Set font to regular for the value
+        $pdf->SetFont('TimesNewRoman', '', 9);
         $pdf->Cell($valueWidth, $lineHeight, $value, 0); // Limited width to avoid overflow
 
         // Increment field count
@@ -139,3 +166,4 @@ if ($enrollmentData) {
 } else {
     echo "No enrollment data found for this student.";
 }
+?>
