@@ -37,50 +37,54 @@ try {
     $error_message = "Error: " . $e->getMessage();
 }
 ?>
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enrollment Details</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100">
-    <div class="container mx-auto p-6">
-        <h1 class="text-3xl font-bold mb-4">Enrollment Details</h1>
+<body class="">
+    <div class="flex justify-center p-8">
+        <div class=" max-w-4xl w-full p-8">
+            <h1 class="text-4xl font-bold text-gray-800 text-center mb-6">Enrollment Details</h1>
 
-        <?php if (isset($error_message)): ?>
-            <div class="bg-red-500 text-white p-4 rounded mb-4">
-                <?= htmlspecialchars($error_message) ?>
-            </div>
-        <?php elseif ($enrollmentData): ?>
-            <div class="bg-white shadow-md rounded-lg p-6">
-                <h2 class="text-2xl font-semibold mb-4">Student Information</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><strong>First Name:</strong> <?= htmlspecialchars($enrollmentData['firstname']) ?></div>
-                    <div><strong>Middle Name:</strong> <?= htmlspecialchars($enrollmentData['middlename']) ?></div>
-                    <div><strong>Last Name:</strong> <?= htmlspecialchars($enrollmentData['lastname']) ?></div>
-                    <div><strong>Suffix:</strong> <?= htmlspecialchars($enrollmentData['suffix']) ?></div>
-                    <div><strong>Student Type:</strong> <?= htmlspecialchars($enrollmentData['student_type']) ?></div>
-                    <div><strong>Sex:</strong> <?= htmlspecialchars($enrollmentData['sex']) ?></div>
-                    <div><strong>Date of Birth:</strong> <?= htmlspecialchars($enrollmentData['dob']) ?></div>
-                    <div><strong>Email:</strong> <?= htmlspecialchars($enrollmentData['email']) ?></div>
-                    <div><strong>Contact No:</strong> <?= htmlspecialchars($enrollmentData['contact_no']) ?></div>
-                    <div><strong>Address:</strong> <?= htmlspecialchars($enrollmentData['address']) ?></div>
-                    <div><strong>School Year:</strong> <?= htmlspecialchars($enrollmentData['school_year']) ?></div>
-                    <div><strong>Status:</strong> <?= htmlspecialchars($enrollmentData['status']) ?></div>
-                    <div><strong>Course:</strong> <?= htmlspecialchars($enrollmentData['course_name']) ?></div>
-                    <div><strong>Section:</strong> <?= htmlspecialchars($enrollmentData['section_name']) ?></div>
-                    <div><strong>Department:</strong> <?= htmlspecialchars($enrollmentData['department_name']) ?></div>
+            <?php if (isset($error_message)): ?>
+                <div class="bg-red-500 text-white p-4 rounded-lg mb-6 text-center">
+                    <?= htmlspecialchars($error_message) ?>
                 </div>
-            </div>
-        <?php else: ?>
-            <div class="bg-yellow-500 text-white p-4 rounded mb-4">
-                No enrollment found for Student Number: <?= htmlspecialchars($_SESSION['student_number']) ?>
-            </div>
-        <?php endif; ?>
+            <?php elseif ($enrollmentData): ?>
+                <div class="bg-gray-100 p-6 rounded-lg">
+                
+ 
+                    <h2 class="text-2xl font-semibold text-gray-700 mb-4">Student Information</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        <div><strong class="font-medium text-gray-600">First Name:</strong> <?= htmlspecialchars($enrollmentData['firstname']) ?></div>
+                        <div><strong class="font-medium text-gray-600">Middle Name:</strong> <?= htmlspecialchars($enrollmentData['middlename']) ?></div>
+                        <div><strong class="font-medium text-gray-600">Last Name:</strong> <?= htmlspecialchars($enrollmentData['lastname']) ?></div>
+                        <div><strong class="font-medium text-gray-600">Suffix:</strong> <?= htmlspecialchars($enrollmentData['suffix']) ?></div>
+                        <div><strong class="font-medium text-gray-600">Student Type:</strong> <?= htmlspecialchars($enrollmentData['student_type']) ?></div>
+                        <div><strong class="font-medium text-gray-600">Sex:</strong> <?= htmlspecialchars($enrollmentData['sex']) ?></div>
+                        <div><strong class="font-medium text-gray-600">Date of Birth:</strong> <?= htmlspecialchars($enrollmentData['dob']) ?></div>
+                        <div><strong class="font-medium text-gray-600">Email:</strong> <?= htmlspecialchars($enrollmentData['email']) ?></div>
+                        <div><strong class="font-medium text-gray-600">Contact No:</strong> <?= htmlspecialchars($enrollmentData['contact_no']) ?></div>
+                        <div><strong class="font-medium text-gray-600">Address:</strong> <?= htmlspecialchars($enrollmentData['address']) ?></div>
+                        <div><strong class="font-medium text-gray-600">School Year:</strong> <?= htmlspecialchars($enrollmentData['school_year']) ?></div>
+                        <div><strong class="font-medium text-gray-600">Status:</strong> <?= htmlspecialchars($enrollmentData['status']) ?></div>
+                        <div><strong class="font-medium text-gray-600">Course:</strong> <?= htmlspecialchars($enrollmentData['course_name']) ?></div>
+                        <div><strong class="font-medium text-gray-600">Section:</strong> <?= htmlspecialchars($enrollmentData['section_name']) ?></div>
+                        <div><strong class="font-medium text-gray-600">Department:</strong> <?= htmlspecialchars($enrollmentData['department_name']) ?></div>
+                    </div>
+                </div>
+            <?php else: ?>
+                <div class="bg-yellow-500 text-white p-4 rounded-lg mb-6 text-center">
+                    No enrollment found for Student Number: <?= htmlspecialchars($_SESSION['student_number']) ?>
+                </div>
+            <?php endif; ?>
+        </div>
     </div>
 </body>
 </html>
+

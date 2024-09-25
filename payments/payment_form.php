@@ -21,17 +21,16 @@ $miscellaneousFee = '';
 $totalUnits = $payment->getTotalUnitsForStudent($student_number); // Fetching total units
 
 // Fetching enrollment details
-$details = $payment->getEnrollmentDetails($student_number); // Pass student_number as parameter
+$details = $payment->getEnrollmentDetails($student_number);
 if ($details) {
     $unitPrice = $details['units_price'];
     $miscellaneousFee = $details['miscellaneous_fee'];
     $monthsOfPayments = $details['months_of_payments']; // Fetching months_of_payments
 } else {
     echo "No enrollment details found.";
-    exit; // Exit if no details are found
+    exit;
 }
 
-// Initialize payment-related variables
 $totalPayment = ($totalUnits * $unitPrice) + $miscellaneousFee;
 
 // Handle form submission
@@ -40,27 +39,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $amountPerUnit = filter_input(INPUT_POST, 'amount_per_unit', FILTER_VALIDATE_FLOAT);
     $miscellaneousFee = filter_input(INPUT_POST, 'miscellaneous_fee', FILTER_VALIDATE_FLOAT);
     $paymentMethod = filter_input(INPUT_POST, 'payment_method', FILTER_SANITIZE_STRING);
-    
-    if ($amountPerUnit === false || $miscellaneousFee === false || empty($paymentMethod)) {
+
+    // Check if total_payment is set and valid
+    if (isset($_POST['total_payment'])) {
+        $totalPayment = filter_input(INPUT_POST, 'total_payment', FILTER_VALIDATE_FLOAT);
+    } else {
+        echo "<p class='text-red-600'>Total payment is not set. Please ensure all fields are filled out correctly.</p>";
+        exit;
+    }
+
+    // Continue with validation
+    if ($amountPerUnit === false || $miscellaneousFee === false || empty($paymentMethod) || $totalPayment === false) {
         echo "<p class='text-red-600'>Invalid input. Please ensure all fields are filled out correctly.</p>";
     } else {
-        $data = [
-            'student_number' => $student_number, // Updated here
-            'number_of_subjects' => $payment->getNumberOfSubjects($student_number),
-            'number_of_units' => $totalUnits,
-            'amount_per_unit' => $amountPerUnit,
-            'miscellaneous_fee' => $miscellaneousFee,
-            'payment_method' => $paymentMethod,
-        ];
-
-        // Insert payment into the database
-        if ($payment->create($data)) {
-            echo "<p class='text-green-600'>Payment recorded successfully!</p>";
-        } else {
-            echo "<p class='text-red-600'>Failed to record payment. Please try again.</p>";
-        }
+        // Proceed with creating the payment record
     }
 }
+
 
 ?>
 
@@ -70,8 +65,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <title>Payment Form</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <!-- Include the PayPal SDK -->
+    <script src="https://www.paypal.com/sdk/js?client-id=AeTnJCEfQ0MJolcWHGQSC8kwaMioTs_jWRC1mOJ05nqsy2zJe7ou1LvYQ88-EMm1vIIjImwRKvULNCT-&currency=PHP"></script>
     <script>
-        const MONTHS_OF_PAYMENTS = <?php echo json_encode($monthsOfPayments); ?>; // Use PHP variable in JS
+        const MONTHS_OF_PAYMENTS = <?php echo json_encode($monthsOfPayments); ?>;
 
         function calculateMonthlyPayments() {
             const unitPrice = parseFloat(document.getElementById('amount_per_unit').value) || 0;
@@ -106,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </script>
 </head>
 <body>
-    <div class="container mx-auto p-6">
+    <div class="container mx-auto p-6 max-w-2xl">
         <h1 class="text-2xl font-bold mb-4">Payment Form</h1>
         <form action="" method="POST">
             <div class="mb-4">
@@ -145,6 +142,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <option value="installment">Installment</option>
                 </select>
             </div>
+            
+            <!-- PayPal Button Container -->
+            <div id="paypal-button-container" class="mt-4"></div>
+            
+            <!-- Submit Payment Button (for cash payments or other methods) -->
             <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Submit Payment</button>
         </form>
 
@@ -158,5 +160,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <tbody id="monthlyPaymentsTableBody"></tbody>
         </table>
     </div>
+
+    <script>
+    // PayPal Button Logic
+    paypal.Buttons({
+        createOrder: function(data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        value: '<?php echo $totalPayment; ?>' // Total payment amount dynamically
+                    }
+                }]
+            });
+        },
+        onApprove: function(data, actions) {
+            return actions.order.capture().then(function(details) {
+                alert('Transaction completed by ' + details.payer.name.given_name);
+
+                // Prepare data to send to the server
+                const paymentData = {
+                    student_number: '<?php echo $student_number; ?>',
+                    amount_per_unit: document.getElementById('amount_per_unit').value,
+                    miscellaneous_fee: document.getElementById('miscellaneous_fee').value,
+                    payment_method: document.getElementById('payment_method').value,
+                    number_of_units: document.getElementById('number_of_units').value,
+                    transaction_id: data.orderID, // PayPal transaction ID
+                };
+
+                // Send AJAX request to store the payment
+                fetch('record_payment.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(paymentData),
+                })
+                .then(response => response.json()) // Expecting JSON response
+                .then(result => {
+                    if (result.success) {
+                        // Redirect to receipt.php
+                        window.location.href = 'receipt.php';
+                    } else {
+                        alert('Failed to record payment. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                });
+            });
+        }
+    }).render('#paypal-button-container');
+</script>
+
 </body>
 </html>

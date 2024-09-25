@@ -40,7 +40,7 @@ if (isset($_SESSION['student_number'])) {
     <title>Select Your Course</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100">
+<body class="">
 
 <div class="max-w-lg mx-auto mt-10 p-8 border border-gray-300 rounded-lg shadow-md bg-white">
     <h2 class="text-2xl font-bold text-gray-800 mb-6">Select Your Course</h2>
@@ -72,6 +72,8 @@ if (isset($_SESSION['student_number'])) {
 
         <button type="submit" class="mt-6 w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300">Submit</button>
     </form>
+
+    
 </div>
 
 <script>
