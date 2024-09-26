@@ -5,13 +5,13 @@ session_start();
 // Include your database connection
 require '../db/db_connection3.php';
 require_once '../vendor/fpdf.php'; // Include FPDF library
-
+$subjects = []; // Initialize variable to hold subjects
 try {
     // Create a new PDO connection
-    $db = Database::connect(); // Assuming Database::connect() returns a PDO instance
+    $pdo = Database::connect(); // Assuming Database::connect() returns a PDO instance
 
     // Adjust column names to match your actual database structure
-    $stmt = $db->prepare("
+    $subjectStmt = $pdo->prepare("
         SELECT 
             se.id,
             se.student_number,
@@ -37,13 +37,13 @@ try {
     ");
 
     // Bind the session student number to the SQL statement
-    $stmt->bindParam(':student_number', $_SESSION['student_number'], PDO::PARAM_STR);
+    $subjectStmt->bindParam(':student_number', $_SESSION['student_number'], PDO::PARAM_STR);
 
     // Execute the statement
-    $stmt->execute();
+    $subjectStmt->execute();
 
-    // Fetch all enrollment records
-    $enrollmentData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+ // Fetch the subjects
+ $subjects = $subjectStmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error_message = "Error: " . $e->getMessage();
 }
@@ -72,7 +72,7 @@ $pdf->Ln();
 
 // Add data to the table
 $pdf->SetFont('Arial', '', 12);
-foreach ($enrollmentData as $row) {
+foreach ($subjects as $row) {
     $pdf->Cell(30, 10, htmlspecialchars($row['student_number']), 1);
     $pdf->Cell(30, 10, htmlspecialchars($row['section_name']), 1);
     $pdf->Cell(40, 10, htmlspecialchars($row['department_name']), 1);
