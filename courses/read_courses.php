@@ -14,25 +14,25 @@ $courses = $course->getCourses();
 
     <title>View Courses</title>
 </head>
-<body class="bg-gray-100">
-    <div class="max-w-4xl mx-auto mt-10 p-4">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6">Courses</h1>
+<body class="bg-transparent">
+    <div class="max-w-8xl mx-auto mt-10 p-6 ">
+        <h1 class="text-3xl font-bold text-red-800 mb-6">Courses</h1>
         
         <!-- Create Course Button -->
-        <a href="create_course.php" class="bg-blue-600 hover:bg-blue-800 text-white font-semibold py-2 px-4 rounded mb-6 inline-block transition duration-200">Create Course</a>
+        <a href="create_course.php" class="bg-red-800 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded mb-6 inline-block transition duration-200">Create Course</a>
         
         <!-- Courses Table -->
-        <table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
-            <thead class="bg-gray-200 text-gray-600">
+        <table class="min-w-full border-collapse shadow-md overflow-hidden">
+            <thead class="bg-red-800">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Course Name</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Department</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Actions</th>
+                    <th class="px-4 py-4 border-b text-left font-medium uppercase tracking-wider text-white">Course Name</th>
+                    <th class="px-4 py-4 border-b text-left font-medium uppercase tracking-wider text-white">Department</th>
+                    <th class="px-4 py-4 border-b text-left font-medium uppercase tracking-wider text-white">Actions</th>
                 </tr>
             </thead>
             <tbody class="text-gray-700">
                 <?php foreach ($courses as $course): ?>
-                <tr>
+                <tr class="border-b bg-red-50 hover:bg-red-200">
                     <td class="border-t px-6 py-4"><?= htmlspecialchars($course['course_name']) ?></td>
                     <td class="border-t px-6 py-4"><?= htmlspecialchars($course['department_name']) ?></td>
                     <td class="border-t px-6 py-4 flex space-x-2">
@@ -46,3 +46,4 @@ $courses = $course->getCourses();
     </div>
 </body>
 </html>
+
