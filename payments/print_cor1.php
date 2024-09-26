@@ -208,7 +208,7 @@ $pdf->Rect($x, $y, $width, $height); // Inner rectangle
 // Add "STUDENT'S COPY" label on the top right corner
 $pdf->SetXY($x, $y); // Adjust Y position for the first label
 $pdf->SetFont('TimesNewRoman', 'B', 9);
-$pdf->Cell($width, $lineHeight, "STUDENT'S COPY", 0, 1, 'C'); // Center aligned within the rectangle
+$pdf->Cell($width, $lineHeight, "COLLEGE DEP. COPY", 0, 1, 'C'); // Center aligned within the rectangle
 
 // Add "FIRST SEMESTER, A.Y. 2624-2626" label below "STUDENT'S COPY"
 $pdf->SetXY($x, $y + 6); // Adjust Y position for the second label
@@ -742,7 +742,7 @@ $pdf->Rect($x, $y, $width, $height); // Inner rectangle
 // Add "STUDENT'S COPY" label on the top right corner
 $pdf->SetXY($x, $y); // Adjust Y position for the first label
 $pdf->SetFont('TimesNewRoman', 'B', 9);
-$pdf->Cell($width, $lineHeight, "CASHIER'S COPY", 0, 1, 'C'); // Center aligned within the rectangle
+$pdf->Cell($width, $lineHeight, "REGISTRAR'S COPY", 0, 1, 'C'); // Center aligned within the rectangle
 
 // Add "FIRST SEMESTER, A.Y. 2624-2626" label below "STUDENT'S COPY"
 $pdf->SetXY($x, $y + 6); // Adjust Y position for the second label
@@ -1230,7 +1230,7 @@ $formatted_end_time = isset($subject['end_time']) ? (new DateTime($subjects['end
     
     
     // Output the PDF
-    $pdf->Output('D', 'COR_Student_and_Cashier_Copy.pdf');
+    $pdf->Output('D', 'COR_College_Dep_and_Registrar_Copy.pdf');
 } else {
     echo "No enrollment data found.";
 }
