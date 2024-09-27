@@ -14,66 +14,74 @@ $assignments = $instructorSubject->read();
     <title>Manage Instructor Subjects</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-async function deleteAssignment(id) {
-    if (confirm("Are you sure you want to delete this assignment?")) {
-        try {
-            const response = await fetch('delete_instructor_subject.php', {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: new URLSearchParams({ id })
-            });
+    async function deleteAssignment(id) {
+        if (confirm("Are you sure you want to delete this assignment?")) {
+            try {
+                const response = await fetch('delete_instructor_subject.php', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({ id })
+                });
 
-            const result = await response.json();
-            if (result.success) {
-                alert("Assignment deleted successfully!");
-                window.location.reload();
-            } else {
-                alert(`Failed to delete assignment. ${result.message || ''}`);
+                const result = await response.json();
+                if (result.success) {
+                    alert("Assignment deleted successfully!");
+                    window.location.reload();
+                } else {
+                    alert(`Failed to delete assignment. ${result.message || ''}`);
+                }
+            } catch (error) {
+                console.error('Error deleting assignment:', error);
             }
-        } catch (error) {
-            console.error('Error deleting assignment:', error);
         }
     }
-}
     </script>
 </head>
-<body class="bg-gray-100">
+<body class="bg-transparent font-sans leading-normal tracking-normal">
 
-    <div class="max-w-5xl mx-auto mt-10 bg-white p-8 shadow-lg rounded-lg">
-        <h2 class="text-2xl font-bold mb-6 text-gray-700">Instructor Subjects</h2>
+    <!-- Container -->
+    <div class="max-w-8xl mx-auto mt-10 p-6 ">
+        <h1 class="text-2xl font-semibold text-red-800 mb-4">Instructor Subjects</h1>
 
+        <!-- Add New Assignment Button -->
         <div class="mb-4">
-            <a href="create_instructor_subject.php" class="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">Add New Assignment</a>
+            <a href="create_instructor_subject.php" class="inline-block px-4 py-4 bg-red-700 text-white rounded hover:bg-red-800">
+                Add New Assignment
+            </a>
         </div>
 
-        <table class="min-w-full bg-white border rounded-lg">
-            <thead>
-                <tr class="bg-gray-200 text-gray-600 uppercase text-sm">
-                    <th class="py-3 px-6 text-left">Instructor</th>
-                    <th class="py-3 px-6 text-left">Subject</th>
-                    <th class="py-3 px-6 text-left">Semester</th>
-                    <th class="py-3 px-6 text-center">Actions</th>
+        <!-- Table -->
+        <table class="w-full border-collapse bg-white shadow-md rounded-lg overflow-hidden">
+            <thead class="bg-red-800 text-white">
+                <tr>
+                    <th class="px-4 py-4 border-b text-left font-medium uppercase tracking-wider">Instructor</th>
+                    <th class="px-4 py-4 border-b text-left font-medium uppercase tracking-wider">Subject</th>
+                    <th class="px-4 py-4 border-b text-left font-medium uppercase tracking-wider">Semester</th>
+                    <th class="px-4 py-4 border-b text-center font-medium uppercase tracking-wider">Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="bg-red-50 divide-y divide-gray-200">
                 <?php foreach ($assignments as $assignment): ?>
-                <tr class="border-b hover:bg-gray-100">
-                    <td class="py-3 px-6"><?php echo htmlspecialchars($assignment['instructor_name']); ?></td>
-                    <td class="py-3 px-6"><?php echo htmlspecialchars($assignment['subject_name']); ?></td>
-                    <td class="py-3 px-6"><?php echo htmlspecialchars($assignment['semester_name']); ?></td>
-                    <td class="py-3 px-6 text-center">
+                <tr class="hover:bg-red-200 transition duration-200">
+                    <td class="px-4 py-3"><?php echo htmlspecialchars($assignment['instructor_name']); ?></td>
+                    <td class="px-4 py-3"><?php echo htmlspecialchars($assignment['subject_name']); ?></td>
+                    <td class="px-4 py-3"><?php echo htmlspecialchars($assignment['semester_name']); ?></td>
+                    <td class="px-4 py-3 text-center flex space-x-2 justify-center">
                         <!-- Edit Button -->
-                        <a href="edit_instructor_subject.php?id=<?php echo htmlspecialchars($assignment['id']); ?>" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Edit</a>
+                        <a href="edit_instructor_subject.php?id=<?php echo htmlspecialchars($assignment['id']); ?>" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-1 px-2 rounded transition duration-150">
+                            Edit
+                        </a>
                         <!-- Delete Button -->
-                        <button onclick="deleteAssignment(<?php echo htmlspecialchars($assignment['id']); ?>)" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Delete</button>
+                        <button onclick="deleteAssignment(<?php echo htmlspecialchars($assignment['id']); ?>)" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-2 rounded transition duration-150">
+                            Delete
+                        </button>
                     </td>
                 </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
     </div>
-
 </body>
 </html>

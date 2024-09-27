@@ -12,29 +12,28 @@ $classrooms = $classroom->getClassrooms();
     <title>Classrooms</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
-    <div class="container mx-auto p-6">
-        <h1 class="text-2xl font-bold mb-4">Classrooms</h1>
-        <a href="create_classroom.php" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 mb-4">Add New Classroom</a>
-        <table class="min-w-full bg-white shadow-md rounded-lg">
-            <thead>
+<body class="bg-transparent font-sans leading-normal tracking-normal">
+    <div class="container mx-auto mt-10 p-6">
+        <h1 class="text-2xl font-semibold text-red-800 mb-6">Classrooms</h1>
+        <a href="create_classroom.php" class="inline-block px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800 mb-4">Add New Classroom</a>
+        <table class="min-w-full border-collapse shadow-md rounded-lg">
+            <thead class="bg-red-800">
                 <tr>
-                    <th class="py-2 px-4 border-b">Room Number</th>
-                    <th class="py-2 px-4 border-b">Capacity</th>
-                    <th class="py-2 px-4 border-b">Building</th>
-                    <th class="py-2 px-4 border-b">Actions</th>
+                    <th class="py-4 px-4 border-b text-left text-white">Room Number</th>
+                    <th class="py-4 px-4 border-b text-left text-white">Capacity</th>
+                    <th class="py-4 px-4 border-b text-left text-white">Building</th>
+                    <th class="py-4 px-4 border-b text-left text-white">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($classrooms as $classroom): ?>
-                    <tr>
-                        <td class="py-2 px-4 border-b"><?= htmlspecialchars($classroom['room_number']) ?></td>
-                        <td class="py-2 px-4 border-b"><?= htmlspecialchars($classroom['capacity']) ?></td>
-                        <td class="py-2 px-4 border-b"><?= htmlspecialchars($classroom['building']) ?></td>
-                        <td class="py-2 px-4 border-b">
-                            <a href="edit_classroom.php?id=<?= $classroom['id'] ?>" class="text-blue-500 hover:underline">Edit</a>
-                            |
-                            <a href="delete_classroom.php?id=<?= $classroom['id'] ?>" class="text-red-500 hover:underline">Delete</a>
+                    <tr class="border-b bg-red-50 hover:bg-red-200">
+                        <td class="border-t px-6 py-3"><?= htmlspecialchars($classroom['room_number']) ?></td>
+                        <td class="border-t px-6 py-3"><?= htmlspecialchars($classroom['capacity']) ?></td>
+                        <td class="border-t px-6 py-3"><?= htmlspecialchars($classroom['building']) ?></td>
+                        <td class="border-t px-6 py-3 text-center">
+                            <a href="edit_classroom.php?id=<?= htmlspecialchars($classroom['id']) ?>" class="bg-yellow-500 hover:bg-yellow-700 text-white font-semibold py-1 px-2 rounded transition duration-150">Edit</a>
+                            <a href="delete_classroom.php?id=<?= htmlspecialchars($classroom['id']) ?>" onclick="return confirm('Are you sure?');" class="bg-red-500 hover:bg-red-700 text-white font-semibold py-1 px-2 rounded transition duration-150">Delete</a>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -43,3 +42,4 @@ $classrooms = $classroom->getClassrooms();
     </div>
 </body>
 </html>
+

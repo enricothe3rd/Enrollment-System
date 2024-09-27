@@ -14,12 +14,12 @@ $courses = $course->getCourses();
 
     <title>View Courses</title>
 </head>
-<body class="bg-transparent">
+<body class="bg-transparent font-sans leading-normal tracking-normal">
     <div class="max-w-8xl mx-auto mt-10 p-6 ">
-        <h1 class="text-3xl font-bold text-red-800 mb-6">Courses</h1>
+        <h1 class="text-3xl font-bold text-red-800 mb-6 ">Courses</h1>
         
         <!-- Create Course Button -->
-        <a href="create_course.php" class="bg-red-800 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded mb-6 inline-block transition duration-200">Create Course</a>
+        <a href="create_course.php" class="inline-block mb-4 px-4 py-4 bg-red-700 text-white rounded hover:bg-red-800">Create Course</a>
         
         <!-- Courses Table -->
         <table class="min-w-full border-collapse shadow-md overflow-hidden">

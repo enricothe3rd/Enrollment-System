@@ -18,7 +18,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $subject->handleUpdateSubjectRequest();
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -26,10 +25,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Update Subject</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet"> <!-- Font Awesome -->
 </head>
 <body class="bg-gray-100 font-sans leading-normal tracking-normal">
     <div class="container mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg max-w-md">
-        <h1 class="text-2xl font-semibold text-gray-800 mb-4">Update Subject</h1>
+        <button 
+            onclick="goBack()" 
+            class="mb-4 px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800 transition duration-200 flex items-center"
+        >
+            <i class="fas fa-arrow-left mr-2"></i> <!-- Arrow icon -->
+            Back
+        </button>
+
+        <h1 class="text-2xl font-semibold text-red-800 mb-4">Update Subject</h1>
         
         <!-- Display the form if subject data is found -->
         <?php if ($sub) { ?>
@@ -37,18 +45,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="hidden" name="id" value="<?php echo htmlspecialchars($sub['id']); ?>">
                 
                 <div>
-                    <label for="code" class="block text-gray-700 font-medium">Subject Code:</label>
-                    <input type="text" id="code" name="code" value="<?php echo htmlspecialchars($sub['code']); ?>" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <label for="code" class="block text-red-700 font-medium">Subject Code:</label>
+                    <input type="text" id="code" name="code" value="<?php echo htmlspecialchars($sub['code']); ?>" required class="mt-1 block w-full px-3 py-2 border border-red-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
                 </div>
                 
                 <div>
-                    <label for="title" class="block text-gray-700 font-medium">Subject Title:</label>
-                    <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($sub['title']); ?>" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <label for="title" class="block text-red-700 font-medium">Subject Title:</label>
+                    <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($sub['title']); ?>" required class="mt-1 block w-full px-3 py-2 border border-red-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
                 </div>
                 
                 <div>
-                    <label for="section_id" class="block text-gray-700 font-medium">Section:</label>
-                    <select id="section_id" name="section_id" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
+                    <label for="section_id" class="block text-red-700 font-medium">Section:</label>
+                    <select id="section_id" name="section_id" class="mt-1 block w-full px-3 py-2 bg-red-50 text-red-800 border-red-300 rounded-md shadow-sm focus:outline-none focus:bg-red-100 focus:border-red-500 sm:text-sm" required>
                         <?php foreach ($sections as $section) { ?>
                             <option value="<?php echo htmlspecialchars($section['id']); ?>" <?php echo ($section['id'] == $sub['section_id']) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($section['name']); ?>
@@ -58,8 +66,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div>
-                    <label for="semester_id" class="block text-gray-700 font-medium">Semester:</label>
-                    <select id="semester_id" name="semester_id" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
+                    <label for="semester_id" class="block text-red-700 font-medium">Semester:</label>
+                    <select id="semester_id" name="semester_id" class="mt-1 block w-full px-3 py-2 bg-red-50 text-red-800 border-red-300 rounded-md shadow-sm focus:outline-none focus:bg-red-100 focus:border-red-500 sm:text-sm" required>
                         <?php foreach ($semesters as $semester) { ?>
                             <option value="<?php echo htmlspecialchars($semester['id']); ?>" <?php echo ($semester['id'] == $sub['semester_id']) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($semester['semester_name']); ?>
@@ -69,15 +77,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 
                 <div>
-                    <label for="units" class="block text-gray-700 font-medium">Units:</label>
-                    <input type="number" id="units" name="units" value="<?php echo htmlspecialchars($sub['units']); ?>" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <label for="units" class="block text-red-700 font-medium">Units:</label>
+                    <input type="number" id="units" name="units" value="<?php echo htmlspecialchars($sub['units']); ?>" required class="mt-1 block w-full px-3 py-2 border border-red-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
                 </div>
                 
-                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Update Subject</button>
+                <button type="submit" class="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 flex items-center justify-center">
+                    <i class="fas fa-save mr-2"></i> <!-- Save icon -->
+                    Update Subject
+                </button>
             </form>
         <?php } else { ?>
             <p class="text-red-500">Invalid Subject ID or no data found for the provided ID.</p>
         <?php } ?>
     </div>
+
+    <script>
+        function goBack() {
+            window.history.back(); // Navigates to the previous page
+        }
+    </script>
 </body>
 </html>

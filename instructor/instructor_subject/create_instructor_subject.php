@@ -10,13 +10,15 @@ $departments = $instructorSubject->getDepartments();
 // Fetch instructors
 $instructors = $instructorSubject->getInstructors();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Select Instructor Data</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet"> <!-- Font Awesome -->
     <script>
         async function fetchCourses(departmentId) {
             try {
@@ -70,13 +72,22 @@ $instructors = $instructorSubject->getInstructors();
     </script>
 </head>
 <body class="bg-gray-100 font-sans leading-normal tracking-normal">
-    <div class="container mx-auto p-6">
-        <h1 class="text-3xl font-bold mb-6 text-gray-800">Assign Subject to Instructor</h1>
-        <form method="POST" action="process_instructor.php" class="bg-white p-6 rounded-lg shadow-lg">
+    <div  class="container mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg max-w-2xl">
+    <button 
+            onclick="goBack()" 
+            class="mb-4 px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800 transition duration-200 flex items-center"
+        >
+            <i class="fas fa-arrow-left mr-2"></i> <!-- Arrow icon -->
+            Back
+        </button>
+        <h1 class="text-2xl font-semibold text-red-800 mb-4">Assign Subject to Instructor</h1>
+        <form method="POST" action="process_instructor.php" class="space-y-4">
             <!-- Instructor Information -->
             <div class="mb-4">
-                <label for="instructor" class="block text-gray-700 text-sm font-bold mb-2">Select Instructor:</label>
-                <select id="instructor" name="instructor" class="block w-full bg-gray-200 border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label for="instructor" class="block text-red-700 font-medium">
+                    <i class="fas fa-user-tie mr-2"></i> Select Instructor:
+                </label>
+                <select id="instructor" name="instructor" class="bg-red-50 block w-full px-3 py-3 text-red-800 border-red-300 rounded-md shadow-sm focus:outline-none focus:bg-red-100 focus:border-red-500 sm:text-sm">
                     <option>Select an instructor</option>
                     <?php
                     foreach ($instructors as $inst) {
@@ -88,8 +99,10 @@ $instructors = $instructorSubject->getInstructors();
 
             <!-- Department Dropdown -->
             <div class="mb-4">
-                <label for="department" class="block text-gray-700 text-sm font-bold mb-2">Select Department:</label>
-                <select id="department" name="department" onchange="fetchCourses(this.value)" class="block w-full bg-gray-200 border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label for="department" class="block text-red-700 font-medium">
+                    <i class="fas fa-building mr-2"></i> Select Department:
+                </label>
+                <select id="department" name="department" onchange="fetchCourses(this.value)" class="bg-red-50 block w-full px-3 py-3 text-red-800 border-red-300 rounded-md shadow-sm focus:outline-none focus:bg-red-100 focus:border-red-500 sm:text-sm">
                     <option>Select a department</option>
                     <?php
                     foreach ($departments as $department) {
@@ -101,24 +114,30 @@ $instructors = $instructorSubject->getInstructors();
 
             <!-- Course Dropdown -->
             <div class="mb-4">
-                <label for="course" class="block text-gray-700 text-sm font-bold mb-2">Select Course:</label>
-                <select id="course" name="course" onchange="fetchSections(this.value)" class="block w-full bg-gray-200 border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label for="course" class="block text-red-700 font-medium">
+                    <i class="fas fa-book mr-2"></i> Select Course:
+                </label>
+                <select id="course" name="course" onchange="fetchSections(this.value)" class="bg-red-50 block w-full px-3 py-3 text-red-800 border-red-300 rounded-md shadow-sm focus:outline-none focus:bg-red-100 focus:border-red-500 sm:text-sm">
                     <option>Select a course</option>
                 </select>
             </div>
 
             <!-- Section Dropdown -->
             <div class="mb-4">
-                <label for="section" class="block text-gray-700 text-sm font-bold mb-2">Select Section:</label>
-                <select id="section" name="section" onchange="updateSubjects()" class="block w-full bg-gray-200 border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label for="section" class="block text-red-700 font-medium">
+                    <i class="fas fa-chalkboard-teacher mr-2"></i> Select Section:
+                </label>
+                <select id="section" name="section" onchange="updateSubjects()" class="bg-red-50 block w-full px-3 py-3 text-red-800 border-red-300 rounded-md shadow-sm focus:outline-none focus:bg-red-100 focus:border-red-500 sm:text-sm">
                     <option>Select a section</option>
                 </select>
             </div>
 
             <!-- Semester Dropdown -->
             <div class="mb-4">
-                <label for="semester" class="block text-gray-700 text-sm font-bold mb-2">Select Semester:</label>
-                <select id="semester" name="semester" onchange="updateSubjects()" class="block w-full bg-gray-200 border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label for="semester" class="block text-red-700 font-medium">
+                    <i class="fas fa-calendar-alt mr-2"></i> Select Semester:
+                </label>
+                <select id="semester" name="semester" onchange="updateSubjects()" class="bg-red-50 block w-full px-3 py-3 text-red-800 border-red-300 rounded-md shadow-sm focus:outline-none focus:bg-red-100 focus:border-red-500 sm:text-sm">
                     <option value="1">1st Semester</option>
                     <option value="2">2nd Semester</option>
                 </select>
@@ -126,15 +145,24 @@ $instructors = $instructorSubject->getInstructors();
 
             <!-- Subject Dropdown -->
             <div class="mb-4">
-                <label for="subject" class="block text-gray-700 text-sm font-bold mb-2">Select Subject:</label>
-                <select id="subject" name="subject" class="block w-full bg-gray-200 border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label for="subject" class="block text-red-700 font-medium">
+                    <i class="fas fa-book-open mr-2"></i> Select Subject:
+                </label>
+                <select id="subject" name="subject" class="bg-red-50 block w-full px-3 py-3 text-red-800 border-red-300 rounded-md shadow-sm focus:outline-none focus:bg-red-100 focus:border-red-500 sm:text-sm">
                     <option>Select a subject</option>
                 </select>
             </div>
 
             <!-- Submit Button -->
-            <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Assign Subject</button>
+            <button type="submit" class="w-full bg-red-700 text-white py-2 px-4 rounded-lg hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <i class="fas fa-plus-circle mr-2"></i> Assign Subject
+            </button>
         </form>
     </div>
 </body>
+<script>
+        function goBack() {
+            window.history.back(); // Navigates to the previous page
+        }
+    </script>
 </html>

@@ -40,21 +40,36 @@
         nav a {
             transition: all 0.3s ease;
         }
+        .custom-logo-size {
+    height: 9rem;
+    width: 8.6rem;
+    margin:auto;
+}
+.profile1-dropdown {
+    position: absolute; /* Use absolute positioning */
+    top: 10px; /* Distance from the top */
+    right: 10px; /* Distance from the right */
+    z-index: 1000; /* Ensure it appears above other elements */
+}
+
+
     </style>
 </head>
-<body class="bg-gray-100">
-    <div class="flex h-screen">
+<body class="bg-gray-100 ">
+    <div class="flex h-[120vh]">
         <!-- Sidebar -->
-        <aside class="w-64 bg-red-800 text-white flex-shrink-0">
+        <aside class="w-64 bg-red-800 h-[120vh]  text-white flex-shrink-0">
             <!-- Logo -->
             <div class="p-6 text-center">
-                <img src="assets/images/school-logo/bcc-icon.png" alt="Logo" class="mx-auto h-16 w-16">
+            <img src="assets/images/school-logo/bcc-icon1.jpg" alt="Logo" class="custom-logo-size rounded-full">
+
             </div>
 
             <!-- Navigation -->
             <nav class="mt-4">
                 <ul>
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('home')"><i class="fas fa-home mr-3"></i> Home</a></li>
+                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('profile')"><i class="fas fa-home mr-3"></i> Profile</a></li>
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('enrollment')"><i class="fas fa-user-plus mr-3"></i> New Enrollments</a></li>
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('student')"><i class="fas fa-user mr-3"></i> Student</a></li>
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('department')"><i class="fas fa-building mr-3"></i> Department</a></li>
@@ -62,16 +77,14 @@
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('sections')"><i class="fas fa-list mr-3"></i> Sections</a></li>
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('subjects')"><i class="fas fa-book mr-3"></i> Subjects</a></li>
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('schedule')"><i class="fas fa-calendar-alt mr-3"></i> Schedule</a></li>
-                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('students')"><i class="fas fa-users mr-3"></i> Students</a></li>
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('instructor')"><i class="fas fa-chalkboard-teacher mr-3"></i> Instructor</a></li>
-                    <li class="pl-8 additional-buttons">
-                        <a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('instructor-details')"><i class="fas fa-info-circle mr-3"></i> Instructor Subject Assignment</a>
-                    </li>
+                    <li ><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('instructor-details')"><i class="fas fa-info-circle mr-3"></i> Instructor Subject Assignment</a></li>
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('set-semester')"><i class="fas fa-calendar-check mr-3"></i> Set Semester</a></li>
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('classroom')"><i class="fas fa-school mr-3"></i> Classroom</a></li>
-                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('payment')"><i class="fas fa-money-check-alt mr-3"></i> Payments</a></li>
-                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('subjectamount')"><i class="fas fa-file-alt mr-3"></i> Add Subject Amount</a></li>
-                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('report')"><i class="fas fa-file-alt mr-3"></i> Report</a></li>
+                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('sex_option')"><i class="fas fa-file-alt mr-3"></i>Add Sex Options</a></li>
+                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('status_option')"><i class="fas fa-file-alt mr-3"></i>Add Status Options</a></li>
+                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('suffixes')"><i class="fas fa-file-alt mr-3"></i>Add Suffixes</a></li>
+                    <li><a href="#" class="flex items-center py-3 px-4 mb-10 hover:bg-red-500" onclick="showContent('school_year')"><i class="fas fa-file-alt mr-3"></i>Add School Year</a></li>
                 </ul>
             </nav>
         </aside>
@@ -81,9 +94,18 @@
             <div id="home" class="content-section">
                 <iframe src="home.php" title="Home"></iframe>
             </div>
-            <div id="enrollment" class="content-section">
-                <iframe src="enrollments/create_enrollment.php" title="New Enrollments"></iframe>
+            <div id="profile" class="content-section">
+            <div class="profile1-dropdown">
+    <?php include 'profile/profile_dropdown.php'; ?>
+</div>
+           
+                <iframe src="profile/student_profile.php" title="My Profile"></iframe>
             </div>
+
+            <div id="student" class="content-section">
+                <iframe src="profile/display_all_student.php" title="All Student"></iframe>
+            </div>
+
             <div id="department" class="content-section">
        
                 <iframe src="departments/read_departments.php" title="Department"></iframe>
@@ -118,11 +140,20 @@
             <div id="payment" class="content-section">
                 <iframe src="payments/read_payments.php" title="Payment"></iframe>
             </div>
-            <div id="subjectamount" class="content-section">
-                <iframe src="payments/subjectAmount/manage_subject_amount.php" title="Subject Amount"></iframe>
+            <div id="sex_option" class="content-section">
+                <iframe src="enrollment/sex_options.php" title="sex_option"></iframe>
             </div>
-            <div id="report" class="content-section">
-                <iframe src="instructor/instructor_subject/read_instructor_subject.php" title="Report"></iframe>
+            <div id="school_year" class="content-section">
+                <iframe src="enrollment/school_year.php" title="school_year"></iframe>
+            </div>
+            <div id="status_option" class="content-section">
+                <iframe src="enrollment/status_options.php" title="status_option"></iframe>
+            </div>
+            <div id="suffixes" class="content-section">
+                <iframe src="enrollment/suffixes.php" title="suffixes"></iframe>
+            </div>
+            <div id="school_year" class="content-section">
+                <iframe src="enrollment/school_year.php" title="school_year"></iframe>
             </div>
         </main>
     </div>

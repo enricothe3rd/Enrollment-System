@@ -19,63 +19,63 @@ $instructors = $instructor->readAll();
     <!-- Include Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
 
-<div class="container mx-auto mt-10">
-    <div class="bg-white shadow-md rounded-lg overflow-hidden">
-        <div class="p-5">
-            <div class="flex justify-between items-center mb-5">
-                <h1 class="text-2xl font-bold text-gray-800">Instructor List</h1>
+<div class="container mx-auto mt-10 p-6">
+    <div class="bg-transparent overflow-hidden">
+        <div class="p-6">
+        <h1 class="text-2xl font-semibold text-red-800 mb-4">Instructor List</h1>
+
+         
                 
                 <!-- Create Instructor Button -->
-                <a href="create_instructor.php" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                <a href="create_instructor.php" class="inline-block mb-4 px-4 py-4 bg-red-700 text-white rounded hover:bg-red-800">
                     + Create Instructor
                 </a>
-            </div>
+      
+
 
             <!-- Table Container -->
             <div class="overflow-x-auto">
                 <!-- Table -->
-                <table class="min-w-full bg-white border border-gray-200">
-                    <thead>
+                <table class="min-w-full  border-collapse border border-gray-200 shadow-lg rounded-lg">
+                    <thead class="bg-red-800 text-white">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">First Name</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Middle Name</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Name</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Suffix</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department Name</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course Name</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Section Name</th>
-                            <!-- Conditionally include created_at and updated_at columns if they exist -->
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Updated At</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <!-- <th class="px-6 py-4 text-left  font-medium uppercase tracking-wider">ID</th> -->
+                            <th class="px-6 py-4 text-left  font-medium uppercase tracking-wider">First Name</th>
+                            <th class="px-6 py-4 text-left  font-medium uppercase tracking-wider">Middle Name</th>
+                            <th class="px-6 py-4 text-left  font-medium uppercase tracking-wider">Last Name</th>
+                            <th class="px-6 py-4 text-left  font-medium uppercase tracking-wider">Suffix</th>
+                            <th class="px-6 py-4 text-left  font-medium uppercase tracking-wider">Email</th>
+                            <th class="px-6 py-4 text-left  font-medium uppercase tracking-wider">Department Name</th>
+                            <th class="px-6 py-4 text-left  font-medium uppercase tracking-wider">Course Name</th>
+                            <th class="px-6 py-4 text-left  font-medium uppercase tracking-wider">Section Name</th>
+                            <!-- <th class="px-6 py-4 text-left  font-medium uppercase tracking-wider">Created At</th>
+                            <th class="px-6 py-4 text-left  font-medium uppercase tracking-wider">Updated At</th> -->
+                            <th class="px-6 py-4 text-left  font-medium uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody class="bg-red-50 divide-y divide-gray-200">
                         <?php foreach ($instructors as $row): ?>
                             <?php
-                            // Check if created_at and updated_at are set
                             $createdAt = isset($row['created_at']) ? (new DateTime($row['created_at']))->format('h:i A, m/d/Y') : 'N/A';
                             $updatedAt = isset($row['updated_at']) ? (new DateTime($row['updated_at']))->format('h:i A, m/d/Y') : 'N/A';
                             ?>
-                            <tr class="hover:bg-gray-100">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><?= $row['id'] ?></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?= $row['first_name'] ?></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?= $row['middle_name'] ?></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?= $row['last_name'] ?></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?= $row['suffix'] ?></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?= $row['email'] ?></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?= $row['department_name'] ?></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?= $row['course_name'] ?></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?= $row['section_name'] ?></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?= $createdAt ?></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?= $updatedAt ?></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    <a href="edit_instructor.php?id=<?= $row['id'] ?>" class="text-indigo-600 hover:text-indigo-900">Edit</a>
-                                    <a href="delete_instructor.php?id=<?= $row['id'] ?>" class="text-red-600 hover:text-red-900 ml-4" onclick="return confirm('Are you sure you want to delete this instructor?')">Delete</a>
+                            <tr class="hover:bg-red-200 transition duration-200">
+                                <!-- <td class="px-6 py-4 whitespace-nowrap  font-medium text-gray-900"><?= htmlspecialchars($row['id']) ?></td> -->
+                                <td class="px-6 py-4 whitespace-nowrap  text-gray-500"><?= htmlspecialchars($row['first_name']) ?></td>
+                                <td class="px-6 py-4 whitespace-nowrap  text-gray-500"><?= htmlspecialchars($row['middle_name']) ?></td>
+                                <td class="px-6 py-4 whitespace-nowrap  text-gray-500"><?= htmlspecialchars($row['last_name']) ?></td>
+                                <td class="px-6 py-4 whitespace-nowrap  text-gray-500"><?= htmlspecialchars($row['suffix']) ?></td>
+                                <td class="px-6 py-4 whitespace-nowrap  text-gray-500"><?= htmlspecialchars($row['email']) ?></td>
+                                <td class="px-6 py-4 whitespace-nowrap  text-gray-500"><?= htmlspecialchars($row['department_name']) ?></td>
+                                <td class="px-6 py-4 whitespace-nowrap  text-gray-500"><?= htmlspecialchars($row['course_name']) ?></td>
+                                <td class="px-6 py-4 whitespace-nowrap  text-gray-500"><?= htmlspecialchars($row['section_name']) ?></td>
+                                <!-- <td class="px-6 py-4 whitespace-nowrap  text-gray-500"><?= $createdAt ?></td>
+                                <td class="px-6 py-4 whitespace-nowrap  text-gray-500"><?= $updatedAt ?></td> -->
+                                <td class="px-6 py-4 whitespace-nowrap  text-gray-500 flex space-x-2">
+                                    <a href="edit_instructor.php?id=<?= htmlspecialchars($row['id']) ?>" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-1 px-2 rounded transition duration-150">Edit</a>
+                                    <a href="delete_instructor.php?id=<?= htmlspecialchars($row['id']) ?>" onclick="return confirm('Are you sure you want to delete this instructor?');" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-2 rounded transition duration-150">Delete</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

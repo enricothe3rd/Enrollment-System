@@ -1,37 +1,3 @@
-<?php
-session_start(); // Start the session
-
-// Include the Database class file (adjust the path if necessary)
-require_once 'db/db_connection3.php'; // Adjust the path to where your Database class is defined
-
-// Fetch the student_number from the session
-$student_number = $_SESSION['student_number'] ?? null;
-
-// Call the connect method to get PDO instance
-$pdo = Database::connect();
-
-$payment_method = null; // Initialize payment method
-
-if ($student_number) {
-    // Prepare the SQL query to fetch the payment method
-    $sql = "SELECT payment_method FROM payments WHERE student_number = :student_number LIMIT 1";
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':student_number', $student_number, PDO::PARAM_STR);
-
-    // Execute the query
-    $stmt->execute();
-
-    // Fetch the result
-    $payment = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    // Check if a payment record was found
-    if ($payment) {
-      $payment_method = $payment['payment_method'];
-    
-    }
-}
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -65,19 +31,15 @@ if ($student_number) {
         .arrow-icon.expanded {
             transform: rotate(90deg); /* Rotate icon when expanded */
         }
+        /* Sidebar hover effect */
         nav a:hover {
             background-color: #f87171;
             color: #fff;
         }
+        /* Make sidebar smoother */
         nav a {
             transition: all 0.3s ease;
         }
-
-        .custom-logo-size {
-    height: 9rem;
-    width: 8.6rem;
-    margin:auto;
-}
     </style>
 </head>
 <body class="bg-gray-100">
@@ -86,59 +48,42 @@ if ($student_number) {
         <aside class="w-64 bg-red-800 text-white flex-shrink-0">
             <!-- Logo -->
             <div class="p-6 text-center">
-            <img src="assets/images/school-logo/bcc-icon1.jpg" alt="Logo" class="custom-logo-size rounded-full">
+                <img src="assets/images/school-logo/bcc-icon.png" alt="Logo" class="mx-auto h-16 w-16">
             </div>
 
             <!-- Navigation -->
             <nav class="mt-4">
                 <ul>
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('home')"><i class="fas fa-home mr-3"></i> Home</a></li>
-                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('profile')"><i class="fas fa-home mr-3"></i>My Profile</a></li>
-                    <?php if ($payment_method !== 'cash' && $payment_method !== 'installment'): ?>
-    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('enrollment')"><i class="fas fa-user-plus mr-3"></i> Enrollments </a></li>
-<?php endif; ?>
-
-
-                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('subjects')"><i class="fas fa-user mr-3"></i> My Subjects</a></li>
+                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('enrollment')"><i class="fas fa-user-plus mr-3"></i> Enrollments Payment </a></li>
+                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('subjects')"><i class="fas fa-user mr-3"></i> OJT Fees</a></li>
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('department')"><i class="fas fa-building mr-3"></i> Research Fees</a></li>
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('courses')"><i class="fas fa-graduation-cap mr-3"></i> Courses <i class="fas fa-chevron-right arrow-icon ml-auto"></i></a></li>
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('sections')"><i class="fas fa-list mr-3"></i> Sections</a></li>
-                </ul>
+</ul>
             </nav>
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 p-6 overflow-hidden">
+        <main class="flex-1 p-6 overflow-hidden ">
             <div id="home" class="content-section">
                 <iframe src="home.php" title="Home"></iframe>
             </div>
-
-            <div id="profile" class="content-section">
-                <iframe src="profile/student_profile.php" title="My Profile"></iframe>
+            <div id="enrollment" class="content-section">
+                <iframe src="payments/enrollment_payments_crud/enrollment_payments.php" title="New Enrollments"></iframe>
             </div>
-
-            <?php if ($payment_method === 'cash' || $payment_method === 'installment'): ?>
-      
-            <?php endif; ?>
-
-            <?php if ($payment_method !== 'cash' && $payment_method !== 'installment'): ?>
-                <div id="enrollment" class="content-section">
-                <iframe src="payments/enrollments/create_enrollment.php" title="New Enrollments"></iframe>
-            </div>
-            <?php endif; ?>
-
             <div id="department" class="content-section">
-                <iframe src="payments/enrollment_payments_crud/research_fees.php" title="Research Fees"></iframe>
+            <iframe src="payments/enrollment_payments_crud/research_fees.php" title="Subjects"></iframe>
+   
+   </div>
+            <div id="subjects" class="content-section">
+            <iframe src="payments/enrollment_payments_crud/ojt_fees.php" title="Department"></iframe>
             </div>
 
-            <div id="subjects" class="content-section">
-                <iframe src="Enrolled_subject/enrolled_subject.php" title="My Subjects"></iframe>
-            </div>
 
             <div id="courses" class="content-section">
                 <iframe src="payments/payment_form.php" title="Courses"></iframe>
             </div>
-
             <div id="sections" class="content-section">
                 <iframe src="payments/re.php" title="Sections"></iframe>
             </div>
@@ -155,6 +100,15 @@ if ($student_number) {
         // Show the selected content section
         document.getElementById(id).style.display = 'block';
 
+        // Toggle additional buttons visibility if instructor section is selected
+        document.querySelectorAll('.additional-buttons').forEach(button => {
+            if (id === 'instructor') {
+                button.style.display = 'block';
+            } else {
+                button.style.display = 'none';
+            }
+        });
+
         // Store the currently selected section in localStorage
         localStorage.setItem('selectedSection', id);
     }
@@ -168,9 +122,11 @@ if ($student_number) {
         showContent('home');
     }
 
-    function goBack() {
-        window.history.back(); // Navigates to the previous page
-    }
+
+        function goBack() {
+            window.history.back(); // Navigates to the previous page
+        }
+  
     </script>
 </body>
 </html>

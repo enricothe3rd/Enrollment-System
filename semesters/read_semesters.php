@@ -11,37 +11,37 @@ $semesters = $semester->getSemesters();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Semesters List</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100">
+<body class="bg-transparent font-sans leading-normal tracking-normal">
 
-    <div class="max-w-5xl mx-auto mt-10 bg-white p-8 shadow-lg rounded-lg">
-        <h2 class="text-2xl font-bold mb-6 text-gray-700">Semesters</h2>
+    <div class="container mx-auto mt-10 p-6 ">
+        <h2 class="text-2xl font-semibold text-red-800 mb-6">Semesters</h2>
 
         <div class="mb-4">
-            <a href="create_semester.php" class="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">Add Semester</a>
+            <a href="create_semester.php" class="inline-block px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800">Add Semester</a>
         </div>
 
-        <table class="min-w-full bg-white border rounded-lg">
-            <thead>
-                <tr class="bg-gray-200 text-gray-600 uppercase text-sm">
-                    <th class="py-3 px-6 text-left">ID</th>
-                    <th class="py-3 px-6 text-left">Semester Name</th>
-                    <th class="py-3 px-6 text-left">Start Date</th>
-                    <th class="py-3 px-6 text-left">End Date</th>
-                    <th class="py-3 px-6 text-center">Actions</th>
+        <table class="min-w-full border-collapset shadow-md rounded-lg">
+            <thead class="bg-red-800">
+                <tr>
+                    <th class="px-4 py-4 border-b text-left text-white">ID</th>
+                    <th class="px-4 py-4 border-b text-left text-white">Semester Name</th>
+                    <th class="px-4 py-4 border-b text-left text-white">Start Date</th>
+                    <th class="px-4 py-4 border-b text-left text-white">End Date</th>
+                    <th class="px-4 py-4 border-b text-left text-white">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($semesters as $semester) : ?>
-                    <tr class="border-b hover:bg-gray-100">
-                        <td class="py-3 px-6"><?= $semester['id'] ?></td>
-                        <td class="py-3 px-6"><?= $semester['semester_name'] ?></td>
-                        <td class="py-3 px-6"><?= $semester['start_date'] ?></td>
-                        <td class="py-3 px-6"><?= $semester['end_date'] ?></td>
-                        <td class="py-3 px-6 text-center">
-                            <a href="edit_semester.php?id=<?= $semester['id'] ?>" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Edit</a>
-                            <a href="delete_semester.php?id=<?= $semester['id'] ?>" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600" onclick="return confirm('Are you sure?')">Delete</a>
+                    <tr class="border-b bg-red-50 hover:bg-red-200">
+                        <td class="border-t px-6 py-3"><?php echo htmlspecialchars($semester['id']); ?></td>
+                        <td class="border-t px-6 py-3"><?php echo htmlspecialchars($semester['semester_name']); ?></td>
+                        <td class="border-t px-6 py-3"><?php echo htmlspecialchars($semester['start_date']); ?></td>
+                        <td class="border-t px-6 py-3"><?php echo htmlspecialchars($semester['end_date']); ?></td>
+                        <td class="border-t px-6 py-3 text-center">
+                            <a href="edit_semester.php?id=<?php echo htmlspecialchars($semester['id']); ?>" class="bg-yellow-500 hover:bg-yellow-700 text-white font-semibold py-1 px-2 rounded transition duration-150">Edit</a>
+                            <a href="delete_semester.php?id=<?php echo htmlspecialchars($semester['id']); ?>" onclick="return confirm('Are you sure?');" class="bg-red-500 hover:bg-red-700 text-white font-semibold py-1 px-2 rounded transition duration-150">Delete</a>
                         </td>
                     </tr>
                 <?php endforeach; ?>

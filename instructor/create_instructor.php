@@ -40,7 +40,8 @@ $sections = $instructor->getSections();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Instructor</title>
     <!-- Include Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // Function to update courses based on department selection
@@ -105,8 +106,16 @@ $sections = $instructor->getSections();
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
 
-<div class="w-full max-w-md bg-white shadow-md rounded-lg p-8">
-    <h1 class="text-2xl font-bold mb-6 text-gray-800">Create Instructor</h1>
+<div class="w-full max-w-md bg-white shadow-md rounded-lg p-8 font-sans leading-normal tracking-normal">
+<button 
+            onclick="goBack()" 
+            class="mb-4 px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800 transition duration-200 flex items-center"
+        >
+            <i class="fas fa-arrow-left mr-2"></i> <!-- Arrow icon -->
+            Back
+        </button>
+        
+    <h1 class="text-2xl font-semibold text-red-800 mb-4">Create Instructor</h1>
 
     <!-- Display success or error message -->
     <?php if (isset($message)): ?>
@@ -115,61 +124,120 @@ $sections = $instructor->getSections();
         </div>
     <?php endif; ?>
 
-    <form method="POST" class="space-y-4">
-        <div>
-            <label for="first_name" class="block text-sm font-medium text-gray-700">First Name</label>
-            <input type="text" id="first_name" name="first_name" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-        </div>
+  <form method="POST" class="space-y-4">
+    <div>
+    <label for="first_name" class="block text-red-700 font-medium">First Name</label>
+    <!-- First Name -->
+      <div class="flex items-center border border-red-300 rounded-md shadow-sm">
+        <i class="fas fa-user  text-red-500 px-3"></i>
+    
+            
+            <input type="text" id="first_name" name="first_name" required placeholder="Enter First Name" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
         
-        <div>
-            <label for="middle_name" class="block text-sm font-medium text-gray-700">Middle Name</label>
-            <input type="text" id="middle_name" name="middle_name" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-        </div>
+    </div>
+    </div>
+    <!-- Middle Name -->
+     <div>
+     <label for="middle_name" class="block text-red-700 font-medium">Middle Name</label>
+      <div class="flex items-center border border-red-300 rounded-md shadow-sm">
+        <i class="fas fa-user  text-red-500 px-3"></i>
+    
+           
+            <input type="text" id="middle_name" name="middle_name" placeholder="Enter Middle Name" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
         
-        <div>
-            <label for="last_name" class="block text-sm font-medium text-gray-700">Last Name</label>
-            <input type="text" id="last_name" name="last_name" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-        </div>
-        
-        <div>
-            <label for="suffix" class="block text-sm font-medium text-gray-700">Suffix (optional)</label>
-            <input type="text" id="suffix" name="suffix" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-        </div>
+    </div>
+    </div>
+    <!-- Last Name -->
+     <div>
+     <label for="last_name" class="block text-red-700 font-medium">Last Name</label>
+      <div class="flex items-center border border-red-300 rounded-md shadow-sm">
+        <i class="fas fa-user  text-red-500 px-3"></i>
+    
+    
+            <input type="text" id="last_name" name="last_name" required placeholder="Enter Last Name" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
+ 
+    </div>
+    </div>
+    <!-- Suffix -->
+     <div>
+     <label for="suffix" class="block text-red-700 font-medium">Suffix (optional)</label>
+      <div class="flex items-center border border-red-300 rounded-md shadow-sm">
+        <i class="fas fa-user  text-red-500 px-3"></i>
+    
+           
+            <input type="text" id="suffix" name="suffix" placeholder="Enter Suffix Name" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
+   
+    </div>
+    </div>
 
-        <div>
-            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-            <input type="email" id="email" name="email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-        </div>
+    <!-- Email -->
+     <div>
+     <label for="email" class="block text-red-700 font-medium">Email</label>
+      <div class="flex items-center border border-red-300 rounded-md shadow-sm">
+        <i class="fas fa-envelope  text-red-500 px-3"></i>
+    
+           
+            <input type="email" id="email" name="email" required placeholder="Enter Email" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
 
-        <div>
-            <label for="department_id" class="block text-sm font-medium text-gray-700">Department</label>
-            <select id="department_id" name="department_id" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+    </div>
+    </div>
+
+    <!-- Department -->
+     <div>
+     <label for="department_id" class="block text-red-700 font-medium">Department</label>
+      <div class="flex items-center border border-red-300 rounded-md shadow-sm">
+        <i class="fas fa-building  text-red-500 px-3"></i>
+    
+          
+            <select id="department_id" name="department_id" required class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
                 <option value="" disabled selected>Select a Department</option>
                 <?php foreach ($departments as $department): ?>
                     <option value="<?= htmlspecialchars($department['id']) ?>"><?= htmlspecialchars($department['name']) ?></option>
                 <?php endforeach; ?>
             </select>
-        </div>
-
-        <div>
-            <label for="course_id" class="block text-sm font-medium text-gray-700">Course</label>
-            <select id="course_id" name="course_id" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+   
+    </div>
+    </div>
+    <!-- Course -->
+     <div>
+    <label for="course_id" class="block text-red-700 font-medium">Course</label>
+      <div class="flex items-center border border-red-300 rounded-md shadow-sm">
+        <i class="fas fa-book  text-red-500 px-3"></i>
+    
+            
+            <select id="course_id" name="course_id" required class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
                 <option value="" disabled selected>Select a Course</option>
                 <!-- Courses will be populated based on department selection -->
             </select>
-        </div>
 
-        <div>
-            <label for="section_id" class="block text-sm font-medium text-gray-700">Section</label>
-            <select id="section_id" name="section_id" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+    </div>
+    </div>
+
+    <!-- Section -->
+     <div>
+     <label for="section_id" class="block text-red-700 font-medium">Section</label>
+      <div class="flex items-center border border-red-300 rounded-md shadow-sm">
+        <i class="fas fa-chalkboard-teacher  text-red-500 px-3"></i>
+    
+            <select id="section_id" name="section_id" required class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
                 <option value="" disabled selected>Select a Section</option>
                 <!-- Sections will be populated based on course selection -->
             </select>
-        </div>
 
-        <button type="submit" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md">Create</button>
-    </form>
+    </div>
+    </div>
+
+    <button type="submit" class="w-full bg-red-700 hover:bg-red-800 text-white font-bold py-2 px-4 rounded-md">
+        <i class="fas fa-save mr-2"></i>Create
+    </button>
+</form>
+
 </div>
 
+<script>
+        function goBack() {
+            window.history.back(); // Navigates to the previous page
+        }
+    </script>
 </body>
 </html>
