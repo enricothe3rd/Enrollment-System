@@ -14,30 +14,30 @@ $subjects = $subject->read(); // Get all subjects
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-transparent font-sans leading-normal tracking-normal">
-    <div class="container mx-auto mt-10 p-6 ">
+    <div class="container mx-auto mt-10 p-6">
         <h1 class="text-2xl font-semibold text-red-800 mb-4">Subjects</h1>
-        <a href="create_subject.php" class="inline-block mb-4 px-4 py-4 bg-red-700 text-white rounded hover:bg-red-800">Add New Subject</a>
-        <table class="w-full border-collapseshadow-md rounded-lg">
+        <a href="create_subject.php" class="inline-block mb-4 px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800">Add New Subject</a>
+        <table class="w-full border-collapse shadow-md rounded-lg">
             <thead class="bg-red-800">
                 <tr>
-                    <!-- <th class="px-4 py-4 border-b text-left text-white">ID</th> -->
-                    <th class="px-4 py-4 border-b text-left text-white">Code</th>
-                    <th class="px-4 py-4 border-b text-left text-white">Title</th>
-                    <th class="px-4 py-4 border-b text-left text-white">Section Name</th>
-                    <th class="px-4 py-4 border-b text-left text-white">Semester</th>
-                    <th class="px-4 py-4 border-b text-left text-white">Units</th>
-                    <th class="px-4 py-4 border-b text-left text-white">Actions</th>
+                    <th class="px-4 py-2 border-b text-left text-white">Code</th>
+                    <th class="px-4 py-2 border-b text-left text-white">Title</th>
+                    <th class="px-4 py-2 border-b text-left text-white">Section Name</th>
+                    <th class="px-4 py-2 border-b text-left text-white">Semester</th>
+                    <th class="px-4 py-2 border-b text-left text-white">Units</th>
+                    <th class="px-4 py-2 border-b text-left text-white">School Year</th> <!-- New School Year Column -->
+                    <th class="px-4 py-2 border-b text-left text-white">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($subjects as $sub): ?>
                 <tr class="border-b bg-red-50 hover:bg-red-200">
-                    <!-- <td class="border-t px-6 py-3"><?php echo htmlspecialchars($sub['id']); ?></td> -->
                     <td class="border-t px-6 py-3"><?php echo htmlspecialchars($sub['code']); ?></td>
                     <td class="border-t px-6 py-3"><?php echo htmlspecialchars($sub['title']); ?></td>
                     <td class="border-t px-6 py-3"><?php echo htmlspecialchars($sub['section_name']); ?></td>
                     <td class="border-t px-6 py-3"><?php echo htmlspecialchars($sub['semester_name']); ?></td>
                     <td class="border-t px-6 py-3"><?php echo htmlspecialchars($sub['units']); ?></td>
+                    <td class="border-t px-6 py-3"><?php echo htmlspecialchars($sub['year']); ?></td> <!-- Display School Year -->
                     <td class="border-t px-6 py-3">
                         <a href="update_subject.php?id=<?php echo htmlspecialchars($sub['id']); ?>" class="bg-yellow-500 hover:bg-yellow-700 text-white font-semibold py-1 px-2 rounded transition duration-150">Edit</a>
                         <a href="delete_subject.php?id=<?php echo htmlspecialchars($sub['id']); ?>" onclick="return confirm('Are you sure?');" class="bg-red-500 hover:bg-red-700 text-white font-semibold py-1 px-2 rounded transition duration-150">Delete</a>

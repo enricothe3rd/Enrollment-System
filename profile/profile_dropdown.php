@@ -1,5 +1,5 @@
 <?php
-session_start();
+// session_start();
 // Check if the profile photo exists in the session
 if (isset($_SESSION['profile_photo']) && !empty($_SESSION['profile_photo'])) {
     $profilePhoto = $_SESSION['profile_photo'];

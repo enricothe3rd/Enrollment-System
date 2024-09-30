@@ -16,100 +16,135 @@ try {
     // Check if student_number is set in the session
     if (isset($_SESSION['student_number'])) {
         $student_number = $_SESSION['student_number'];
+        // echo "Student number found in session: $student_number\n"; // Debugging statement
 
         // Prepare the SQL statement with JOINs to fetch course, section, and department info
         $stmt = $pdo->prepare("
             SELECT e.*, 
-                   c.course_name, 
-                   s.name AS section_name, 
+                   se.course_id,
+                   c.course_name,
+                   s.name AS section_name,
                    d.name AS department_name,
                    e.firstname,
                    e.middlename,
                    e.lastname,
                    e.suffix,
-                   e.sex  -- Include sex in the SELECT statement
+                   e.sex  
             FROM enrollments e
-            LEFT JOIN courses c ON e.course_id = c.id
-            LEFT JOIN sections s ON e.section_id = s.id
+            LEFT JOIN subject_enrollments se ON e.student_number = se.student_number
+            LEFT JOIN courses c ON se.course_id = c.id
+            LEFT JOIN sections s ON se.section_id = s.id
             LEFT JOIN departments d ON c.department_id = d.id
             WHERE e.student_number = :student_number
         ");
+    
         $stmt->bindParam(':student_number', $student_number, PDO::PARAM_STR);
         $stmt->execute();
 
         // Fetch the results
         $enrollmentData = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        // Debugging statement to check the fetched enrollment data
+        if ($enrollmentData) {
+            // echo "Enrollment data found:\n";
+            // echo "<pre>";
+            // print_r($enrollmentData);
+            // echo "</pre>";
+        } else {
+            // echo "No enrollment data found for student number: $student_number\n";
+        }
+    } else {
+        // echo "Student number not found in session.\n";
     }
 
-      // Adjust column names to match your actual database structure
-      $SubjectStmt = $pdo->prepare("
-      SELECT 
-          se.id,
-          se.student_number,
-          s.name AS section_name,
-          d.name AS department_name,
-          c.course_name AS course_name,
-          sub.code AS subject_code,
-          sub.title AS subject_title,
-          sub.units AS subject_units,
-          sem.semester_name AS semester_name,
-          sch.day_of_week AS day_of_week,
-          sch.start_time AS start_time,
-          sch.end_time AS end_time,
-          sch.room AS room
-      FROM subject_enrollments se
-      LEFT JOIN sections s ON se.section_id = s.id
-      LEFT JOIN departments d ON se.department_id = d.id
-      LEFT JOIN courses c ON se.course_id = c.id
-      LEFT JOIN subjects sub ON se.subject_id = sub.id
-      LEFT JOIN semesters sem ON sub.semester_id = sem.id
-      LEFT JOIN schedules sch ON se.schedule_id = sch.id
-      WHERE se.student_number = :student_number
-  ");
+    // Adjust column names to match your actual database structure
+    $SubjectStmt = $pdo->prepare("
+        SELECT 
+            se.id,
+            se.student_number,
+            s.name AS section_name,
+            d.name AS department_name,
+            c.course_name AS course_name,
+            sub.code AS subject_code,
+            sub.title AS subject_title,
+            sub.units AS subject_units,
+            sem.semester_name AS semester_name,
+            sch.day_of_week AS day_of_week,
+            sch.start_time AS start_time,
+            sch.end_time AS end_time,
+            sch.room AS room,
+            se.school_year -- Ensure this column is selected
+        FROM subject_enrollments se
+        LEFT JOIN sections s ON se.section_id = s.id
+        LEFT JOIN departments d ON se.department_id = d.id
+        LEFT JOIN courses c ON se.course_id = c.id
+        LEFT JOIN subjects sub ON se.subject_id = sub.id
+        LEFT JOIN semesters sem ON sub.semester_id = sem.id
+        LEFT JOIN schedules sch ON se.schedule_id = sch.id
+        WHERE se.student_number = :student_number
+    ");
 
-  // Bind the session student number to the SQL statement
+    // Bind the session student number to the SQL statement
     $SubjectStmt->bindParam(':student_number', $_SESSION['student_number'], PDO::PARAM_STR);
-  // Execute the statement
-     $SubjectStmt->execute();
+    // Execute the statement
+    $SubjectStmt->execute();
 
-
-// Fetch the subjects
+    // Fetch the subjects
     $subjects = $SubjectStmt->fetchAll(PDO::FETCH_ASSOC);
 
-  // SQL query to fetch payment details based on student_number from the session
-  $paymentStmt = $pdo->prepare("
-  SELECT 
-      p.id,
-      p.student_number,
-      p.number_of_units,
-      p.amount_per_unit,
-      p.miscellaneous_fee,
-      p.total_payment,
-      p.payment_method,
-      IFNULL(p.research_fee, '') AS research_fee,
-      IFNULL(p.transfer_fee, '') AS transfer_fee,
-      IFNULL(p.overload_fee, '') AS overload_fee,
-      p.created_at,
-      p.updated_at,
-      p.transaction_id
-  FROM payments p
-  WHERE p.student_number = :student_number
-");
+    // Debugging statement to check fetched subjects
+    if (empty($subjects)) {
+        // echo "No subjects found for student number: " . htmlspecialchars($_SESSION['student_number']) . "\n";
+    } else {
+        // echo "Subjects found:\n";
+        // echo "<pre>";
+        // print_r($subjects);
+        // echo "</pre>";
+    }
 
-// Bind the session student number to the SQL statement
-$paymentStmt->bindParam(':student_number', $_SESSION['student_number'], PDO::PARAM_STR);
+    // SQL query to fetch payment details based on student_number from the session
+    $paymentStmt = $pdo->prepare("
+        SELECT 
+            p.id,
+            p.student_number,
+            p.number_of_units,
+            p.amount_per_unit,
+            p.miscellaneous_fee,
+            p.total_payment,
+            p.payment_method,
+            IFNULL(p.research_fee, '') AS research_fee,
+            IFNULL(p.transfer_fee, '') AS transfer_fee,
+            IFNULL(p.overload_fee, '') AS overload_fee,
+            p.created_at,
+            p.updated_at,
+            p.transaction_id
+        FROM payments p
+        WHERE p.student_number = :student_number
+    ");
 
-// Execute the statement
-$paymentStmt->execute();
+    // Bind the session student number to the SQL statement
+    $paymentStmt->bindParam(':student_number', $_SESSION['student_number'], PDO::PARAM_STR);
 
-// Fetch the payment details
-$payments = $paymentStmt->fetchAll(PDO::FETCH_ASSOC);
+    // Execute the statement
+    $paymentStmt->execute();
 
+    // Fetch the payment details
+    $payments = $paymentStmt->fetchAll(PDO::FETCH_ASSOC);
 
+    // Debugging statement to check fetched payment details
+    if (empty($payments)) {
+        // echo "No payment details found for student number: " . htmlspecialchars($_SESSION['student_number']) . "\n";
+    } else {
+        // echo "Payment details found:\n";
+        // echo "<pre>";
+        // print_r($payments);
+        // echo "</pre>";
+    }
 
 } catch (PDOException $e) {
     // Handle any errors
     $error_message = "Error: " . $e->getMessage();
+    // echo $error_message; // Debugging statement to show error
 }
 
 // Check if enrollment data was retrieved successfully
@@ -124,16 +159,12 @@ if ($enrollmentData) {
         $fullname .= ' ' . htmlspecialchars($enrollmentData['suffix']);
     }
 
+    // Display the full name
+    // echo "Full Name: $fullname\n";
 
-
-
-
-
-
-// Create the PDF
-$pdf = new FPDF();
-$pdf->AddPage();
-
+    // Create the PDF
+    $pdf = new FPDF();
+    $pdf->AddPage();
 
     // Add the logo image at the top left (adjust the path and size as needed)
     $pdf->Image('../assets/images/school-logo/bcc-icon.png', 33, 12, 16); // X, Y, Width
@@ -141,26 +172,21 @@ $pdf->AddPage();
     // Set title
     $pdf->SetFont('Courier', 'B', 17);
     $pdf->Cell(0, 6, 'BINANGONAN CATHOLIC COLLEGE', 0, 1, 'C');
-    
+
     // Add school details
     $pdf->SetFont('Arial', '', 8);
     $pdf->Cell(0, 4, 'Binangonan Rizal', 0, 1, 'C');
     $pdf->Ln(2); // Add a line break
 
-     // Add school details
-     $pdf->SetFont('Courier', 'I', 16);
-     $pdf->Cell(0, 4, 'COLLEGE DEPARTMENT', 0, 1, 'C');
-     $pdf->Ln(6); // Add a line break
+    // Add school details
+    $pdf->SetFont('Courier', 'I', 16);
+    $pdf->Cell(0, 4, 'COLLEGE DEPARTMENT', 0, 1, 'C');
+    $pdf->Ln(6); // Add a line break
 
-   
     // Add school details
     $pdf->SetFont('Helvetica', 'B', 9);
     $pdf->SetX(6); // Change 6 to the desired left margin
     $pdf->Cell(0, 4, 'Registration Form', 0, 1, 'L');
-
-    
-
-
 
     // Add the font files for Times New Roman
     $pdf->AddFont('TimesNewRoman', '', 'times.php'); // Regular Times New Roman
@@ -169,19 +195,21 @@ $pdf->AddPage();
     // Set font to bold for the labels and increase the size
     $pdf->SetFont('TimesNewRoman', 'B', 9); // Use the newly added bold font
 
+    // Get the school year from subjects, if available
+    $schoolYear = !empty($subjects) ? htmlspecialchars($subjects[0]['school_year']) : 'No School Year Available'; // Use first subject's school_year or default message
+
     // Define fields to display (with combined full name)
     $fields = [
         'Student' => $fullname, // Combined full name
-        'Year' => htmlspecialchars($enrollmentData['school_year']),
+        'Year' => $schoolYear, // Display school year
         'Course' => htmlspecialchars($enrollmentData['course_name']),
-        'Data of Birth' => htmlspecialchars($enrollmentData['dob']),
+        'Date of Birth' => htmlspecialchars($enrollmentData['dob']),
         'Address' => htmlspecialchars($enrollmentData['address']),
         'Email' => htmlspecialchars($enrollmentData['email']),
         'Contact No' => htmlspecialchars($enrollmentData['contact_no']),
         'Status' => htmlspecialchars($enrollmentData['status']),
         'Section' => htmlspecialchars($enrollmentData['section_name']),
     ];
-
 
 
 // Define line height
@@ -272,7 +300,7 @@ $pdf->Ln($lineHeight );
     $pdf->Cell($labelWidth, $lineHeight, "Year:", 0);
     $pdf->SetX(81 );
     $pdf->SetFont('Helvetica', '', 9);
-    $pdf->Cell($valueWidth, $lineHeight, htmlspecialchars($enrollmentData['school_year']), 0);
+    $pdf->Cell($valueWidth, $lineHeight, htmlspecialchars($schoolYear), 0);
 
     $pdf->SetX(100 ); // Move to next position
     $pdf->SetFont('Helvetica', 'B', 9);
@@ -706,7 +734,7 @@ $formatted_end_time = isset($subject['end_time']) ? (new DateTime($subjects['end
     // Define fields to display (with combined full name)
     $fields = [
         'Student' => $fullname, // Combined full name
-        'Year' => htmlspecialchars($enrollmentData['school_year']),
+        'Year' => htmlspecialchars($schoolYear),
         'Course' => htmlspecialchars($enrollmentData['course_name']),
         'Data of Birth' => htmlspecialchars($enrollmentData['dob']),
         'Address' => htmlspecialchars($enrollmentData['address']),
@@ -806,7 +834,7 @@ $pdf->Ln($lineHeight );
     $pdf->Cell($labelWidth, $lineHeight, "Year:", 0);
     $pdf->SetX(81 );
     $pdf->SetFont('Helvetica', '', 9);
-    $pdf->Cell($valueWidth, $lineHeight, htmlspecialchars($enrollmentData['school_year']), 0);
+    $pdf->Cell($valueWidth, $lineHeight, htmlspecialchars($schoolYear), 0);
 
     $pdf->SetX(100 ); // Move to next position
     $pdf->SetFont('Helvetica', 'B', 9);
@@ -1230,12 +1258,11 @@ $formatted_end_time = isset($subject['end_time']) ? (new DateTime($subjects['end
     
     
     // Output the PDF
-    $pdf->Output('D', 'COR_College_Dep_and_Registrar_Copy.pdf');
+    $pdf->Output('D', 'COR_College_def_and_Registrar_Copy.pdf');
 } else {
     echo "No enrollment data found.";
 }
 
-// Disconnect from the database
-Database::disconnect();
+
 ?>
 

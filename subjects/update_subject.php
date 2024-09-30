@@ -9,9 +9,10 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     $sub = $subject->find($_GET['id']);
 }
 
-// Fetch all sections and semesters for the dropdowns
+// Fetch all sections, semesters, and school years for the dropdowns
 $sections = $subject->getAllSections();
 $semesters = $subject->getAllSemesters();
+$schoolYears = $subject->getAllSchoolYears(); // New method to fetch school years
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -76,6 +77,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </select>
                 </div>
                 
+                <div>
+    <label for="school_year" class="block text-red-700 font-medium">School Year:</label>
+    <select id="school_year" name="school_year_id" class="mt-1 block w-full px-3 py-2 bg-red-50 text-red-800 border-red-300 rounded-md shadow-sm focus:outline-none focus:bg-red-100 focus:border-red-500 sm:text-sm" required>
+        <?php foreach ($schoolYears as $year) { ?>
+            <option value="<?php echo htmlspecialchars($year['id']); ?>" <?php echo ($year['id'] == $sub['school_year_id']) ? 'selected' : ''; ?>>
+                <?php echo htmlspecialchars($year['year']); ?>
+            </option>
+        <?php } ?>
+    </select>
+</div>
+
+
                 <div>
                     <label for="units" class="block text-red-700 font-medium">Units:</label>
                     <input type="number" id="units" name="units" value="<?php echo htmlspecialchars($sub['units']); ?>" required class="mt-1 block w-full px-3 py-2 border border-red-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">

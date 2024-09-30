@@ -8,9 +8,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $subject->handleCreateSubjectRequest();
 }
 
-// Get all sections and semesters
+// Get all sections, semesters, and school years
 $sections = $subject->getAllSections();
 $semesters = $subject->getAllSemesters();
+$school_years = $subject->getAllSchoolYears(); // Fetch school years
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -73,6 +74,19 @@ $semesters = $subject->getAllSemesters();
                     </select>
                 </div>
             </div>
+            <div>
+        <label for="school_year_id" class="block text-red-700 font-medium">School Year:</label>
+        <div class="flex items-center border border-red-300 rounded-md shadow-sm">
+            <i class="fas fa-calendar text-red-500 px-3"></i> <!-- School year icon -->
+            <select id="school_year_id" name="school_year_id" required class="bg-red-50 block w-full px-3 py-2 text-red-800 border-red-300 rounded-md shadow-sm focus:outline-none focus:bg-red-100 focus:border-red-500 sm:text-sm">
+                <?php foreach ($school_years as $year): ?>
+                    <option value="<?php echo htmlspecialchars($year['id']); ?>">
+                        <?php echo htmlspecialchars($year['year']); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+    </div>
             <div>
                 <label for="units" class="block text-red-700 font-medium">Units:</label>
                 <div class="flex items-center border border-red-300 rounded-md shadow-sm">

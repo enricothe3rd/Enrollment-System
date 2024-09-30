@@ -14,16 +14,17 @@ $user_email = $_SESSION['user_email']; // Assuming the user's email is stored in
 // Check if the form was submitted
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Retrieve form data
-    $lastname = $_POST['lastname'];
-    $firstname = $_POST['firstname'];
-    $middlename = $_POST['middlename'];
-    $dob = $_POST['dob'];
-    $address = $_POST['address'];
-    $contact_no = $_POST['contact_no'];
-    $sex = $_POST['sex'];
-    $suffix = $_POST['suffix'];
-    $school_year = $_POST['school_year'];
-    $status = $_POST['status'];
+    $lastname = $_POST['lastname'] ?? '';
+    $firstname = $_POST['firstname'] ?? '';
+    $middlename = $_POST['middlename'] ?? '';
+    $dob = $_POST['dob'] ?? '';
+    $address = $_POST['address'] ?? '';
+    $contact_no = $_POST['contact_no'] ?? '';
+    $sex = $_POST['sex'] ?? '';
+    $suffix = $_POST['suffix'] ?? '';
+    $school_year = $_POST['school_year'] ?? '';
+    $status = $_POST['status'] ?? '';
+
 
     // Validate data (optional, add your own validation rules)
     if (empty($lastname) || empty($firstname) || empty($user_email)) {
@@ -51,7 +52,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 'sex' => $sex,
                 'suffix' => $suffix,
                 'school_year' => $school_year,
-                'status' => $status
+                'status' => $status,
+            
             ], $existingEnrollment['id']); // Assuming the ID is used for the update
 
             if ($result) {
@@ -107,6 +109,7 @@ if ($existingEnrollment) {
     $suffix = $existingEnrollment['suffix'];
     $school_year = $existingEnrollment['school_year'];
     $status = $existingEnrollment['status'];
+
 } else {
     // Default values if no existing enrollment
     $lastname = '';
@@ -119,5 +122,6 @@ if ($existingEnrollment) {
     $suffix = '';
     $school_year = '';
     $status = '';
+
 }
 ?>

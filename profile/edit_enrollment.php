@@ -11,13 +11,25 @@ if (isset($_GET['student_number'])) {
     try {
         // Prepare the SQL statement to fetch enrollment details for the specific student
         $stmt = $pdo->prepare("
-            SELECT e.*, 
+            SELECT e.student_number, 
+                   e.firstname, 
+                   e.middlename, 
+                   e.lastname, 
+                   e.suffix, 
+                   c.id AS course_id, 
                    c.course_name, 
+                   s.id AS section_id, 
                    s.name AS section_name, 
-                   d.name AS department_name
+                   d.name AS department_name,
+                   e.sex, 
+                   e.dob, 
+                   e.email, 
+                   e.contact_no, 
+                   e.created_at
             FROM enrollments e
-            LEFT JOIN courses c ON e.course_id = c.id
-            LEFT JOIN sections s ON e.section_id = s.id
+            LEFT JOIN subject_enrollments se ON e.student_number = se.student_number
+            LEFT JOIN courses c ON se.course_id = c.id
+            LEFT JOIN sections s ON se.section_id = s.id
             LEFT JOIN departments d ON c.department_id = d.id
             WHERE e.student_number = :student_number
         ");
@@ -55,8 +67,6 @@ if (isset($_GET['student_number'])) {
                     suffix = :suffix,
                     email = :email,
                     contact_no = :contact_no,
-                    course_id = :course_id,
-                    section_id = :section_id,
                     sex = :sex,
                     dob = :dob
                 WHERE student_number = :student_number
@@ -69,8 +79,6 @@ if (isset($_GET['student_number'])) {
             $updateStmt->bindParam(':suffix', $suffix);
             $updateStmt->bindParam(':email', $email);
             $updateStmt->bindParam(':contact_no', $contact_no);
-            $updateStmt->bindParam(':course_id', $course_id);
-            $updateStmt->bindParam(':section_id', $section_id);
             $updateStmt->bindParam(':sex', $sex);
             $updateStmt->bindParam(':dob', $dob);
             $updateStmt->bindParam(':student_number', $student_number);
@@ -92,7 +100,8 @@ if (isset($_GET['student_number'])) {
     echo "No student number provided.";
     exit;
 }
-?><!DOCTYPE html>
+?>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -173,15 +182,14 @@ if (isset($_GET['student_number'])) {
                 <label for="course_id" class="block text-sm font-medium text-red-700">Course</label>
                 <div class="flex items-center border border-red-300 rounded-md shadow-sm">
                     <i class="fas fa-book text-red-500 px-3"></i>
-                    <select name="course_id" id="course_id" required 
-                            class="w-full h-12 bg-red-50 text-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 rounded-md transition duration-200">
-                        <option value="" disabled selected>Select a Course</option>
+                    <select name="course_id" id="course_id" required class="w-full h-10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <option value="" disabled>Select Course</option>
                         <?php
-                        // Fetch all courses to populate the select options
+                        // Fetch courses to populate the dropdown
                         $coursesStmt = $pdo->query("SELECT * FROM courses");
                         while ($course = $coursesStmt->fetch(PDO::FETCH_ASSOC)) {
                             $selected = $course['id'] == $enrollmentData['course_id'] ? 'selected' : '';
-                            echo "<option value=\"{$course['id']}\" $selected>" . htmlspecialchars($course['course_name']) . "</option>";
+                            echo "<option value=\"{$course['id']}\" $selected>{$course['course_name']}</option>";
                         }
                         ?>
                     </select>
@@ -191,16 +199,15 @@ if (isset($_GET['student_number'])) {
             <div>
                 <label for="section_id" class="block text-sm font-medium text-red-700">Section</label>
                 <div class="flex items-center border border-red-300 rounded-md shadow-sm">
-                    <i class="fas fa-list text-red-500 px-3"></i>
-                    <select name="section_id" id="section_id" required 
-                            class="w-full h-12 bg-red-50 text-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 rounded-md transition duration-200">
-                        <option value="" disabled selected>Select a Section</option>
+                    <i class="fas fa-layer-group text-red-500 px-3"></i>
+                    <select name="section_id" id="section_id" required class="w-full h-10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <option value="" disabled>Select Section</option>
                         <?php
-                        // Fetch all sections to populate the select options
+                        // Fetch sections to populate the dropdown
                         $sectionsStmt = $pdo->query("SELECT * FROM sections");
                         while ($section = $sectionsStmt->fetch(PDO::FETCH_ASSOC)) {
                             $selected = $section['id'] == $enrollmentData['section_id'] ? 'selected' : '';
-                            echo "<option value=\"{$section['id']}\" $selected>" . htmlspecialchars($section['name']) . "</option>";
+                            echo "<option value=\"{$section['id']}\" $selected>{$section['name']}</option>";
                         }
                         ?>
                     </select>
@@ -210,12 +217,10 @@ if (isset($_GET['student_number'])) {
             <div>
                 <label for="sex" class="block text-sm font-medium text-red-700">Sex</label>
                 <div class="flex items-center border border-red-300 rounded-md shadow-sm">
-                    <i class="fas fa-venus-mars text-red-500 px-3"></i>
-                    <select name="sex" id="sex" required 
-                            class="w-full h-12 bg-red-50 text-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 rounded-md transition duration-200">
+                    <select name="sex" id="sex" required class="w-full h-10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <option value="" disabled>Select Sex</option>
                         <option value="Male" <?= $enrollmentData['sex'] == 'Male' ? 'selected' : '' ?>>Male</option>
                         <option value="Female" <?= $enrollmentData['sex'] == 'Female' ? 'selected' : '' ?>>Female</option>
-                        <option value="Other" <?= $enrollmentData['sex'] == 'Other' ? 'selected' : '' ?>>Other</option>
                     </select>
                 </div>
             </div>
@@ -229,15 +234,17 @@ if (isset($_GET['student_number'])) {
                 </div>
             </div>
 
-            <button type="submit" class="col-span-1 md:col-span-2 bg-red-700 hover:bg-red-800 text-white font-bold py-3 px-4 rounded transition duration-200">
-                Update Enrollment
-            </button>
+            <div class="col-span-2">
+                <button type="submit" class="w-full py-2 bg-red-600 text-white font-semibold rounded hover:bg-red-700 transition duration-200">
+                    Update Enrollment
+                </button>
+            </div>
         </form>
     </div>
 
     <script>
         function goBack() {
-            window.history.back(); // Navigates to the previous page
+            window.history.back();
         }
     </script>
 </body>

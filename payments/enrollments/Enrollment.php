@@ -7,6 +7,7 @@ class Enrollment {
     public function __construct() {
         $this->db = Database::connect(); // Assuming Database class handles the connection
     }
+    
     public function generateStudentNumber() {
         $currentYear = date("Y");
         $latestNumber = $this->getLatestStudentNumber(); // A method to get the latest student number
@@ -38,56 +39,30 @@ class Enrollment {
         $latest = $stmt->fetch(PDO::FETCH_ASSOC);
         return $latest ? $latest['student_number'] : null;
     }
+    
     public function getLatestStudentNumberByEmail($email) {
         $query = "SELECT student_number FROM enrollments WHERE email = :email ORDER BY created_at DESC LIMIT 1"; // Adjust the table name and fields as necessary
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':email', $email);
         $stmt->execute();
-
         return $stmt->fetchColumn(); // Returns the latest student_number
     }
     
-    
-    public function createEnrollment($data) {
-        // Prepare your SQL query
-        $stmt = $this->db->prepare("INSERT INTO enrollments (student_number, lastname, firstname, middlename, email, dob, address, contact_no, sex, suffix, school_year, status) VALUES (:student_number, :lastname, :firstname, :middlename, :email, :dob, :address, :contact_no, :sex, :suffix, :school_year, :status)");
-        
-        // Bind parameters
-        $stmt->bindParam(':student_number', $data['student_number']);
-        $stmt->bindParam(':lastname', $data['lastname']);
-        $stmt->bindParam(':firstname', $data['firstname']);
-        $stmt->bindParam(':middlename', $data['middlename']);
-        $stmt->bindParam(':email', $data['email']);
-        $stmt->bindParam(':dob', $data['dob']);
-        $stmt->bindParam(':address', $data['address']);
-        $stmt->bindParam(':contact_no', $data['contact_no']);
-        $stmt->bindParam(':sex', $data['sex']);
-        $stmt->bindParam(':suffix', $data['suffix']);
-        $stmt->bindParam(':school_year', $data['school_year']);
-        $stmt->bindParam(':status', $data['status']);
-        
-        // Execute the query
-        return $stmt->execute();
-    }
-    
-
     public function updateEnrollment($data) {
-        // Assuming $data is an associative array containing the enrollment details
-        // Make sure to include proper validation and sanitization of input data
-    
-        $sql = "UPDATE enrollments SET 
-                    lastname = :lastname, 
-                    firstname = :firstname, 
-                    middlename = :middlename, 
-                    dob = :dob, 
-                    address = :address, 
-                    contact_no = :contact_no, 
-                    sex = :sex, 
-                    suffix = :suffix, 
-                    school_year = :school_year, 
-                    status = :status 
-                WHERE email = :email"; // Adjust the condition as necessary
-    
+        $sql = "
+            UPDATE enrollments SET 
+                lastname = :lastname, 
+                firstname = :firstname, 
+                middlename = :middlename, 
+                dob = :dob, 
+                address = :address, 
+                contact_no = :contact_no, 
+                sex = :sex, 
+                suffix = :suffix, 
+
+                status = :status
+            WHERE email = :email"; // Adjust the condition as necessary
+        
         $stmt = $this->db->prepare($sql);
         
         // Bind parameters
@@ -99,14 +74,36 @@ class Enrollment {
         $stmt->bindParam(':contact_no', $data['contact_no']);
         $stmt->bindParam(':sex', $data['sex']);
         $stmt->bindParam(':suffix', $data['suffix']);
-        $stmt->bindParam(':school_year', $data['school_year']);
+   
         $stmt->bindParam(':status', $data['status']);
-        $stmt->bindParam(':email', $data['email']); // Adjust this to use the appropriate identifier
-    
+        $stmt->bindParam(':email', $data['email']); // Use email as the condition for the update
+        
         return $stmt->execute();
     }
-    
-    
+
+    public function createEnrollment($data) {
+        $sql = "
+            INSERT INTO enrollments (student_number, lastname, firstname, middlename, email, dob, address, contact_no, sex, suffix, status)
+            VALUES (:student_number, :lastname, :firstname, :middlename, :email, :dob, :address, :contact_no, :sex, :suffix, :status)";
+
+        $stmt = $this->db->prepare($sql);
+
+        // Bind parameters
+        $stmt->bindParam(':student_number', $data['student_number']);
+        $stmt->bindParam(':lastname', $data['lastname']);
+        $stmt->bindParam(':firstname', $data['firstname']);
+        $stmt->bindParam(':middlename', $data['middlename']);
+        $stmt->bindParam(':email', $data['email']);
+        $stmt->bindParam(':dob', $data['dob']);
+        $stmt->bindParam(':address', $data['address']);
+        $stmt->bindParam(':contact_no', $data['contact_no']);
+        $stmt->bindParam(':sex', $data['sex']);
+        $stmt->bindParam(':suffix', $data['suffix']);
+   
+        $stmt->bindParam(':status', $data['status']);
+
+        return $stmt->execute();
+    }
 
     public function getEnrollments() {
         $sql = "SELECT * FROM enrollments";
@@ -120,6 +117,7 @@ class Enrollment {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
     public function getStatusOptions() {
         $stmt = $this->db->prepare("SELECT status_name FROM status_options");
         $stmt->execute();
@@ -131,8 +129,5 @@ class Enrollment {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    
-    
-    
 }
 ?>

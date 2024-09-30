@@ -1,54 +1,44 @@
 <?php
+
 session_start();
 require '../db/db_connection3.php'; // Adjust the filename as needed
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $sectionId = $_POST['section_id'] ?? null;
+    $section_id = $_POST['section_id'] ?? null;
+    $school_year_id = $_POST['school_year_id'] ?? null; // Get school year ID
+    $semester_id = $_POST['semester_id'] ?? null; // Get semester ID
 
-    if (!$sectionId) {
-        echo json_encode(['error' => 'Section ID is required.']);
-        exit;
-    }
+    if ($section_id && $school_year_id && $semester_id) {
+        try {
+            $db = Database::connect();
 
-    try {
-        $db = Database::connect();
-        
-        // Fetch the subjects for the given section
-        $stmt = $db->prepare("SELECT * FROM subjects WHERE section_id = :section_id");
-        $stmt->bindParam(':section_id', $sectionId, PDO::PARAM_INT);
-        $stmt->execute();
-        
-        $subjects = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        // If subjects were found, fetch the schedule for each subject
-        if ($subjects) {
-            $subjectIds = array_column($subjects, 'id');
-            $placeholders = implode(',', array_fill(0, count($subjectIds), '?'));
-
-            // Prepare the SQL statement for fetching schedules
-            $scheduleStmt = $db->prepare("
-                SELECT subject_id, day_of_week, start_time, end_time, room 
-                FROM schedules 
-                WHERE subject_id IN ($placeholders)
+            // Prepare the query to fetch subjects based on school year and semester
+            $stmt = $db->prepare("
+                SELECT * FROM subjects 
+                WHERE school_year_id = :school_year_id 
+                AND semester_id = :semester_id 
+                AND section_id = :section_id
             ");
-            
-            // Execute the schedule query with the list of subject IDs
-            $scheduleStmt->execute($subjectIds);
-            $schedules = $scheduleStmt->fetchAll(PDO::FETCH_ASSOC);
+            $stmt->bindParam(':school_year_id', $school_year_id);
+            $stmt->bindParam(':semester_id', $semester_id);
+            $stmt->bindParam(':section_id', $section_id);
+            $stmt->execute();
 
-            // Attach schedules to the corresponding subjects
-            foreach ($subjects as &$subject) {
-                $subject['schedules'] = array_filter($schedules, function ($schedule) use ($subject) {
-                    return $schedule['subject_id'] === $subject['id'];
-                });
+            // Fetch all subjects
+            $subjects = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Check if subjects are empty
+            if (empty($subjects)) {
+                echo json_encode(['message' => 'No subjects found for this section.']);
+            } else {
+                echo json_encode($subjects);
             }
+        } catch (PDOException $e) {
+            echo json_encode(['error' => 'Error fetching subjects: ' . $e->getMessage()]);
         }
-
-        // Return the subjects with their schedules as a JSON response
-        echo json_encode($subjects);
-
-    } catch (PDOException $e) {
-        echo json_encode(['error' => 'Error fetching subjects: ' . $e->getMessage()]);
+    } else {
+        echo json_encode(['error' => 'Invalid parameters.']);
     }
+} else {
+    echo json_encode(['error' => 'Invalid request method.']);
 }
-?>

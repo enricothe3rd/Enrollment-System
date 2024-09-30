@@ -17,8 +17,9 @@ try {
                s.name AS section_name, 
                d.name AS department_name
         FROM enrollments e
-        LEFT JOIN courses c ON e.course_id = c.id
-        LEFT JOIN sections s ON e.section_id = s.id
+        LEFT JOIN subject_enrollments se ON e.student_number = se.student_number
+        LEFT JOIN courses c ON se.course_id = c.id
+        LEFT JOIN sections s ON se.section_id = s.id
         LEFT JOIN departments d ON c.department_id = d.id
     ");
     $stmt->execute();
@@ -30,6 +31,43 @@ try {
     echo "Error: " . $e->getMessage();
     exit;
 }
+
+
+
+    // Adjust column names to match your actual database structure
+    $SubjectStmt = $pdo->prepare("
+        SELECT 
+            se.id,
+            se.student_number,
+            s.name AS section_name,
+            d.name AS department_name,
+            c.course_name AS course_name,
+            sub.code AS subject_code,
+            sub.title AS subject_title,
+            sub.units AS subject_units,
+            sem.semester_name AS semester_name,
+            sch.day_of_week AS day_of_week,
+            sch.start_time AS start_time,
+            sch.end_time AS end_time,
+            sch.room AS room,
+            se.school_year -- Ensure this column is selected
+        FROM subject_enrollments se
+        LEFT JOIN sections s ON se.section_id = s.id
+        LEFT JOIN departments d ON se.department_id = d.id
+        LEFT JOIN courses c ON se.course_id = c.id
+        LEFT JOIN subjects sub ON se.subject_id = sub.id
+        LEFT JOIN semesters sem ON sub.semester_id = sem.id
+        LEFT JOIN schedules sch ON se.schedule_id = sch.id
+        WHERE se.student_number = :student_number
+    ");
+
+    // Bind the session student number to the SQL statement
+    $SubjectStmt->bindParam(':student_number', $_SESSION['student_number'], PDO::PARAM_STR);
+    // Execute the statement
+    $SubjectStmt->execute();
+
+    // Fetch the subjects
+    $subjects = $SubjectStmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
