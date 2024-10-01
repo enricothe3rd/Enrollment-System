@@ -31,6 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $departments = $instructor->getDepartments();
 $courses = $instructor->getCourses();
 $sections = $instructor->getSections();
+$emails = $instructor->getAllEmails(); // Fetch emails
 ?>
 
 <!DOCTYPE html>
@@ -170,17 +171,19 @@ $sections = $instructor->getSections();
     </div>
     </div>
 
-    <!-- Email -->
-     <div>
-     <label for="email" class="block text-red-700 font-medium">Email</label>
-      <div class="flex items-center border border-red-300 rounded-md shadow-sm">
-        <i class="fas fa-envelope  text-red-500 px-3"></i>
-    
-           
-            <input type="email" id="email" name="email" required placeholder="Enter Email" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
-
+ <!-- Email Dropdown -->
+<div>
+    <label for="email" class="block text-red-700 font-medium">Email</label>
+    <div class="flex items-center border border-red-300 rounded-md shadow-sm">
+        <i class="fas fa-envelope text-red-500 px-3"></i>
+        <select id="email" name="email" required class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
+            <option value="" disabled selected>Select an Email</option>
+            <?php foreach ($emails as $user): ?>
+                <option value="<?= htmlspecialchars($user['email']) ?>"><?= htmlspecialchars($user['email']) ?></option>
+            <?php endforeach; ?>
+        </select>
     </div>
-    </div>
+</div>
 
     <!-- Department -->
      <div>

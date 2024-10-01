@@ -53,22 +53,26 @@ if (!$paymentDetails) {
             Print Receipt
         </a>
 
-        
         <a class="bg-blue-500 text-white font-semibold py-2 px-4 rounded hover:bg-blue-600 inline-block mt-4" onclick="openTwoFiles(event)">
-    Print COR
-</a>
+            Print COR
+        </a>
 
-<script>
-    function openTwoFiles(event) {
-        event.preventDefault();  // Prevent the default anchor action
-        
-        // Open first PDF file
-        window.open('print_cor.php', '_blank');
-        
-        // Open second PDF file
-        window.open('print_cor1.php', '_self');
-    }
-</script>
+        <script>
+            function openTwoFiles(event) {
+                event.preventDefault();  // Prevent the default anchor action
+                
+                // Open first PDF file in a new tab
+                window.open('print_cor.php', '_blank');
+                
+                // Open second PDF file in the same tab
+                window.location.href = 'print_cor1.php';
+            }
+        </script>
+<!-- Button to go to the student dashboard -->
+<button onclick="window.top.location.reload();" class="bg-green-500 text-white font-semibold py-2 px-4 rounded hover:bg-green-600 inline-block mt-4">
+    Go to Dashboard
+</button>
+
 
 
     </div>

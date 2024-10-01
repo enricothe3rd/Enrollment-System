@@ -14,7 +14,7 @@ $instructorData = $instructor->read($id);
 $courses = $instructor->getCourses(); // Fetch all courses
 $sections = $instructor->getSections(); // Fetch all sections
 $departments = $instructor->getDepartments(); // Fetch all departments
-
+$emails = $instructor->getAllEmails(); // Fetch all departments
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $firstName = $_POST['first_name'];
     $middleName = $_POST['middle_name']; // New field
@@ -107,17 +107,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                     </div>
 
-                    <!-- Email -->
-                    <div>
-                        <label for="email" class="block text-red-700 font-medium">Email</label>
-                        <div class="flex items-center border border-red-300 rounded-md shadow-sm">
-                            <span class="flex items-center px-3">
-                                <i class="fas fa-envelope  text-red-500"></i>
-                            </span>
-                            <input type="email" id="email" name="email" value="<?= htmlspecialchars($instructorData['email']) ?>" 
-                                   class="mt-1 block w-full rounded-lg shadow-sm px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
-                        </div>
-                    </div>
+     <!-- Email Dropdown -->
+<div>
+    <label for="email" class="block text-red-700 font-medium">Email</label>
+    <div class="flex items-center border border-red-300 rounded-md shadow-sm">
+        <span class="flex items-center px-3">
+            <i class="fas fa-envelope text-red-500"></i>
+        </span>
+        <select id="email" name="email" class="mt-1 block w-full rounded-lg shadow-sm px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
+            <!-- <option value="">Select Email</option> -->
+            <?php foreach ($emails as $userEmail): ?>
+                <option value="<?= htmlspecialchars($userEmail['email']) ?>" <?= $userEmail['email'] == $instructorData['email'] ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($userEmail['email']) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+</div>
+
 
                     <!-- Department -->
                     <div>

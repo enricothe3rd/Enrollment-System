@@ -122,5 +122,11 @@ class Instructor {
         $stmt->execute([':course_id' => $courseId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getAllEmails() {
+        $stmt = $this->pdo->prepare("SELECT email FROM users");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 ?>

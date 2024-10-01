@@ -1,45 +1,80 @@
 <?php
 session_start();
 require '../db/db_connection3.php';
+require '../message.php';
 
 $pdo = Database::connect();
 
-// Prepare the SQL statement to fetch subject enrollments
-$SubjectStmt = $pdo->prepare("
-    SELECT 
-        se.id,
-        se.student_number,
-        s.name AS section_name,
-        d.name AS department_name,
-        c.course_name AS course_name,
-        sub.code AS subject_code,
-        sub.title AS subject_title,
-        sub.units AS subject_units,
-        sem.semester_name AS semester_name,
-        sch.day_of_week AS day_of_week,
-        sch.start_time AS start_time,
-        sch.end_time AS end_time,
-        sch.room AS room
-    FROM subject_enrollments se
-    LEFT JOIN sections s ON se.section_id = s.id
-    LEFT JOIN departments d ON se.department_id = d.id
-    LEFT JOIN courses c ON se.course_id = c.id
-    LEFT JOIN subjects sub ON se.subject_id = sub.id
-    LEFT JOIN semesters sem ON sub.semester_id = sem.id
-    LEFT JOIN schedules sch ON se.schedule_id = sch.id
-    WHERE se.student_number = :student_number
-");
+// Check if the session variables are set
+if (isset($_SESSION['student_number']) && isset($_SESSION['user_email'])) {
+    $student_number = $_SESSION['student_number'];
+    $email = $_SESSION['user_email'];
 
-// Bind the session student number to the SQL statement
-$SubjectStmt->bindParam(':student_number', $_SESSION['student_number'], PDO::PARAM_STR);
+    // Check if the student has made payments
+    $checkPaymentStmt = $pdo->prepare("
+        SELECT COUNT(*) 
+        FROM payments 
+        WHERE student_number = :student_number
+    ");
+    
+    // Bind the student number
+    $checkPaymentStmt->bindParam(':student_number', $student_number, PDO::PARAM_STR);
+    
+    // Execute the payment check
+    $checkPaymentStmt->execute();
+    $paymentExists = $checkPaymentStmt->fetchColumn();
 
-// Execute the statement
-$SubjectStmt->execute();
+    // Initialize subjects array
+    $subjects = [];
 
-// Fetch the subjects
-$subjects = $SubjectStmt->fetchAll(PDO::FETCH_ASSOC);
+    // Only fetch subjects if the payment exists
+    if ($paymentExists > 0) {
+        // Prepare the SQL statement to fetch subject enrollments
+        $SubjectStmt = $pdo->prepare("
+            SELECT 
+                se.id,
+                se.student_number,
+                s.name AS section_name,
+                d.name AS department_name,
+                c.course_name AS course_name,
+                sub.code AS subject_code,
+                sub.title AS subject_title,
+                sub.units AS subject_units,
+                sem.semester_name AS semester_name,
+                sch.day_of_week AS day_of_week,
+                sch.start_time AS start_time,
+                sch.end_time AS end_time,
+                sch.room AS room
+            FROM subject_enrollments se
+            LEFT JOIN sections s ON se.section_id = s.id
+            LEFT JOIN departments d ON se.department_id = d.id
+            LEFT JOIN courses c ON se.course_id = c.id
+            LEFT JOIN subjects sub ON se.subject_id = sub.id
+            LEFT JOIN semesters sem ON sub.semester_id = sem.id
+            LEFT JOIN schedules sch ON se.schedule_id = sch.id
+            WHERE se.student_number = :student_number
+        ");
 
-// Extract the course name from the first result (assuming the course is the same for all subjects)
+        // Bind the session student number to the SQL statement
+        $SubjectStmt->bindParam(':student_number', $student_number, PDO::PARAM_STR);
+
+        // Execute the statement
+        $SubjectStmt->execute();
+
+        // Fetch the subjects
+        $subjects = $SubjectStmt->fetchAll(PDO::FETCH_ASSOC);
+    } else {
+        // If no payment, inform the user
+        displayMessage('error', 'Payment Required', 'No payment found for this student. Please complete the payment to view subjects.');
+        exit; // Exit to prevent further processing
+    }
+} else {
+    // Handle case where session variables are not set
+    displayMessage('warning', 'Session Error', 'No valid session found. Please log in.');
+    exit; // Exit if session is invalid
+}
+
+// Extract course details if subjects are available
 $semester_name = !empty($subjects) ? $subjects[0]['semester_name'] : null;
 $section_name = !empty($subjects) ? $subjects[0]['section_name'] : null;
 $course_name = !empty($subjects) ? $subjects[0]['course_name'] : null;
@@ -51,6 +86,7 @@ function formatTime($time) {
 }
 ?>
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -61,9 +97,16 @@ function formatTime($time) {
 </head>
 <body class="bg-gray-100">
 
-<div class="container mx-auto my-4 p-6  overflow-x-auto">
+<div class="container mx-auto my-4 p-6 overflow-x-auto">
     <h2 class="text-2xl font-semibold text-red-800 mb-4">Enrolled Subject</h2>
-
+    
+    <!-- Display the email if it's available -->
+    <!-- <?php// if// ($email): ?>
+    <div class="p-6 bg-gray-200">
+        Logged in as:// <?php //echo htmlspecialchars($email); ?>
+    </div>
+    <?php //endif; ?> -->
+    
     <!-- Display the course and section names -->
     <div class="mb-4">
         <?php if ($section_name): ?>
@@ -83,53 +126,52 @@ function formatTime($time) {
         <?php endif; ?>
     </div>
 
-   <!-- Table of subject enrollments -->
-<table class="min-w-full table-auto bg-gray-50 rounded-lg shadow-md">
-    <thead class="bg-red-800">
-        <tr class="hidden sm:table-row">
-            <th class="px-4 py-4 border-b text-left text-white">Subject Code</th>
-            <th class="px-4 py-4 border-b text-left text-white">Subject Title</th>
-            <th class="px-4 py-4 border-b text-left text-white">Units</th>
-            <th class="px-4 py-4 border-b text-left text-white">Schedule (Day, Time)</th>
-            <th class="px-4 py-4 border-b text-left text-white">Room</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php if (!empty($subjects)): ?>
-            <?php foreach ($subjects as $subject): ?>
-                <tr class="border-b bg-red-50 hover:bg-red-200 block sm:table-row">
-                    <td class="border-t px-6 py-3 block sm:table-cell">
-                        <span class="sm:hidden font-semibold">Subject Code: </span>
-                        <?= htmlspecialchars($subject['subject_code']) ?>
-                    </td>
-                    <td class="border-t px-6 py-3 block sm:table-cell">
-                        <span class="sm:hidden font-semibold">Subject Title: </span>
-                        <?= htmlspecialchars($subject['subject_title']) ?>
-                    </td>
-                    <td class="border-t px-6 py-3 block sm:table-cell">
-                        <span class="sm:hidden font-semibold">Units: </span>
-                        <?= htmlspecialchars($subject['subject_units']) ?>
-                    </td>
-                    <td class="border-t px-6 py-3 block sm:table-cell">
-                        <span class="sm:hidden font-semibold">Schedule: </span>
-                        <?= htmlspecialchars($subject['day_of_week']) ?>, 
-                        <?= formatTime($subject['start_time']) ?> - 
-                        <?= formatTime($subject['end_time']) ?>
-                    </td>
-                    <td class="border-t px-6 py-3 block sm:table-cell">
-                        <span class="sm:hidden font-semibold">Room: </span>
-                        <?= htmlspecialchars($subject['room']) ?>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <tr>
-                <td colspan="6" class="py-3 px-6 text-center">No subjects found.</td>
+    <!-- Table of subject enrollments -->
+    <table class="min-w-full table-auto bg-gray-50 rounded-lg shadow-md">
+        <thead class="bg-red-800">
+            <tr class="hidden sm:table-row">
+                <th class="px-4 py-4 border-b text-left text-white">Subject Code</th>
+                <th class="px-4 py-4 border-b text-left text-white">Subject Title</th>
+                <th class="px-4 py-4 border-b text-left text-white">Units</th>
+                <th class="px-4 py-4 border-b text-left text-white">Schedule (Day, Time)</th>
+                <th class="px-4 py-4 border-b text-left text-white">Room</th>
             </tr>
-        <?php endif; ?>
-    </tbody>
-</table>
-
+        </thead>
+        <tbody>
+            <?php if (!empty($subjects)): ?>
+                <?php foreach ($subjects as $subject): ?>
+                    <tr class="border-b bg-red-50 hover:bg-red-200 block sm:table-row">
+                        <td class="border-t px-6 py-3 block sm:table-cell">
+                            <span class="sm:hidden font-semibold">Subject Code: </span>
+                            <?= htmlspecialchars($subject['subject_code']) ?>
+                        </td>
+                        <td class="border-t px-6 py-3 block sm:table-cell">
+                            <span class="sm:hidden font-semibold">Subject Title: </span>
+                            <?= htmlspecialchars($subject['subject_title']) ?>
+                        </td>
+                        <td class="border-t px-6 py-3 block sm:table-cell">
+                            <span class="sm:hidden font-semibold">Units: </span>
+                            <?= htmlspecialchars($subject['subject_units']) ?>
+                        </td>
+                        <td class="border-t px-6 py-3 block sm:table-cell">
+                            <span class="sm:hidden font-semibold">Schedule: </span>
+                            <?= htmlspecialchars($subject['day_of_week']) ?>, 
+                            <?= formatTime($subject['start_time']) ?> - 
+                            <?= formatTime($subject['end_time']) ?>
+                        </td>
+                        <td class="border-t px-6 py-3 block sm:table-cell">
+                            <span class="sm:hidden font-semibold">Room: </span>
+                            <?= htmlspecialchars($subject['room']) ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <tr>
+                    <td colspan="6" class="py-3 px-6 text-center">No subjects found.</td>
+                </tr>
+            <?php endif; ?>
+        </tbody>
+    </table>
 </div>
 
 </body>

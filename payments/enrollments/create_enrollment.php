@@ -57,6 +57,25 @@ if ($existingEnrollment) {
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
     <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl">
         <h2 class="text-2xl font-bold mb-6 text-center">Enrollment Form</h2>
+            <!-- Display error message if set -->
+<?php if (isset($_SESSION['error_message'])): ?>
+    <div class="bg-red-500 text-white p-4 rounded-md mb-4">
+        <?php 
+            echo $_SESSION['error_message']; 
+            unset($_SESSION['error_message']); // Clear message after displaying it
+        ?>
+    </div>
+<?php endif; ?>
+
+<!-- Display success message if set -->
+<?php if (isset($_SESSION['success_message'])): ?>
+    <div class="bg-green-500 text-white p-4 rounded-md mb-4">
+        <?php 
+            echo $_SESSION['success_message']; 
+            unset($_SESSION['success_message']); // Clear message after displaying it
+        ?>
+    </div>
+<?php endif; ?>
         <form action="send_enrollment.php" method="POST" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             
             <!-- Student Number -->

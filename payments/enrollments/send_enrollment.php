@@ -9,7 +9,7 @@ require 'Enrollment.php';
 
 // Start session
 session_start();
-$user_email = $_SESSION['user_email']; // Assuming the user's email is stored in the session
+$user_email = $_SESSION['user_email'] ?? ''; // Assuming the user's email is stored in the session
 
 // Check if the form was submitted
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -22,17 +22,60 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $contact_no = $_POST['contact_no'] ?? '';
     $sex = $_POST['sex'] ?? '';
     $suffix = $_POST['suffix'] ?? '';
-    $school_year = $_POST['school_year'] ?? '';
-    $status = $_POST['status'] ?? '';
+    $status = $_POST['status'] ?? ''; // Assuming status is something you still need
 
+    // One-by-one validation for required fields
 
-    // Validate data (optional, add your own validation rules)
-    if (empty($lastname) || empty($firstname) || empty($user_email)) {
-        echo "Please fill in all required fields.";
+    // Validate lastname
+    if (empty($lastname)) {
+        $_SESSION['error_message'] = "Please provide your last name.";
+        header("Location: create_enrollment.php");
         exit;
     }
 
-    // Insert or update the enrollment data
+    // Validate firstname
+    if (empty($firstname)) {
+        $_SESSION['error_message'] = "Please provide your first name.";
+        header("Location: create_enrollment.php");
+        exit;
+    }
+
+    // Validate dob
+    if (empty($dob)) {
+        $_SESSION['error_message'] = "Please provide your date of birth.";
+        header("Location: create_enrollment.php");
+        exit;
+    }
+
+    // Validate address
+    if (empty($address)) {
+        $_SESSION['error_message'] = "Please provide your address.";
+        header("Location: create_enrollment.php");
+        exit;
+    }
+
+    // Validate contact_no
+    if (empty($contact_no)) {
+        $_SESSION['error_message'] = "Please provide your contact number.";
+        header("Location: create_enrollment.php");
+        exit;
+    }
+
+    // Validate sex
+    if (empty($sex)) {
+        $_SESSION['error_message'] = "Please specify your gender.";
+        header("Location: create_enrollment.php");
+        exit;
+    }
+
+    // Validate email from session
+    if (empty($user_email)) {
+        $_SESSION['error_message'] = "User email not found. Please log in.";
+        header("Location: create_enrollment.php");
+        exit;
+    }
+
+    // If validation passes, insert or update the enrollment data
     try {
         $enrollment = new Enrollment(); // Assuming this class is in Enrollment.php
 
@@ -51,17 +94,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 'contact_no' => $contact_no,
                 'sex' => $sex,
                 'suffix' => $suffix,
-                'school_year' => $school_year,
                 'status' => $status,
-            
             ], $existingEnrollment['id']); // Assuming the ID is used for the update
 
             if ($result) {
-                // Redirect to payment form on successful update
+                $_SESSION['success_message'] = "Enrollment updated successfully!";
                 header("Location: ../select_courses.php");
                 exit;
             } else {
-                echo "Failed to update enrollment. Please try again.";
+                $_SESSION['error_message'] = "Failed to update enrollment. Please try again.";
+                header("Location: create_enrollment.php");
+                exit;
             }
         } else {
             // If no existing record, create a new one
@@ -79,20 +122,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 'contact_no' => $contact_no,
                 'sex' => $sex,
                 'suffix' => $suffix,
-                'school_year' => $school_year,
                 'status' => $status
             ]);
 
             if ($result) {
-                // Redirect to payment form on successful enrollment
+                $_SESSION['success_message'] = "Enrollment created successfully!";
                 header("Location: ../select_courses.php");
                 exit;
             } else {
-                echo "Failed to enroll. Please try again.";
+                $_SESSION['error_message'] = "Failed to enroll. Please try again.";
+                header("Location: create_enrollment.php");
+                exit;
             }
         }
     } catch (PDOException $e) {
-        echo "Error: " . $e->getMessage();
+        $_SESSION['error_message'] = "Error: " . $e->getMessage();
+        header("Location: create_enrollment.php");
+        exit;
     }
 }
 
@@ -107,9 +153,7 @@ if ($existingEnrollment) {
     $contact_no = $existingEnrollment['contact_no'];
     $sex = $existingEnrollment['sex'];
     $suffix = $existingEnrollment['suffix'];
-    $school_year = $existingEnrollment['school_year'];
     $status = $existingEnrollment['status'];
-
 } else {
     // Default values if no existing enrollment
     $lastname = '';
@@ -120,8 +164,6 @@ if ($existingEnrollment) {
     $contact_no = '';
     $sex = '';
     $suffix = '';
-    $school_year = '';
     $status = '';
-
 }
 ?>
