@@ -12,12 +12,37 @@ $subjects = $subject->read(); // Get all subjects
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subjects</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script>
+        function filterTable() {
+            const input = document.getElementById("searchInput");
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById("subjectsTable");
+            const tr = table.getElementsByTagName("tr");
+
+            for (let i = 1; i < tr.length; i++) { // Start from 1 to skip the header row
+                const td = tr[i].getElementsByTagName("td");
+                let rowContainsFilter = false;
+
+                for (let j = 0; j < td.length; j++) {
+                    if (td[j] && td[j].innerText.toLowerCase().includes(filter)) {
+                        rowContainsFilter = true;
+                        break;
+                    }
+                }
+                tr[i].style.display = rowContainsFilter ? "" : "none"; // Show or hide row
+            }
+        }
+    </script>
 </head>
 <body class="bg-transparent font-sans leading-normal tracking-normal">
     <div class="container mx-auto mt-10 p-6">
         <h1 class="text-2xl font-semibold text-red-800 mb-4">Subjects</h1>
         <a href="create_subject.php" class="inline-block mb-4 px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800">Add New Subject</a>
-        <table class="w-full border-collapse shadow-md rounded-lg">
+
+        <!-- Search Input -->
+        <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search by code, title, or section..." class="mb-4 p-2 border border-gray-300 rounded">
+
+        <table id="subjectsTable" class="w-full border-collapse shadow-md rounded-lg">
             <thead class="bg-red-800">
                 <tr>
                     <th class="px-4 py-2 border-b text-left text-white">Code</th>

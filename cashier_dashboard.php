@@ -58,8 +58,8 @@
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('enrollment')"><i class="fas fa-user-plus mr-3"></i> Enrollments Payment </a></li>
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('subjects')"><i class="fas fa-user mr-3"></i> OJT Fees</a></li>
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('department')"><i class="fas fa-building mr-3"></i> Research Fees</a></li>
-                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('courses')"><i class="fas fa-graduation-cap mr-3"></i> Courses <i class="fas fa-chevron-right arrow-icon ml-auto"></i></a></li>
-                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('sections')"><i class="fas fa-list mr-3"></i> Sections</a></li>
+                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('courses')"><i class="fas fa-graduation-cap mr-3"></i> ALl Payments <i class="fas fa-chevron-right arrow-icon ml-auto"></i></a></li>
+                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('sections')"><i class="fas fa-list mr-3"></i> Edit Payment</a></li>
 </ul>
             </nav>
         </aside>
@@ -82,10 +82,10 @@
 
 
             <div id="courses" class="content-section">
-                <iframe src="payments/payment_form.php" title="Courses"></iframe>
+                <iframe src="payments/enrollment_payments_crud/view_all_payments.php" title="Courses"></iframe>
             </div>
             <div id="sections" class="content-section">
-                <iframe src="payments/re.php" title="Sections"></iframe>
+                <iframe src="payments/enrollment_payments_crud/edit_payments.php" title="Sections"></iframe>
             </div>
         </main>
     </div>

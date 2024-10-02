@@ -99,60 +99,101 @@ if (isset($_GET['edit_id'])) {
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OJT Fee Entry</title>
+    <!-- Tailwind CSS CDN -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="bg-gray-100 p-6">
-    <div class="max-w-lg mx-auto bg-white p-4 rounded shadow">
-        <h1 class="text-2xl font-bold mb-4"><?= $selected_fee ? 'Edit OJT Fee' : 'Enter OJT Fee' ?></h1>
-        <form method="POST" action="">
+
+    <div class="max-w-lg mx-auto p-8 bg-white rounded-lg shadow-lg">
+        <!-- OJT Fee Form -->
+        <h1 class="text-3xl font-bold text-red-800 mb-6">
+            <i class="fas fa-money-bill-wave"></i> <?= $selected_fee ? 'Edit OJT Fee' : 'Enter OJT Fee' ?>
+        </h1>
+        
+        <form method="POST" action="" class="space-y-6">
+            <!-- Hidden field for OJT Fee ID -->
             <input type="hidden" name="ojt_fee_id" value="<?= $selected_fee ? $selected_fee['id'] : '' ?>">
-            <label for="subject" class="block mb-2">Select Subject:</label>
-            <select id="subject" name="subject_id" class="block w-full mb-4 border rounded p-2" required>
-                <option value="">--Select a Subject--</option>
-                <?php foreach ($subjects as $subject): ?>
-                    <option value="<?= htmlspecialchars($subject['subject_id']); ?>" <?= $selected_fee && $selected_fee['subject_id'] == $subject['subject_id'] ? 'selected' : '' ?>>
-                        <?= htmlspecialchars($subject['subject_title']) . ' (Section: ' . htmlspecialchars($subject['section_name']) . ')'; ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
 
-            <label for="ojt_fee" class="block mb-2">OJT Fee:</label>
-            <input type="number" id="ojt_fee" name="ojt_fee" step="0.01" value="<?= $selected_fee ? htmlspecialchars($selected_fee['ojt_fee']) : '' ?>" class="block w-full mb-4 border rounded p-2" required>
+        <!-- Subject Selection -->
+        <div>
+                <label for="subject" class="block text-sm font-medium text-red-700">
+                    <i class="fas fa-book"></i> Select Subject:
+                </label>
+                <div class="flex items-center border border-red-300 rounded-md shadow-sm">
+                    <i class="fas fa-graduation-cap px-3 text-red-500"></i>
+                    <!-- Apply max-height and overflow-y-auto for scrollable dropdown -->
+                    <select id="subject" name="subject_id" class="w-full h-10 px-3 py-2 focus:outline-none max-h-48 overflow-y-auto" required>
+                        <option value="">--Select a Subject--</option>
+                        <?php foreach ($subjects as $subject): ?>
+                            <option value="<?= htmlspecialchars($subject['subject_id']); ?>" <?= $selected_fee && $selected_fee['subject_id'] == $subject['subject_id'] ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($subject['subject_title']) . ' (Section: ' . htmlspecialchars($subject['section_name']) . ')'; ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
 
-            <button type="submit" class="bg-blue-500 text-white rounded p-2"><?= $selected_fee ? 'Update' : 'Submit' ?></button>
+            <!-- OJT Fee -->
+            <div>
+                <label for="ojt_fee" class="block text-sm font-medium text-red-700">
+                    <i class="fas fa-dollar-sign"></i> OJT Fee (₱)
+                </label>
+                <div class="flex items-center border border-red-300 rounded-md shadow-sm">
+                    <span class="px-3 text-red-500">₱</span>
+                    <input type="number" id="ojt_fee" name="ojt_fee" step="0.01"
+                           value="<?= $selected_fee ? htmlspecialchars($selected_fee['ojt_fee']) : '' ?>"
+                           class="w-full h-10 px-3 py-2 focus:outline-none" required>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit"
+                    class="w-full bg-red-700 hover:bg-red-800 text-white font-bold py-3 px-4 rounded transition duration-200">
+                <i class="fas fa-check-circle"></i> <?= $selected_fee ? 'Update' : 'Submit' ?>
+            </button>
         </form>
 
-        <h2 class="text-xl font-bold mt-6 mb-4">Existing OJT Fees</h2>
-        <table class="min-w-full bg-white border rounded shadow">
-            <thead>
-                <tr class="bg-gray-200">
-                    <th class="border px-4 py-2">ID</th>
-                    <th class="border px-4 py-2">Subject Title</th>
-                    <th class="border px-4 py-2">OJT Fee</th>
-                    <th class="border px-4 py-2">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($ojt_fees as $fee): ?>
+        <!-- Existing OJT Fees Table -->
+        <div class="mt-8">
+            <h2 class="text-lg font-bold text-red-700"><i class="fas fa-list"></i> Existing OJT Fees</h2>
+            <table class="min-w-full mt-4 border border-red-300 rounded-md shadow-sm">
+                <thead class="bg-red-50">
                     <tr>
-                        <td class="border px-4 py-2"><?= htmlspecialchars($fee['fee_id']) ?></td>
-                        <td class="border px-4 py-2"><?= htmlspecialchars($fee['subject_title']) ?></td>
-                        <td class="border px-4 py-2"><?= htmlspecialchars($fee['ojt_fee']) ?></td>
-                        <td class="border px-4 py-2">
-                            <a href="?edit_id=<?= htmlspecialchars($fee['fee_id']) ?>" class="text-blue-500 hover:underline">Edit</a>
-                            <a href="?delete_id=<?= htmlspecialchars($fee['fee_id']) ?>" class="text-red-500 hover:underline ml-4" onclick="return confirm('Are you sure you want to delete this OJT fee?');">Delete</a>
-                        </td>
+                        <th class="border px-4 py-2 text-red-700">ID</th>
+                        <th class="border px-4 py-2 text-red-700">Subject Title</th>
+                        <th class="border px-4 py-2 text-red-700">OJT Fee (₱)</th>
+                        <th class="border px-4 py-2 text-red-700">Actions</th>
                     </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    <?php foreach ($ojt_fees as $fee): ?>
+                        <tr>
+                            <td class="border px-4 py-2"><?= htmlspecialchars($fee['fee_id']) ?></td>
+                            <td class="border px-4 py-2"><?= htmlspecialchars($fee['subject_title']) ?></td>
+                            <td class="border px-4 py-2">₱<?= htmlspecialchars($fee['ojt_fee']) ?></td>
+                            <td class="border px-4 py-2">
+                                <a href="?edit_id=<?= htmlspecialchars($fee['fee_id']) ?>"
+                                   class="text-blue-500 hover:underline"><i class="fas fa-edit"></i> Edit</a>
+                                <a href="?delete_id=<?= htmlspecialchars($fee['fee_id']) ?>"
+                                   class="text-red-600 hover:underline ml-4"
+                                   onclick="return confirm('Are you sure you want to delete this OJT fee?');">
+                                   <i class="fas fa-trash-alt"></i> Delete
+                                </a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
+
 </body>
 </html>

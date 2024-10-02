@@ -78,69 +78,104 @@ try {
     echo "Error fetching research fees: " . $e->getMessage();
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Research Fee Entry</title>
+    <!-- Tailwind CSS CDN -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="bg-gray-100 p-6">
-    <div class="max-w-lg mx-auto bg-white p-4 rounded shadow">
-        <h1 class="text-2xl font-bold mb-4">Manage Research Fees</h1>
+    <div class="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-lg">
+        <!-- Page Title -->
+        <h1 class="text-3xl font-bold text-red-800 mb-6">
+            <i class="fas fa-book"></i> Manage Research Fees
+        </h1>
         
         <!-- Form for creating/updating research fee -->
-        <form method="POST" action="">
+        <form method="POST" action="" class="space-y-4">
+            <!-- Hidden fields for fee ID and action -->
             <input type="hidden" name="fee_id" id="fee_id" value="">
             <input type="hidden" name="action" id="form_action" value="create">
 
-            <label for="subject" class="block mb-2">Select Subject:</label>
-            <select id="subject" name="subject_id" class="block w-full mb-4 border rounded p-2" required>
-                <option value="">--Select a Subject--</option>
-                <?php foreach ($subjects as $subject): ?>
-                    <option value="<?= htmlspecialchars($subject['subject_id']); ?>">
-                        <?= htmlspecialchars($subject['subject_title']) . ' (Section: ' . htmlspecialchars($subject['section_name']) . ')'; ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
+            <!-- Subject Selection -->
+            <div>
+    <label for="subject" class="block text-sm font-medium text-red-700">
+        <i class="fas fa-graduation-cap"></i> Select Subject:
+    </label>
+    <div class="flex items-center border border-red-300 rounded-md shadow-sm">
+        <i class="fas fa-book-open px-3 text-red-500"></i>
+        <!-- Apply max-height and overflow-y-auto for scrollable dropdown -->
+        <select id="subject" name="subject_id" class="w-full h-10 px-3 py-2 focus:outline-none max-h-48 overflow-y-auto" required>
+            <option value="">--Select a Subject--</option>
+            <?php foreach ($subjects as $subject): ?>
+                <option value="<?= htmlspecialchars($subject['subject_id']); ?>">
+                    <?= htmlspecialchars($subject['subject_title']) . ' (Section: ' . htmlspecialchars($subject['section_name']) . ')'; ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+</div>
 
-            <label for="research_fee" class="block mb-2">Research Fee:</label>
-            <input type="number" id="research_fee" name="research_fee" step="0.01" class="block w-full mb-4 border rounded p-2" required>
+            <!-- Research Fee Input -->
+            <div>
+                <label for="research_fee" class="block text-sm font-medium text-red-700">
+                    <i class="fas fa-dollar-sign"></i> Research Fee (₱)
+                </label>
+                <div class="flex items-center border border-red-300 rounded-md shadow-sm">
+                    <span class="px-3 text-red-500">₱</span>
+                    <input type="number" id="research_fee" name="research_fee" step="0.01"
+                           class="w-full h-10 px-3 py-2 focus:outline-none" required>
+                </div>
+            </div>
 
-            <button type="submit" class="bg-blue-500 text-white rounded p-2">Submit</button>
+            <!-- Submit Button -->
+            <button type="submit"
+                    class="w-full bg-red-700 hover:bg-red-800 text-white font-bold py-3 px-4 rounded transition duration-200">
+                <i class="fas fa-check-circle"></i> Submit
+            </button>
         </form>
 
-        <!-- Table of existing research fees -->
-        <h2 class="text-xl font-bold mt-6 mb-4">Existing Research Fees</h2>
-        <table class="min-w-full border">
-            <thead>
-                <tr class="bg-gray-200">
-                    <th class="border px-4 py-2">Subject</th>
-                    <th class="border px-4 py-2">Section</th>
-                    <th class="border px-4 py-2">Research Fee</th>
-                    <th class="border px-4 py-2">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($research_fees as $fee): ?>
+        <!-- Existing Research Fees Table -->
+        <div class="mt-8">
+            <h2 class="text-xl font-bold text-red-700"><i class="fas fa-list"></i> Existing Research Fees</h2>
+            <table class="min-w-full mt-4 border border-red-300 rounded-md shadow-sm">
+                <thead class="bg-red-50">
                     <tr>
-                        <td class="border px-4 py-2"><?= htmlspecialchars($fee['subject_title']); ?></td>
-                        <td class="border px-4 py-2"><?= htmlspecialchars($fee['section_name']); ?></td>
-                        <td class="border px-4 py-2"><?= htmlspecialchars($fee['research_fee']); ?></td>
-                        <td class="border px-4 py-2">
-                            <form method="POST" action="" class="inline">
-                                <input type="hidden" name="fee_id" value="<?= htmlspecialchars($fee['id']); ?>">
-                                <input type="hidden" name="action" value="delete">
-                                <button type="submit" class="text-red-500">Delete</button>
-                            </form>
-                            <button type="button" class="text-blue-500" onclick="editFee(<?= htmlspecialchars($fee['id']); ?>, <?= htmlspecialchars($fee['subject_id']); ?>, '<?= htmlspecialchars($fee['research_fee']); ?>')">Edit</button>
-                        </td>
+                        <th class="border px-4 py-2 text-red-700">Subject</th>
+                        <th class="border px-4 py-2 text-red-700">Section</th>
+                        <th class="border px-4 py-2 text-red-700">Research Fee (₱)</th>
+                        <th class="border px-4 py-2 text-red-700">Actions</th>
                     </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    <?php foreach ($research_fees as $fee): ?>
+                        <tr class="hover:bg-red-50">
+                            <td class="border px-4 py-2"><?= htmlspecialchars($fee['subject_title']); ?></td>
+                            <td class="border px-4 py-2"><?= htmlspecialchars($fee['section_name']); ?></td>
+                            <td class="border px-4 py-2">₱<?= htmlspecialchars($fee['research_fee']); ?></td>
+                            <td class="border px-4 py-2">
+                                <form method="POST" action="" class="inline">
+                                    <input type="hidden" name="fee_id" value="<?= htmlspecialchars($fee['id']); ?>">
+                                    <input type="hidden" name="action" value="delete">
+                                    <button type="submit" class="text-red-500 hover:underline">
+                                        <i class="fas fa-trash-alt"></i> Delete
+                                    </button>
+                                </form>
+                                <button type="button" class="text-blue-500 hover:underline ml-4"
+                                        onclick="editFee(<?= htmlspecialchars($fee['id']); ?>, <?= htmlspecialchars($fee['subject_id']); ?>, '<?= htmlspecialchars($fee['research_fee']); ?>')">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script>
