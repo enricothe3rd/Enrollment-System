@@ -40,26 +40,33 @@
         nav a {
             transition: all 0.3s ease;
         }
+        .custom-logo-size {
+    height: 9rem;
+    width: 8.6rem;
+    margin:auto;
+}
     </style>
 </head>
 <body class="bg-gray-100">
     <div class="flex h-screen">
         <!-- Sidebar -->
-        <aside class="w-64 bg-red-800 text-white flex-shrink-0">
+        <aside class="w-64 bg-red-800 h-[120vh]  text-white flex-shrink-0">
             <!-- Logo -->
             <div class="p-6 text-center">
-                <img src="assets/images/school-logo/bcc-icon.png" alt="Logo" class="mx-auto h-16 w-16">
+            <img src="assets/images/school-logo/bcc-icon1.jpg" alt="Logo" class="custom-logo-size rounded-full">
+
             </div>
 
             <!-- Navigation -->
             <nav class="mt-4">
                 <ul>
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('home')"><i class="fas fa-home mr-3"></i> Home</a></li>
-                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('enrollment')"><i class="fas fa-user-plus mr-3"></i> Enrollments Payment </a></li>
-                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('subjects')"><i class="fas fa-user mr-3"></i> OJT Fees</a></li>
-                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('department')"><i class="fas fa-building mr-3"></i> Research Fees</a></li>
-                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('courses')"><i class="fas fa-graduation-cap mr-3"></i> ALl Payments <i class="fas fa-chevron-right arrow-icon ml-auto"></i></a></li>
-                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('sections')"><i class="fas fa-list mr-3"></i> Edit Payment</a></li>
+                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('profile')"><i class="fas fa-home mr-3"></i> Profile</a></li>
+                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('enrollment_fee')"><i class="fas fa-user-plus mr-3"></i> Enrollments Payment </a></li>
+                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('ojt_fee')"><i class="fas fa-user mr-3"></i> OJT Fees</a></li>
+                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('research_fee')"><i class="fas fa-building mr-3"></i> Research Fees</a></li>
+                  
+                  
 </ul>
             </nav>
         </aside>
@@ -67,26 +74,26 @@
         <!-- Main Content -->
         <main class="flex-1 p-6 overflow-hidden ">
             <div id="home" class="content-section">
-                <iframe src="home.php" title="Home"></iframe>
+            <iframe src="payments/enrollment_payments_crud/view_all_payments.php" title="all_payments"></iframe>
             </div>
-            <div id="enrollment" class="content-section">
-                <iframe src="payments/enrollment_payments_crud/enrollment_payments.php" title="New Enrollments"></iframe>
+            <div id="profile" class="content-section">
+
+<iframe src="profile/student_profile.php" title="My Profile"></iframe>
+</div>
+
+            <div id="enrollment_fee" class="content-section">
+                <iframe src="payments/enrollment_payments_crud/enrollment_payments.php" title="enrollment_fee"></iframe>
             </div>
-            <div id="department" class="content-section">
-            <iframe src="payments/enrollment_payments_crud/research_fees.php" title="Subjects"></iframe>
+            <div id="research_fee" class="content-section">
+            <iframe src="payments/enrollment_payments_crud/research_fees.php" title="ojt_fee"></iframe>
    
    </div>
-            <div id="subjects" class="content-section">
-            <iframe src="payments/enrollment_payments_crud/ojt_fees.php" title="Department"></iframe>
+            <div id="ojt_fee" class="content-section">
+            <iframe src="payments/enrollment_payments_crud/ojt_fees.php" title="research_fee"></iframe>
             </div>
 
 
-            <div id="courses" class="content-section">
-                <iframe src="payments/enrollment_payments_crud/view_all_payments.php" title="Courses"></iframe>
-            </div>
-            <div id="sections" class="content-section">
-                <iframe src="payments/enrollment_payments_crud/edit_payments.php" title="Sections"></iframe>
-            </div>
+
         </main>
     </div>
 

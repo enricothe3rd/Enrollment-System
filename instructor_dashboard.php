@@ -2,7 +2,7 @@
 session_start(); // Start the session
 
 // Include the Database class file (adjust the path if necessary)
-require_once '../db/db_connection3.php'; // Adjust the path to where your Database class is defined
+require_once 'db/db_connection3.php'; // Adjust the path to where your Database class is defined
 
 // Fetch the student_number and email from the session
 
@@ -93,19 +93,19 @@ $pdo = Database::connect();
             </div>
 
             <div id="profile" class="content-section">
-                <iframe src="../profile/student_profile.php" title="My Profile"></iframe>
+                <iframe src="profile/student_profile.php" title="My Profile"></iframe>
             </div>
 
             <div id="department" class="content-section">
-                <iframe src="../Enrolled_subject/grades.php" title="Research Fees"></iframe>
+                <iframe src="Enrolled_subject/grades.php" title="Research Fees"></iframe>
             </div>
 
             <div id="subjects" class="content-section">
-                <iframe src="instructor_details.php" title="My Subjects"></iframe>
+                <iframe src="instructor/instructor_details.php" title="My Subjects"></iframe>
             </div>
 
             <div id="courses" class="content-section">
-                <iframe src="student_by_subject.php" title="Courses"></iframe>
+                <iframe src="instructor/student_by_subject.php" title="Courses"></iframe>
             </div>
 
             <div id="sections" class="content-section">

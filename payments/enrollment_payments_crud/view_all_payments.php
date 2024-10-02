@@ -1,7 +1,7 @@
 <?php
 // Include database connection
 require '../../db/db_connection3.php'; // Ensure you have your DB connection
-
+require_once '../../vendor/fpdf.php'; // Include FPDF library
 // Get the PDO instance from your Database class
 $pdo = Database::connect();
 
@@ -61,6 +61,11 @@ try {
         <h1 class="text-3xl font-bold text-red-800 mb-6">
             <i class="fas fa-money-check-alt"></i> Payments Overview
         </h1>
+
+
+        <button onclick="window.location.href='generate_all_payments.php'" class="bg-red-700 hover:bg-red-800 text-white font-bold py-2 px-4 rounded">
+    <i class="fas fa-print"></i> Print PDF
+</button>
 
         <!-- Search Input -->
         <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search by letter..." class="mb-4 p-2 border border-gray-300 rounded">
