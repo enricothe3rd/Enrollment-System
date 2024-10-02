@@ -1,5 +1,4 @@
 <?php
-
 require 'Section.php';
 
 // Create an instance of the Section class
@@ -7,7 +6,6 @@ $section = new Section();
 
 // Fetch all sections
 $sections = $section->getAllSections();
-
 ?>
 
 <!DOCTYPE html>
@@ -17,15 +15,48 @@ $sections = $section->getAllSections();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sections</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script>
+        function filterTable() {
+            const input = document.getElementById("searchInput");
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById("sectionsTable");
+            const tr = table.getElementsByTagName("tr");
+            let hasMatches = false; // Flag to track if there are matches
+
+            for (let i = 1; i < tr.length; i++) { // Start from 1 to skip the header row
+                const td = tr[i].getElementsByTagName("td");
+                let rowContainsFilter = false;
+
+                for (let j = 0; j < td.length; j++) {
+                    if (td[j] && td[j].innerText.toLowerCase().includes(filter)) {
+                        rowContainsFilter = true;
+                        break;
+                    }
+                }
+
+                tr[i].style.display = rowContainsFilter ? "" : "none"; // Show or hide row
+                if (rowContainsFilter) {
+                    hasMatches = true; // Set the flag if there's a match
+                }
+            }
+
+            // Show or hide the no results message
+            const noResultsRow = document.getElementById("noResultsRow");
+            noResultsRow.style.display = hasMatches ? "none" : ""; // Show message if no matches
+        }
+    </script>
 </head>
 <body class="bg-transparent font-sans leading-normal tracking-normal">
     <div class="container mx-auto mt-10 p-6 ">
         <h1 class="text-2xl font-semibold text-red-800 mb-4">Sections</h1>
         <a href="create_section.php" class="inline-block mb-4 px-4 py-4 bg-red-700 text-white rounded hover:bg-red-800">Add New Section</a>
-        <table class="w-full border-collapse  overflow-hidden">
-            <thead class="bg-red-800 ">
+        
+        <!-- Search Input -->
+        <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search by section name or course..." class="mb-4 p-2 border border-gray-300 rounded">
+
+        <table id="sectionsTable" class="w-full border-collapse overflow-hidden">
+            <thead class="bg-red-800">
                 <tr>
-                    <!-- <th class="px-4 py-4 border-b text-left font-medium text-white uppercase tracking-wider">ID</th> -->
                     <th class="px-4 py-4 border-b text-left font-medium text-white uppercase tracking-wider">Name</th>
                     <th class="px-4 py-4 border-b text-left font-medium text-white uppercase tracking-wider">Course</th>
                     <th class="px-4 py-4 border-b text-left font-medium text-white uppercase tracking-wider">Actions</th>
@@ -34,7 +65,6 @@ $sections = $section->getAllSections();
             <tbody class="text-gray-700">
                 <?php foreach ($sections as $sec): ?>
                 <tr class="border-b bg-red-50 hover:bg-red-200">
-                    <!-- <td class="px-4 py-2"><?php echo htmlspecialchars($sec['id'] ?? ''); ?></td> -->
                     <td class="px-4 py-2"><?php echo htmlspecialchars($sec['name'] ?? ''); ?></td>
                     <td class="border-t px-6 py-4"><?= htmlspecialchars($section->getCourseName($sec['course_id'])) ?></td>
                     <td class="px-4 py-2 flex space-x-2">
@@ -43,6 +73,11 @@ $sections = $section->getAllSections();
                     </td>
                 </tr>
                 <?php endforeach; ?>
+                
+                <!-- No Results Row -->
+                <tr id="noResultsRow" class="border-b bg-red-50 hover:bg-red-200" style="display: none;">
+                    <td colspan="3" class="text-red-500 text-center py-4">No sections found matching your search criteria.</td>
+                </tr>
             </tbody>
         </table>
     </div>

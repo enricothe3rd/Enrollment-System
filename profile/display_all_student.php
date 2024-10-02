@@ -31,43 +31,6 @@ try {
     echo "Error: " . $e->getMessage();
     exit;
 }
-
-
-
-    // Adjust column names to match your actual database structure
-    $SubjectStmt = $pdo->prepare("
-        SELECT 
-            se.id,
-            se.student_number,
-            s.name AS section_name,
-            d.name AS department_name,
-            c.course_name AS course_name,
-            sub.code AS subject_code,
-            sub.title AS subject_title,
-            sub.units AS subject_units,
-            sem.semester_name AS semester_name,
-            sch.day_of_week AS day_of_week,
-            sch.start_time AS start_time,
-            sch.end_time AS end_time,
-            sch.room AS room,
-            se.school_year -- Ensure this column is selected
-        FROM subject_enrollments se
-        LEFT JOIN sections s ON se.section_id = s.id
-        LEFT JOIN departments d ON se.department_id = d.id
-        LEFT JOIN courses c ON se.course_id = c.id
-        LEFT JOIN subjects sub ON se.subject_id = sub.id
-        LEFT JOIN semesters sem ON sub.semester_id = sem.id
-        LEFT JOIN schedules sch ON se.schedule_id = sch.id
-        WHERE se.student_number = :student_number
-    ");
-
-    // Bind the session student number to the SQL statement
-    $SubjectStmt->bindParam(':student_number', $_SESSION['student_number'], PDO::PARAM_STR);
-    // Execute the statement
-    $SubjectStmt->execute();
-
-    // Fetch the subjects
-    $subjects = $SubjectStmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -77,25 +40,57 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <title>Student Enrollment Information</title>
+    <script>
+        function filterTable() {
+            const input = document.getElementById("searchInput");
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById("enrollmentTable");
+            const tr = table.getElementsByTagName("tr");
+            let hasMatches = false; // Flag to track if there are matches
+
+            for (let i = 1; i < tr.length; i++) { // Start from 1 to skip the header row
+                const td = tr[i].getElementsByTagName("td");
+                let rowContainsFilter = false;
+
+                for (let j = 0; j < td.length; j++) {
+                    if (td[j] && td[j].innerText.toLowerCase().includes(filter)) {
+                        rowContainsFilter = true;
+                        break;
+                    }
+                }
+                tr[i].style.display = rowContainsFilter ? "" : "none"; // Show or hide row
+                if (rowContainsFilter) {
+                    hasMatches = true; // Set the flag if there's a match
+                }
+            }
+
+            // Show or hide the no results message
+            const noResultsRow = document.getElementById("noResultsRow");
+            noResultsRow.style.display = hasMatches ? "none" : ""; // Show message if no matches
+        }
+    </script>
 </head>
 <body class="bg-gray-100">
     <div class="container mx-auto p-6">
         <h1 class="text-2xl font-semibold text-red-800 mb-4">Student Enrollment Information</h1>
-        
+
+        <!-- Search Input -->
+        <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search by name, course, or section..." class="mb-4 p-2 border border-gray-300 rounded">
+
         <!-- Enrollment Table -->
         <div class="overflow-x-auto bg-white shadow-md rounded-lg">
-            <table class="min-w-full border-collapset shadow-md rounded-lg">
-                <thead  class="bg-red-800">
+            <table id="enrollmentTable" class="min-w-full border-collapse shadow-md rounded-lg">
+                <thead class="bg-red-800">
                     <tr>
-                        <th  class="px-4 py-4 border-b text-left text-white">Student Number</th>
-                        <th  class="px-4 py-4 border-b text-left text-white">Full Name</th>
-                        <th  class="px-4 py-4 border-b text-left text-white">Course</th>
-                        <th  class="px-4 py-4 border-b text-left text-white">Section</th>
-                        <th  class="px-4 py-4 border-b text-left text-white">Department</th>
-                        <th  class="px-4 py-4 border-b text-left text-white">Action</th>
+                        <th class="px-4 py-4 border-b text-left text-white">Student Number</th>
+                        <th class="px-4 py-4 border-b text-left text-white">Full Name</th>
+                        <th class="px-4 py-4 border-b text-left text-white">Course</th>
+                        <th class="px-4 py-4 border-b text-left text-white">Section</th>
+                        <th class="px-4 py-4 border-b text-left text-white">Department</th>
+                        <th class="px-4 py-4 border-b text-left text-white">Action</th>
                     </tr>
                 </thead>
-                <tbody >
+                <tbody>
                     <?php if (count($enrollmentData) > 0): ?>
                         <?php foreach ($enrollmentData as $enrollment): ?>
                         <tr class="border-b bg-red-50 hover:bg-red-200">
@@ -115,6 +110,11 @@ try {
                             <td colspan="6" class="px-6 py-4 text-center">No enrollments found.</td>
                         </tr>
                     <?php endif; ?>
+                    
+                    <!-- No Results Row -->
+                    <tr id="noResultsRow" style="display: none;">
+                        <td colspan="6" class="px-6 py-4 text-center text-red-500">No enrollments found matching your search criteria.</td>
+                    </tr>
                 </tbody>
             </table>
         </div>

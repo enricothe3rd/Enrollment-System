@@ -18,6 +18,33 @@ $instructors = $instructor->readAll();
     <title>Instructor List</title>
     <!-- Include Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        function filterTable() {
+            const input = document.getElementById("searchInput");
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById("instructorsTable");
+            const tr = table.getElementsByTagName("tr");
+            let hasMatch = false; // Flag to check if there's a match
+
+            for (let i = 1; i < tr.length; i++) { // Start from 1 to skip the header row
+                const td = tr[i].getElementsByTagName("td");
+                let rowContainsFilter = false;
+
+                for (let j = 0; j < td.length; j++) {
+                    if (td[j] && td[j].innerText.toLowerCase().includes(filter)) {
+                        rowContainsFilter = true;
+                        hasMatch = true; // Set flag to true if a match is found
+                        break;
+                    }
+                }
+                tr[i].style.display = rowContainsFilter ? "" : "none"; // Show or hide row
+            }
+
+            // Show or hide the no results message
+            const noResultsRow = document.getElementById("noResultsRow");
+            noResultsRow.style.display = hasMatch ? "none" : ""; // Show if no match is found
+        }
+    </script>
 </head>
 <body class="bg-gray-100 font-sans leading-normal tracking-normal">
 
@@ -31,10 +58,13 @@ $instructors = $instructor->readAll();
                 + Create Instructor
             </a>
 
+            <!-- Search Input -->
+            <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search by name, email, or department..." class="mb-4 p-2 border border-gray-300 rounded">
+
             <!-- Table Container -->
             <div class="overflow-x-auto">
                 <!-- Table -->
-                <table class="min-w-full border-collapse border border-gray-200 shadow-lg rounded-lg">
+                <table id="instructorsTable" class="min-w-full border-collapse border border-gray-200 shadow-lg rounded-lg">
                     <thead class="bg-red-800 text-white">
                         <tr>
                             <th class="px-6 py-4 text-left font-medium uppercase tracking-wider">First Name</th>
@@ -65,6 +95,11 @@ $instructors = $instructor->readAll();
                                 </td>
                             </tr>
                         <?php endforeach; ?>
+
+                        <!-- No Results Row -->
+                        <tr id="noResultsRow" style="display: none;">
+                            <td colspan="9" class="px-6 py-4 text-center text-gray-500">No instructors found matching your search.</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>

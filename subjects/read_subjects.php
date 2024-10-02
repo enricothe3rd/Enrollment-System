@@ -18,6 +18,7 @@ $subjects = $subject->read(); // Get all subjects
             const filter = input.value.toLowerCase();
             const table = document.getElementById("subjectsTable");
             const tr = table.getElementsByTagName("tr");
+            let hasMatches = false; // Flag to track if there are matches
 
             for (let i = 1; i < tr.length; i++) { // Start from 1 to skip the header row
                 const td = tr[i].getElementsByTagName("td");
@@ -30,7 +31,14 @@ $subjects = $subject->read(); // Get all subjects
                     }
                 }
                 tr[i].style.display = rowContainsFilter ? "" : "none"; // Show or hide row
+                if (rowContainsFilter) {
+                    hasMatches = true; // Set the flag if there's a match
+                }
             }
+
+            // Show or hide the no results message
+            const noResultsMessageRow = document.getElementById("noResultsMessage");
+            noResultsMessageRow.style.display = hasMatches ? "none" : ""; // Show message if no matches
         }
     </script>
 </head>
@@ -50,7 +58,7 @@ $subjects = $subject->read(); // Get all subjects
                     <th class="px-4 py-2 border-b text-left text-white">Section Name</th>
                     <th class="px-4 py-2 border-b text-left text-white">Semester</th>
                     <th class="px-4 py-2 border-b text-left text-white">Units</th>
-                    <th class="px-4 py-2 border-b text-left text-white">School Year</th> <!-- New School Year Column -->
+                    <th class="px-4 py-2 border-b text-left text-white">School Year</th>
                     <th class="px-4 py-2 border-b text-left text-white">Actions</th>
                 </tr>
             </thead>
@@ -62,13 +70,17 @@ $subjects = $subject->read(); // Get all subjects
                     <td class="border-t px-6 py-3"><?php echo htmlspecialchars($sub['section_name']); ?></td>
                     <td class="border-t px-6 py-3"><?php echo htmlspecialchars($sub['semester_name']); ?></td>
                     <td class="border-t px-6 py-3"><?php echo htmlspecialchars($sub['units']); ?></td>
-                    <td class="border-t px-6 py-3"><?php echo htmlspecialchars($sub['year']); ?></td> <!-- Display School Year -->
+                    <td class="border-t px-6 py-3"><?php echo htmlspecialchars($sub['year']); ?></td>
                     <td class="border-t px-6 py-3">
                         <a href="update_subject.php?id=<?php echo htmlspecialchars($sub['id']); ?>" class="bg-yellow-500 hover:bg-yellow-700 text-white font-semibold py-1 px-2 rounded transition duration-150">Edit</a>
                         <a href="delete_subject.php?id=<?php echo htmlspecialchars($sub['id']); ?>" onclick="return confirm('Are you sure?');" class="bg-red-500 hover:bg-red-700 text-white font-semibold py-1 px-2 rounded transition duration-150">Delete</a>
                     </td>
                 </tr>
                 <?php endforeach; ?>
+                <!-- No Results Message Row -->
+                <tr id="noResultsMessage" class="bg-red-50 text-red-500 text-center" style="display: none;">
+                    <td colspan="7" class="border-t px-6 py-3">No subjects found matching your search criteria.</td>
+                </tr>
             </tbody>
         </table>
     </div>

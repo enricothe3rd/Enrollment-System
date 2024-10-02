@@ -19,6 +19,7 @@ $courses = $course->getCourses();
             const filter = input.value.toLowerCase();
             const table = document.getElementById("coursesTable");
             const tr = table.getElementsByTagName("tr");
+            let hasMatches = false; // Flag to track if there are matches
 
             for (let i = 1; i < tr.length; i++) { // Start from 1 to skip the header row
                 const td = tr[i].getElementsByTagName("td");
@@ -31,7 +32,14 @@ $courses = $course->getCourses();
                     }
                 }
                 tr[i].style.display = rowContainsFilter ? "" : "none"; // Show or hide row
+                if (rowContainsFilter) {
+                    hasMatches = true; // Set the flag if there's a match
+                }
             }
+
+            // Show or hide the no results message
+            const noResultsRow = document.getElementById("noResultsRow");
+            noResultsRow.style.display = hasMatches ? "none" : ""; // Show message if no matches
         }
     </script>
 </head>
@@ -61,10 +69,15 @@ $courses = $course->getCourses();
                     <td class="border-t px-6 py-4"><?= htmlspecialchars($course['department_name']) ?></td>
                     <td class="border-t px-6 py-4 flex space-x-2">
                         <a href="update_course.php?id=<?= $course['id'] ?>" class="bg-yellow-500 hover:bg-yellow-700 text-white font-semibold py-1 px-2 rounded transition duration-150">Edit</a>
-                        <a href="delete_course.php?id=<?= $course['id'] ?>" class="bg-red-500 hover:bg-red-700 text-white font-semibold py-1 px-2 rounded transition duration-150">Delete</a>
+                        <a href="delete_course.php?id=<?= $course['id'] ?>" onclick="return confirm('Are you sure you want to delete this course?');" class="bg-red-500 hover:bg-red-700 text-white font-semibold py-1 px-2 rounded transition duration-150">Delete</a>
                     </td>
                 </tr>
                 <?php endforeach; ?>
+                
+                <!-- No Results Row -->
+                <tr id="noResultsRow" style="display: none;">
+                    <td colspan="3" class="px-6 py-4 text-center text-red-500">No courses found matching your search criteria.</td>
+                </tr>
             </tbody>
         </table>
     </div>

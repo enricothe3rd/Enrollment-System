@@ -70,8 +70,8 @@
                 <ul>
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('home')"><i class="fas fa-home mr-3"></i> Home</a></li>
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('profile')"><i class="fas fa-home mr-3"></i> Profile</a></li>
-                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('enrollment')"><i class="fas fa-user-plus mr-3"></i> New Enrollments</a></li>
-                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('student')"><i class="fas fa-user mr-3"></i> Student</a></li>
+      
+              
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('department')"><i class="fas fa-building mr-3"></i> Department</a></li>
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('courses')"><i class="fas fa-graduation-cap mr-3"></i> Courses <i class="fas fa-chevron-right arrow-icon ml-auto"></i></a></li>
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('sections')"><i class="fas fa-list mr-3"></i> Sections</a></li>
@@ -92,19 +92,15 @@
         <!-- Main Content -->
         <main class="flex-1 p-6 overflow-hidden ">
             <div id="home" class="content-section">
-                <iframe src="home.php" title="Home"></iframe>
-            </div>
-            <div id="profile" class="content-section">
-            <div class="profile1-dropdown">
-    <?php include 'profile/profile_dropdown.php'; ?>
-</div>
-           
-                <iframe src="profile/student_profile.php" title="My Profile"></iframe>
+            <iframe src="profile/display_all_student.php" title="All Student"></iframe> 
             </div>
 
-            <div id="student" class="content-section">
-                <iframe src="profile/display_all_student.php" title="All Student"></iframe>
+            <div id="profile" class="content-section">
+
+                <iframe src="profile/student_profile.php" title="My Profile"></iframe>
             </div>
+      
+
 
             <div id="department" class="content-section">
        
