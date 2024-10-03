@@ -48,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
             $mail->Username = 'pedrajetajr22@gmail.com'; // SMTP username
-            $mail->Password = 'mtesveduhyxvlfxa'; // SMTP password
+            $mail->Password = 'fstvwntidussfhvc'; // SMTP password
             $mail->SMTPSecure = 'tls';
             $mail->Port = 587;
 
@@ -152,7 +152,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <div class="content">
                         <h1>Password Reset Request</h1>
                         <p>You have requested a password reset. Click the button below to reset your password:</p>
-                        <a href="http://localhost/enrollment/token-sample/reset_password.php?token=' . $reset_token . '" class="btn">Reset Password</a>
+                        <a href="http://localhost/Enrollment-System/views/login/reset_password.php?token=' . $reset_token . '" class="btn">Reset Password</a>
                     </div>
                     <div class="footer">
                         <p>Binangonan Catholic College<br>123 Street Address<br>City, State, ZIP<br>© ' . date('Y') . ' BCC. All rights reserved.</p>

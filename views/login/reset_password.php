@@ -1,5 +1,5 @@
 <?php
-require 'db_connection.php';
+require '../../db/db_connection.php';
 
 $error_message = '';
 $success_message = '';
@@ -79,8 +79,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reset Password</title>
-    <link href="./output.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="../../assets/css/output.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
         .error-message {
             background-color: #FEE2E2;
@@ -160,7 +160,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <input type="hidden" name="token" value="<?php echo htmlspecialchars($token); ?>">
         
         <div class="password-container">
-            <label for="password" class="block font-body text-[1.2rem] font-semibold leading-6 text-custom-black">New Password</label>
+            <label for="password" class="block font-body text-[1.2rem] font-semibold leading-6 text-black">New Password</label>
             <div class="mt-2 relative">
                 <input id="password" name="password" type="password" autocomplete="new-password" placeholder="Enter a new password" style="outline:none;"
                        class="block w-full rounded-md border-0 p-[1rem] text-gray-900 shadow-md ring-2 ring-inset ring-gray-300 placeholder:text-gray-300">
@@ -177,7 +177,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         </div>
 
-        <button type="submit" class="flex w-full justify-center rounded-md bg-custom-red px-3 py-5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-600">
+        <button type="submit" class="flex w-full justify-center rounded-md bg-red-700 px-3 py-5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-600">
             <span>Reset Password</span>
         </button>
     </form>

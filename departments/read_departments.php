@@ -14,8 +14,8 @@ $departments = $department->read();
     <title>Departments</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="  font-sans leading-normal tracking-normal">
-    <div class="container mx-auto mt-10 ">
+<body class=" font-sans leading-normal tracking-normal">
+    <div class=" mt-10 ">
         <h1 class="text-2xl font-semibold text-red-800 mb-4">Departments</h1>
         <a href="create_department.php" class="inline-block mb-4 px-4 py-4 bg-red-700 text-white rounded hover:bg-red-800">Add New Department</a>
         <table class="w-full border-collapse  shadow-md rounded-lg">

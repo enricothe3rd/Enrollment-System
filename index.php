@@ -234,7 +234,7 @@ unset($_SESSION['form_values']);
         <div class="password-container">
             <div class="flex justify-between items-center">
                 <label for="password" class="font-body text-[1.2rem] font-semibold leading-6 text-custom-black">Password</label>
-                <a href="./views/login/forgot_password.php" class="underline text-custom-darkRed font-bold" id="forgotPasswordLink">Forgot Password?</a>
+                <a href="views/login/forgot_password.php" class="underline text-custom-darkRed font-bold" id="forgotPasswordLink">Forgot Password?</a>
             </div>
             <div class="mt-2 relative">
                 <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" style="outline:none;"

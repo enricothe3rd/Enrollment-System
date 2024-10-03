@@ -35,12 +35,15 @@ if (!empty($instructor_id)) {
     $assigned_subjects = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-// Fetch students based on the selected subject
+
+
 $students = [];
 $subject_id = null; // Initialize subject_id
+
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['subject_id'])) {
     $subject_id = $_POST['subject_id'];
     
+    // Prepare and execute the query
     $stmt = $db->prepare("
         SELECT e.student_number, e.firstname, e.lastname 
         FROM subject_enrollments se 
@@ -49,73 +52,108 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['subject_id'])) {
     ");
     $stmt->execute([$subject_id]);
     $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Check if no students were enrolled in the selected subject
+    if (empty($students)) {
+        $_SESSION['error_message'] = "No students enrolled in that subject."; // Set error message
+    } else {
+        // $_SESSION['success_message'] = "Students are enrolled in that subject."; // Set success message
+    }
+
+
 }
+
+
+
+
 
 // Handle form submission for adding or updating grades
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_grade'])) {
-    // Your existing code for adding or updating grades
+    $student_number = $_POST['student_number'] ?? null; // Get student number from form
+    $subject_id = $_POST['subject_id'] ?? null; // Get subject ID from form
+    $prelim = $_POST['prelim'] ?? 0; // Ensure you get prelim value
+    $midterm = $_POST['midterm'] ?? 0; // Ensure you get midterm value
+    $finals = $_POST['finals'] ?? 0; // Ensure you get finals value
+
+    // Debugging output to check received values
+    error_log("Student Number: $student_number, Subject ID: $subject_id, Prelim: $prelim, Midterm: $midterm, Finals: $finals");
+
+
+
+ // Validate grades only if they are set and not empty
+if (!empty($prelim) && ($prelim < 1 || $prelim > 5)) {
+    $_SESSION['error_message'] = "Prelim grade must be between 1 and 5.";
 }
 
-// Handle AJAX request to fetch existing grades
-if (isset($_GET['fetch_grades']) && isset($_GET['student_number']) && isset($_GET['subject_id'])) {
-    $student_number = $_GET['student_number'];
-    $subject_id = $_GET['subject_id'];
+if (!empty($midterm) && ($midterm < 1 || $midterm > 5)) {
+    $_SESSION['error_message'] = "Midterm grade must be between 1 and 5.";
+}
 
-    // Fetch existing grades for the student and subject
-    $stmt = $db->prepare("
-        SELECT prelim, midterm, finals 
-        FROM grades 
-        WHERE student_id = (SELECT id FROM enrollments WHERE student_number = ?) AND subject_id = ?
-    ");
+if (!empty($finals) && ($finals < 1 || $finals > 5)) {
+    $_SESSION['error_message'] = "Finals grade must be between 1 and 5.";
+}
+
+// Proceed only if there is no error message
+if (!isset($_SESSION['error_message'])) {
+    // Check if a grade entry already exists for this student and subject
+    $stmt = $db->prepare("SELECT id FROM grades WHERE student_number = ? AND subject_id = ?");
     $stmt->execute([$student_number, $subject_id]);
-    $grades = $stmt->fetch(PDO::FETCH_ASSOC);
+    $existing_grade = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    echo json_encode($grades);
-    exit; // Exit to avoid rendering the rest of the page
+    if ($existing_grade) {
+        // Update existing grade
+        $stmt = $db->prepare("UPDATE grades SET prelim = ?, midterm = ?, finals = ? WHERE id = ?");
+        $stmt->execute([$prelim, $midterm, $finals, $existing_grade['id']]);
+        $_SESSION['success_message'] = "Grades successfully updated."; // Set success message in session
+    } else {
+        // Insert new grade
+        $stmt = $db->prepare("INSERT INTO grades (student_number, subject_id, prelim, midterm, finals) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([$student_number, $subject_id, $prelim, $midterm, $finals]);
+        $_SESSION['success_message'] = "Grades successfully added."; // Set success message in session
+    }
 }
 
-// Handle form submission for deleting grades
+}
+
+
+// Include the message handler to display messages
+include 'message_handler.php';
+
+
+
+// Handle grade deletion
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_grade_id'])) {
-    $delete_grade_id = $_POST['grade_id'] ?? null; // Use the hidden input's name
+    $grade_id = $_POST['grade_id'];
 
-    if ($delete_grade_id) {
-        // Prepare and execute the delete statement
-        $stmt = $db->prepare("DELETE FROM grades WHERE id = ?");
-        if ($stmt->execute([$delete_grade_id])) {
-            echo "<p class='text-green-500'>Grade deleted successfully!</p>";
-        } else {
-            $errorInfo = $stmt->errorInfo(); // Capture error information
-            echo "<p class='text-red-500'>Error deleting grade: " . htmlspecialchars($errorInfo[2]) . "</p>";
-        }
+    // Prepare the delete statement
+    $stmt = $db->prepare("DELETE FROM grades WHERE id = ?");
+    if ($stmt->execute([$grade_id])) {
+        $_SESSION['message'] = "Grade ID $grade_id deleted successfully."; // Set success message
+        error_log("Grade ID $grade_id deleted successfully.");
     } else {
-        echo "<p class='text-red-500'>No grade ID provided.</p>";
+        $_SESSION['message'] = "Failed to delete Grade ID $grade_id."; // Set error message
+        error_log("Failed to delete Grade ID $grade_id.");
     }
+
+  
 }
 
-
-// Handle form submission for updating grades
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_grade'])) {
-    $grade_id = $_POST['grade_id'];
-    $prelim = $_POST['prelim'];
-    $midterm = $_POST['midterm'];
-    $finals = $_POST['finals'];
-
-    // Prepare and execute the update statement
-    $stmt = $db->prepare("UPDATE grades SET prelim = ?, midterm = ?, finals = ? WHERE id = ?");
-    if ($stmt->execute([$prelim, $midterm, $finals, $grade_id])) {
-        echo "<p class='text-green-500'>Grade updated successfully!</p>";
-    } else {
-        echo "<p class='text-red-500'>Error updating grade.</p>";
-    }
+// Display success or error message if available
+if (isset($_SESSION['message'])) {
+    $message = $_SESSION['message'];
+    unset($_SESSION['message']); // Clear the message after displaying it
 }
 
 // Fetch all grades for displaying, including units
-$grades = $db->query("
+$grades = $db->prepare("
     SELECT g.id, e.student_number, e.firstname, e.lastname, sub.title AS subject_title, g.prelim, g.midterm, g.finals, sub.units 
     FROM grades g 
-    JOIN enrollments e ON g.student_id = e.id 
+    JOIN enrollments e ON g.student_number = e.student_number 
     JOIN subjects sub ON g.subject_id = sub.id
-")->fetchAll(PDO::FETCH_ASSOC);
+");
+$grades->execute();
+$grades = $grades->fetchAll(PDO::FETCH_ASSOC);
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -123,96 +161,127 @@ $grades = $db->query("
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
     <title>Instructor Manage Grades</title>
 </head>
-<body class="bg-gray-100 p-6">
-    <div class="container mx-auto bg-white rounded-lg shadow-lg p-6">
-        <h1 class="text-2xl font-bold mb-6">Manage Grades</h1>
+<body class=" font-sans leading-normal tracking-normal">
+    <div class="">
+        <h1 class="text-2xl font-semibold text-red-800 mb-4">Manage Grades</h1>
+<!-- Form for Selecting Subject -->
+<form method="POST" action="" class="mb-6">
 
-        <!-- Form for Selecting Subject -->
-        <form method="POST" action="" class="mb-6">
-            <h2 class="text-xl font-semibold mb-4">Select Subject to View Students</h2>
-            <div class="mb-4">
-                <label for="subject_id" class="block text-gray-700">Subject:</label>
-                <select name="subject_id" class="border rounded p-2 w-full" required>
-                    <option value="" disabled selected>Select a subject</option>
-                    <?php foreach ($assigned_subjects as $subject): ?>
-                        <option value="<?= $subject['id']; ?>" <?= isset($subject_id) && $subject_id == $subject['id'] ? 'selected' : ''; ?>>
-                            <?= htmlspecialchars($subject['title'] ?? ''); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
+
+
+
+    <h2 class="text-xl font-semibold mb-4 text-red-800">Select Subject to View Students</h2>
+    <div class="mb-4">
+        <label for="subject_id" class="block px-3 text-red-700 font-medium">Subject:</label>
+        <select name="subject_id" class="border rounded p-2 w-full border-red-300 outline-none" required>
+            <option value="" disabled selected>Select a subject</option>
+            <?php foreach ($assigned_subjects as $subject): ?>
+                <option value="<?= $subject['id']; ?>" <?= isset($subject_id) && $subject_id == $subject['id'] ? 'selected' : ''; ?>>
+                    <?= htmlspecialchars($subject['title'] ?? ''); ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
+    <button type="submit" class="bg-red-700 text-white rounded py-2 px-4 hover:bg-red-800">View Students</button>
+</form>
+
+
+<!-- If subject_id is selected, display students -->
+<?php if (!empty($students)): ?>
+    <form method="POST" action="" class="mb-6" id="gradeForm">
+        <h2 class="text-xl font-semibold mb-4">Add Grades</h2>
+        <input type="hidden" name="subject_id" value="<?= htmlspecialchars($subject_id ?? ''); ?>">
+
+        <div class="mb-4">
+            <label for="student_number" class="block px-3 text-red-700 font-medium">
+                <i class="fas fa-user"></i> Student:
+            </label>
+            <select name="student_number" class="border border-red-300 outline-none rounded p-2 w-full" required>
+                <?php foreach ($students as $student): ?>
+                    <option value="<?= htmlspecialchars($student['student_number'] ?? ''); ?>">
+                        <?= htmlspecialchars(($student['firstname'] ?? '') . ' ' . ($student['lastname'] ?? '')); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
+
+        
+       
+
+        <div class="mb-4">
+            <label for="prelim" class="block px-3 text-red-700 font-medium">
+                <i class="fas fa-pencil-alt"></i> Prelim (1.0-5.0):
+            </label>
+            <div class="flex items-center">
+                <input type="number" name="prelim" id="prelim" step="0.01" class="border border-red-300 rounded p-2 w-full focus:border-red-500 outline-none" value="<?= htmlspecialchars($_POST['prelim'] ?? ''); ?>" >
             </div>
+        </div>
 
-            <button type="submit" class="bg-blue-500 text-white rounded py-2 px-4 hover:bg-blue-600">View Students</button>
-        </form>
+        <div class="mb-4">
+            <label for="midterm" class="block px-3 text-red-700 font-medium">
+                <i class="fas fa-pencil-alt"></i> Midterm (1.0-5.0):
+            </label>
+            <div class="flex items-center">
+                <input type="number" name="midterm" id="midterm" step="0.01" class="border border-red-300 rounded p-2 w-full focus:border-red-500 outline-none" value="<?= htmlspecialchars($_POST['midterm'] ?? ''); ?>" >
+            </div>
+        </div>
 
-        <!-- If subject_id is selected, display students -->
-        <?php if (!empty($students)): ?>
-            <form method="POST" action="" class="mb-6">
-                <h2 class="text-xl font-semibold mb-4">Add Grades</h2>
-                <input type="hidden" name="subject_id" value="<?= htmlspecialchars($subject_id ?? ''); ?>">
+        <div class="mb-4">
+            <label for="finals" class="block px-3 text-red-700 font-medium">
+                <i class="fas fa-pencil-alt"></i> Finals (1.0-5.0):
+            </label>
+            <div class="flex items-center">
+                <input type="number" name="finals" id="finals" step="0.01" class="border border-red-300 rounded p-2 w-full focus:border-red-500 outline-none" value="<?= htmlspecialchars($_POST['finals'] ?? ''); ?>" >
+            </div>
+        </div>
 
-                <div class="mb-4">
-                    <label for="student_number" class="block text-gray-700">Student:</label>
-                    <select name="student_number" class="border rounded p-2 w-full" required>
-                        <?php foreach ($students as $student): ?>
-                            <option value="<?= htmlspecialchars($student['student_number'] ?? ''); ?>">
-                                <?= htmlspecialchars(($student['firstname'] ?? '') . ' ' . ($student['lastname'] ?? '')); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
+        <button type="submit" name="add_grade" class="bg-red-700 text-white rounded py-2 px-4 hover:bg-red-800">
+            <i class="fas fa-plus"></i> Add Grades
+        </button>
+    </form>
+<?php endif; ?>
 
-                <div class="mb-4">
-    <label for="prelim" class="block text-gray-700">Prelim:</label>
-    <input type="number" name="prelim" step="0.01" min="0" max="100" class="border rounded p-2 w-full" value="<?= htmlspecialchars($_POST['prelim'] ?? ''); ?>">
-</div>
-
-<div class="mb-4">
-    <label for="midterm" class="block text-gray-700">Midterm:</label>
-    <input type="number" name="midterm" step="0.01" min="0" max="100" class="border rounded p-2 w-full" value="<?= htmlspecialchars($_POST['midterm'] ?? ''); ?>">
-</div>
-
-<div class="mb-4">
-    <label for="finals" class="block text-gray-700">Finals:</label>
-    <input type="number" name="finals" step="0.01" min="0" max="100" class="border rounded p-2 w-full" value="<?= htmlspecialchars($_POST['finals'] ?? ''); ?>">
-</div>
-
-
-                <button type="submit" name="add_grade" class="bg-blue-500 text-white rounded py-2 px-4 hover:bg-blue-600">Add Grades</button>
-            </form>
-        <?php endif; ?>
 
         <!-- Table for Displaying Grades -->
-        <h2 class="text-xl font-semibold mb-4">Grades List</h2>
-        <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow">
-            <thead>
+        <h2 class="text-xl font-semibold mb-4 text-red-700">Grades List</h2>
+        <table class="w-full border-collapse  shadow-md rounded-lg">
+            <thead class="bg-red-800">
                 <tr>
-                    <th class="border-b border-gray-300 p-4">Student Number</th>
-                    <th class="border-b border-gray-300 p-4">Student Name</th>
-                    <th class="border-b border-gray-300 p-4">Subject</th>
-                    <th class="border-b border-gray-300 p-4">Units</th>
-                    <th class="border-b border-gray-300 p-4">Prelim</th>
-                    <th class="border-b border-gray-300 p-4">Midterm</th>
-                    <th class="border-b border-gray-300 p-4">Finals</th>
-                    <th class="border-b border-gray-300 p-4">Actions</th>
+                    <th class="px-4 py-4 border-b text-left text-white">Student Number</th>
+                    <th class="px-4 py-4 border-b text-left text-white">Student Name</th>
+                    <th class="px-4 py-4 border-b text-left text-white">Subject</th>
+                    <th class="px-4 py-4 border-b text-left text-white">Units</th>
+                    <th class="px-4 py-4 border-b text-left text-white">Prelim</th>
+                    <th class="px-4 py-4 border-b text-left text-white">Midterm</th>
+                    <th class="px-4 py-4 border-b text-left text-white">Finals</th>
+                    <th class="px-4 py-4 border-b text-left text-white">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($grades as $grade): ?>
-                    <tr>
-                        <td class="border-b border-gray-300 p-4"><?= htmlspecialchars($grade['student_number'] ?? ''); ?></td>
-                        <td class="border-b border-gray-300 p-4"><?= htmlspecialchars($grade['firstname'] . ' ' . $grade['lastname']); ?></td>
-                        <td class="border-b border-gray-300 p-4"><?= htmlspecialchars($grade['subject_title'] ?? ''); ?></td>
-                        <td class="border-b border-gray-300 p-4"><?= htmlspecialchars($grade['units'] ?? ''); ?></td>
-                        <td class="border-b border-gray-300 p-4"><?= htmlspecialchars($grade['prelim'] ?? ''); ?></td>
-                        <td class="border-b border-gray-300 p-4"><?= htmlspecialchars($grade['midterm'] ?? ''); ?></td>
-                        <td class="border-b border-gray-300 p-4"><?= htmlspecialchars($grade['finals'] ?? ''); ?></td>
-                        <td class="border-b border-gray-300 p-4">
+                    <tr class="border-b bg-red-50 hover:bg-red-200">
+                        <td class="px-4 py-4"><?= htmlspecialchars($grade['student_number'] ?? ''); ?></td>
+                        <td class="px-4 py-4"><?= htmlspecialchars($grade['firstname'] . ' ' . $grade['lastname']); ?></td>
+                        <td class="px-4 py-4"><?= htmlspecialchars($grade['subject_title'] ?? ''); ?></td>
+                        <td class="px-4 py-4"><?= htmlspecialchars($grade['units'] ?? ''); ?></td>
+                        <td class="px-4 py-4"><?= htmlspecialchars($grade['prelim'] ?? ''); ?></td>
+                        <td class="px-4 py-4"><?= htmlspecialchars($grade['midterm'] ?? ''); ?></td>
+                        <td class="px-4 py-4"><?= htmlspecialchars($grade['finals'] ?? ''); ?></td>
+                        <td class="px-4 py-4">
                             <form method="POST" action="" class="inline">
                                 <input type="hidden" name="grade_id" value="<?= htmlspecialchars($grade['id'] ?? ''); ?>">
-                                <button type="submit" name="delete_grade_id" class="text-red-600 hover:text-red-800">Delete</button>
+                                <button 
+        class="text-red-600 hover:text-red-800 delete-button" 
+        data-grade-id="<?= htmlspecialchars($grade['id'] ?? ''); ?>"
+        type="button">
+        Delete
+    </button>
                             </form>
                         </td>
                     </tr>
@@ -222,3 +291,90 @@ $grades = $db->query("
     </div>
 </body>
 </html>
+
+<!-- Success Modal -->
+<div id="successModal" class="fixed inset-0 flex items-center justify-center hidden">
+    <div class="bg-white p-6 rounded shadow-md max-w-sm">
+        <h2 class="text-lg font-semibold mb-4 flex items-center">
+            <!-- You can add any title here -->
+        </h2>
+        <img src="../assets/images/modal-icons/checked.png" alt="Success Image" class="w-24 h-24 m-5 mx-7 rounded">
+        <p class="text-red-700 bold text-center">Deletion Success!</p>
+    </div>
+</div>
+
+
+<!-- Confirmation Modal -->
+<div id="confirmationModal" class="fixed inset-0 flex items-center justify-center  hidden">
+    <div class="bg-white p-6 rounded shadow-md max-w-sm">
+        <h2 class="text-lg font-semibold mb-4">Confirm Delete</h2>
+        <p>Are you sure you want to delete this grade?</p>
+        <div class="flex justify-end mt-4">
+            <button id="cancelDelete" class="mr-2 bg-gray-300 text-black px-4 py-2 rounded">Cancel</button>
+            <button id="confirmDelete" class="bg-red-500 text-white px-4 py-2 rounded">Delete</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let gradeIdToDelete;
+
+        // Open modal on delete button click
+        document.querySelectorAll('.delete-button').forEach(button => {
+            button.addEventListener('click', function() {
+                gradeIdToDelete = this.getAttribute('data-grade-id');
+                document.getElementById('confirmationModal').classList.remove('hidden');
+            });
+        });
+
+        // Handle confirmation
+        document.getElementById('confirmDelete').addEventListener('click', function() {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = ''; // Replace with your PHP script URL if needed
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'grade_id';
+            input.value = gradeIdToDelete;
+            form.appendChild(input);
+            const deleteInput = document.createElement('input');
+            deleteInput.type = 'hidden';
+            deleteInput.name = 'delete_grade_id';
+            deleteInput.value = '1'; // Add value to confirm deletion
+            form.appendChild(deleteInput);
+            document.body.appendChild(form);
+
+            // Use Fetch API for smooth redirect after submission
+            fetch(form.action, {
+                method: form.method,
+                body: new FormData(form)
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Hide confirmation modal and show success modal
+                    document.getElementById('confirmationModal').classList.add('hidden');
+                    document.getElementById('successModal').classList.remove('hidden');
+                    
+                    // Redirect after a few seconds
+                    setTimeout(() => {
+                        window.location.href = 'grades.php'; // Replace with your grades page
+                    }, 10000);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        // Close modal on cancel
+        document.getElementById('cancelDelete').addEventListener('click', function() {
+            document.getElementById('confirmationModal').classList.add('hidden');
+        });
+
+        // Close success modal on button click
+        document.getElementById('closeSuccessModal').addEventListener('click', function() {
+            document.getElementById('successModal').classList.add('hidden');
+        });
+    });
+</script>

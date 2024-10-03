@@ -89,7 +89,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             $mail->Host = 'smtp.gmail.com';
                             $mail->SMTPAuth = true;
                             $mail->Username = 'pedrajetajr22@gmail.com'; // SMTP username
-                            $mail->Password = 'mtesveduhyxvlfxa'; // SMTP password
+                            $mail->Password = 'fstvwntidussfhvc'; // SMTP password
                             $mail->SMTPSecure = 'tls';
                             $mail->Port = 587;
 
@@ -113,7 +113,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         <div class="content">
                                             <h1>Welcome to our platform!</h1>
                                             <p>Click the following link to confirm your email and set your password:</p>
-                                            <a href="http://localhost/enrollment/token-sample/confirm_email1.php?token=' . $registration_token . '" class="btn">Confirm Email</a>
+                                            <a href="http://localhost/Enrollment-System/views/login/confirm_email1.php?token=' . $registration_token . '" class="btn">Confirm Email</a>
                                         </div>
                                         <div class="footer">
                                            <p>Binangonan Catholic College<br>123 Street Address<br>City, State, ZIP<br>© ' . date('Y') . ' BCC. All rights reserved.</p>
