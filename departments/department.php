@@ -54,10 +54,29 @@ class Department {
     }
     
     public function delete($id) {
+        // Check if the department is associated with any courses
+        $checkSql = "SELECT COUNT(*) FROM courses WHERE department_id = :id";
+        $checkStmt = $this->pdo->prepare($checkSql);
+        $checkStmt->execute(['id' => $id]);
+        $count = $checkStmt->fetchColumn();
+    
+        // If there are associated courses, do not allow deletion
+        if ($count > 0) {
+            return "Cannot delete department: it's associated with existing courses.";
+        }
+    
+        // Proceed to delete the department
         $sql = "DELETE FROM departments WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute(['id' => $id]);
+        if ($stmt->execute(['id' => $id])) {
+            return "Department deleted successfully.";
+        }
+    
+        return "Error deleting department.";
     }
+    
+    
+    
 
     public function find($id) {
         $sql = "SELECT * FROM departments WHERE id = :id";

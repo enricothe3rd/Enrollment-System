@@ -2,9 +2,17 @@
 require 'Department.php';
 
 if (isset($_GET['id'])) {
-    $id = $_GET['id'];
+    $departmentId = $_GET['id'];
+
     $department = new Department();
-    $department->delete($id);
-    header('Location: read_departments.php');
+    if ($department->delete($departmentId)) {
+        header('Location: read_departments.php?deletion=success');
+    } else {
+        header('Location: read_departments.php?deletion=failed');
+    }
+    exit;
+} else {
+    header('Location: read_departments.php?deletion=failed');
+    exit;
 }
 ?>

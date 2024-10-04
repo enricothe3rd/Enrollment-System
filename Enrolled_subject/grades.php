@@ -272,11 +272,8 @@ $grades = $grades->fetchAll(PDO::FETCH_ASSOC);
                         <td class="px-4 py-4">
                             <form method="POST" action="" class="inline">
                                 <input type="hidden" name="grade_id" value="<?= htmlspecialchars($grade['id'] ?? ''); ?>">
-                                <button 
-        class="text-red-600 hover:text-red-800 delete-button" 
-        data-grade-id="<?= htmlspecialchars($grade['id'] ?? ''); ?>"
-        type="button">
-        Delete
+            <button  class="text-red-600 hover:text-red-800 delete-button" 
+        data-grade-id="<?= htmlspecialchars($grade['id'] ?? ''); ?>" type="button">Delete
     </button>
                             </form>
                         </td>
