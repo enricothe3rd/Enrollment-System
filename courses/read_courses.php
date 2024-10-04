@@ -1,9 +1,12 @@
-
 <?php
 require 'Course.php';
 
 $course = new Course();
 $courses = $course->getCourses();
+
+
+
+
 ?>
 
 <!DOCTYPE html>
@@ -45,14 +48,38 @@ $courses = $course->getCourses();
     </script>
 </head>
 <body class="bg-transparent font-sans leading-normal tracking-normal">
-    <div class="max-w-8xl mx-auto mt-10 p-6 ">
-        <h1 class="text-3xl font-bold text-red-800 mb-6 ">Courses</h1>
+    <div class="mt-6">
+        <h1 class="text-3xl font-bold text-red-800 mb-6">Courses</h1>
         
         <!-- Create Course Button -->
         <a href="create_course.php" class="inline-block mb-4 px-4 py-4 bg-red-700 text-white rounded hover:bg-red-800">Create Course</a>
 
         <!-- Search Input -->
         <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search by course or department..." class="mb-4 p-2 border border-gray-300 rounded">
+
+        <?php if (isset($_GET['message'])): ?>
+            <?php if ($_GET['message'] == 'exists'): ?>
+                <div id="error-message" class="mb-2 bg-red-200 text-red-700 p-4 rounded">
+                    <h2 class="text-lg font-semibold">Error</h2>
+                    <p>This course cannot be deleted because it has associated sections or departments.</p>
+                </div>
+                <script>
+                setTimeout(function() {
+                    document.getElementById('error-message').style.display = 'none'; // Hide the message
+                }, 3000); // Hide after 3000 milliseconds (3 seconds)
+                </script>
+            <?php elseif ($_GET['message'] == 'deleted'): ?>
+                <div id="deleted-message" class="mb-2 bg-green-200 text-green-700 p-4 rounded">
+                    <h2 class="text-lg font-semibold">Success</h2>
+                    <p>The course was deleted successfully.</p>
+                </div>
+                <script>
+                setTimeout(function() {
+                    document.getElementById('deleted-message').style.display = 'none'; // Hide the message
+                }, 3000); // Hide after 3000 milliseconds (3 seconds)
+                </script>
+            <?php endif; ?>
+        <?php endif; ?>
 
         <!-- Courses Table -->
         <table id="coursesTable" class="min-w-full border-collapse shadow-md overflow-hidden">

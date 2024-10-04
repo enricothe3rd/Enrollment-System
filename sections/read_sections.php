@@ -47,7 +47,7 @@ $sections = $section->getAllSections();
     </script>
 </head>
 <body class="bg-transparent font-sans leading-normal tracking-normal">
-    <div class="container mx-auto mt-10 p-6 ">
+    <div class="mt-6">
 
         <h1 class="text-2xl font-semibold text-red-800 mb-4">Sections</h1>
         <a href="create_section.php" class="inline-block mb-4 px-4 py-4 bg-red-700 text-white rounded hover:bg-red-800">Add New Section</a>

@@ -2,17 +2,16 @@
 require 'Department.php';
 
 if (isset($_GET['id'])) {
-    $departmentId = $_GET['id'];
-
     $department = new Department();
-    if ($department->delete($departmentId)) {
-        header('Location: read_departments.php?deletion=success');
+
+    if (isset($_GET['id'])) {
+        $id = $_GET['id'];
+    
+        // Attempt to delete the department
+        $department->delete($id);
     } else {
-        header('Location: read_departments.php?deletion=failed');
+        // Redirect if no ID is provided
+        header('Location: department.php?message=error');
+        exit;
     }
-    exit;
-} else {
-    header('Location: read_departments.php?deletion=failed');
-    exit;
 }
-?>

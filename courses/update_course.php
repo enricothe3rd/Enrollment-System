@@ -1,9 +1,31 @@
-
 <?php
 require 'Course.php';
 
+// Create an instance of Course
 $course = new Course();
-$courses = $course->getCourses();
+
+// Fetch course data based on the provided ID in the URL
+$currentCourse = null;
+if (isset($_GET['id'])) {
+    $currentCourse = $course->getCourseById($_GET['id']);
+    if (!$currentCourse) {
+        // If the course does not exist, redirect with an error message
+        header('Location: course_list.php?message=course_not_found');
+        exit();
+    }
+}
+
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Call the handleUpdateCourseRequest method with the course ID
+    $course->handleUpdateCourseRequest($_GET['id']);
+}
+
+// Check for message parameter to display feedback
+$message = isset($_GET['message']) ? $_GET['message'] : '';
+
+// Fetch all departments for the dropdown
+$departments = $course->getDepartments();
 ?>
 
 <!DOCTYPE html>
@@ -11,76 +33,98 @@ $courses = $course->getCourses();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Course</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-
-    <title>View Courses</title>
-    <script>
-        function filterTable() {
-            const input = document.getElementById("searchInput");
-            const filter = input.value.toLowerCase();
-            const table = document.getElementById("coursesTable");
-            const tr = table.getElementsByTagName("tr");
-            let hasMatches = false; // Flag to track if there are matches
-
-            for (let i = 1; i < tr.length; i++) { // Start from 1 to skip the header row
-                const td = tr[i].getElementsByTagName("td");
-                let rowContainsFilter = false;
-
-                for (let j = 0; j < td.length; j++) {
-                    if (td[j] && td[j].innerText.toLowerCase().includes(filter)) {
-                        rowContainsFilter = true;
-                        break;
-                    }
-                }
-                tr[i].style.display = rowContainsFilter ? "" : "none"; // Show or hide row
-                if (rowContainsFilter) {
-                    hasMatches = true; // Set the flag if there's a match
-                }
-            }
-
-            // Show or hide the no results message
-            const noResultsRow = document.getElementById("noResultsRow");
-            noResultsRow.style.display = hasMatches ? "none" : ""; // Show message if no matches
-        }
-    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-transparent font-sans leading-normal tracking-normal">
-    <div class="max-w-8xl mx-auto mt-10 p-6 ">
-        <h1 class="text-3xl font-bold text-red-800 mb-6 ">Courses</h1>
-        
-        <!-- Create Course Button -->
-        <a href="create_course.php" class="inline-block mb-4 px-4 py-4 bg-red-700 text-white rounded hover:bg-red-800">Create Course</a>
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+    <div class="container mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg max-w-lg">
+        <button 
+            onclick="goBack()" 
+            class="mb-4 px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800 transition duration-200 flex items-center"
+        >
+            <i class="fas fa-arrow-left mr-2"></i>
+            Back
+        </button>
+         
+        <h1 class="text-2xl font-semibold text-red-800 mb-4">Edit Course</h1>
 
-        <!-- Search Input -->
-        <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search by course or department..." class="mb-4 p-2 border border-gray-300 rounded">
+        <!-- Display success or error messages -->
+        <?php if ($message == 'exists'): ?>
+            <div class="mt-4 bg-red-200 text-red-700 p-4 rounded">
+                <h2 class="text-lg font-semibold">Error</h2>
+                <p>The course already exists.</p>
+            </div>
+            <script>
+                setTimeout(function() {
+                    window.location.href = 'update_course.php?id=<?php echo htmlspecialchars($_GET['id']); ?>'; // Redirect after 3 seconds
+                }, 3000);
+            </script>
+        <?php elseif ($message == 'success'): ?>
+            <div class="mt-4 bg-green-200 text-green-700 p-4 rounded">
+                <h2 class="text-lg font-semibold">Success</h2>
+                <p>The course was updated successfully.</p>
+            </div>
+            <script>
+                setTimeout(function() {
+                    window.location.href = 'read_courses.php'; // Change to the desired URL
+                }, 3000); // Redirect after 3000 milliseconds (3 seconds)
+            </script>
+        <?php elseif ($message == 'invalid_name'): ?>
+            <div class="mt-4 bg-red-200 text-red-700 p-4 rounded">
+                <h2 class="text-lg font-semibold">Error</h2>
+                <p>The course name is invalid. Please enter a valid name.</p>
+            </div>
+            <script>
+                setTimeout(function() {
+                    window.location.href = 'update_course.php?id=<?php echo htmlspecialchars($_GET['id']); ?>'; // Redirect after 3 seconds
+                }, 3000); // Redirect after 3000 milliseconds (3 seconds)
+            </script>
+        <?php endif; ?>
 
-        <!-- Courses Table -->
-        <table id="coursesTable" class="min-w-full border-collapse shadow-md overflow-hidden">
-            <thead class="bg-red-800">
-                <tr>
-                    <th class="px-4 py-4 border-b text-left font-medium uppercase tracking-wider text-white">Course Name</th>
-                    <th class="px-4 py-4 border-b text-left font-medium uppercase tracking-wider text-white">Department</th>
-                    <th class="px-4 py-4 border-b text-left font-medium uppercase tracking-wider text-white">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="text-gray-700">
-                <?php foreach ($courses as $course): ?>
-                <tr class="border-b bg-red-50 hover:bg-red-200">
-                    <td class="border-t px-6 py-4"><?= htmlspecialchars($course['course_name']) ?></td>
-                    <td class="border-t px-6 py-4"><?= htmlspecialchars($course['department_name']) ?></td>
-                    <td class="border-t px-6 py-4 flex space-x-2">
-                        <a href="update_course.php?id=<?= $course['id'] ?>" class="bg-yellow-500 hover:bg-yellow-700 text-white font-semibold py-1 px-2 rounded transition duration-150">Edit</a>
-                        <a href="delete_course.php?id=<?= $course['id'] ?>" onclick="return confirm('Are you sure you want to delete this course?');" class="bg-red-500 hover:bg-red-700 text-white font-semibold py-1 px-2 rounded transition duration-150">Delete</a>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-                
-                <!-- No Results Row -->
-                <tr id="noResultsRow" style="display: none;">
-                    <td colspan="3" class="px-6 py-4 text-center text-red-500">No courses found matching your search criteria.</td>
-                </tr>
-            </tbody>
-        </table>
+        <!-- Check if course data is available before rendering the form -->
+        <?php if (isset($currentCourse)) { ?>
+            <form action="" method="post" class="space-y-4">
+                <input type="hidden" name="id" value="<?php echo htmlspecialchars($currentCourse['id']); ?>">
+
+                <!-- Course Name Input -->
+                <div>
+                    <label for="course_name" class="block text-red-700 font-medium">Course Name:</label>
+                    <div class="flex items-center border border-red-300 rounded-md shadow-sm">
+                        <i class="fas fa-book px-3 text-red-500"></i>
+                        <input type="text" id="course_name" name="course_name" value="<?php echo htmlspecialchars($currentCourse['course_name']); ?>" placeholder="Enter course name" required class="block w-full bg-red-50 px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm placeholder-red-500">
+                    </div>
+                </div>
+
+                <!-- Department Selection Dropdown -->
+                <div>
+                    <label for="department_id" class="block text-red-700 font-medium">Department:</label>
+                    <div class="flex items-center border border-red-300 rounded-md shadow-sm">
+                        <i class="fas fa-building px-3 text-red-500"></i>
+                        <select id="department_id" name="department_id" required class="block w-full px-3 py-2 bg-red-50 text-red-800 border-red-300 rounded-md shadow-sm focus:outline-none focus:bg-red-100 focus:border-red-500 sm:text-sm">
+                            <?php foreach ($departments as $dept): ?>
+                                <option value="<?= htmlspecialchars($dept['id']) ?>" <?= $dept['id'] == $currentCourse['department_id'] ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($dept['name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 flex items-center justify-center">
+                    <i class="fas fa-save mr-2"></i>
+                    Update Course
+                </button>
+            </form>
+        <?php } else { ?>
+            <p class="text-red-500">Invalid Course ID.</p>
+        <?php } ?>
     </div>
 </body>
 </html>
+<script>
+    function goBack() {
+        window.history.back(); // Navigates to the previous page
+    }
+</script>
