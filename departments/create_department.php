@@ -61,11 +61,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+
+    // List of valid email providers
+    $valid_providers = ['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com'];
+
+    // Check if email is empty or invalid
     if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $_SESSION['error_message'] = "A valid email is required.";
         header('Location: create_department.php');
         exit;
     }
+
+    // Extract the domain from the email address
+    $email_domain = substr(strrchr($email, "@"), 1);
+
+    // Check if the domain is in the list of valid providers
+    if (!in_array($email_domain, $valid_providers)) {
+        $_SESSION['error_message'] = "Email format must be one of the following: " . implode(', ', $valid_providers) . ".";
+        header('Location: create_department.php');
+        exit;
+    }
+
+    // Proceed with your logic if the email is valid and from an allowed provider
 
     $phone = trim($_POST['phone']); // Trim to remove any extra spaces
 

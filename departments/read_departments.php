@@ -102,87 +102,95 @@ if (isset($_GET['message']) && isset($_GET['type'])) {
         </div>
     </div>
 
-    <!-- Error Message Modal -->
-    <div id="errorModal" class="fixed inset-0 flex items-center justify-center hidden">
-        <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm text-center">
-            <h2 class="text-lg font-semibold mb-4 text-gray-800">Error</h2>
-            <img src="../assets/images/modal-icons/cancel.png" alt="Error Icon" class="mb-4 mx-auto w-25 h-25 object-cover rounded-full">
-            <p id="errorMessageText" class="text-gray-600"></p>
-            <div class="flex justify-center mt-6">
-                <button id="closeErrorModal" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">Close</button>
-            </div>
+<!-- Error Message Modal -->
+<div id="errorModal" class="fixed inset-0 flex items-center justify-center hidden">
+    <div class="bg-white p-8 rounded-lg shadow-lg max-w-sm text-center">
+        <h2 class="text-xl font-bold mb-4 text-gray-800">Error</h2>
+        <img src="../assets/images/modal-icons/cancel.png" alt="Error Icon" class="mb-4 mx-auto w-16 h-16 object-cover rounded-full">
+        <p id="errorMessageText" class="text-gray-600"></p>
+        <div class="flex justify-center mt-6">
+            <button id="closeErrorModal" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition duration-300 ease-in-out">Close</button>
         </div>
     </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let departmentIdToDelete;
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        let departmentIdToDelete;
-
-        // Open confirmation modal on delete button click
-        document.querySelectorAll('.delete-button').forEach(button => {
-            button.addEventListener('click', function() {
-                departmentIdToDelete = this.getAttribute('data-department-id');
-                const modal = document.getElementById('confirmationModal');
-                modal.classList.remove('hidden');
-                modal.classList.add('animate__animated', 'animate__fadeIn'); // Add animation classes
-            });
-        });
-
-        // Handle confirmation
-        document.getElementById('confirmDelete').addEventListener('click', function() {
-            // Redirect to the PHP delete script
-            window.location.href = `read_departments.php?id=${departmentIdToDelete}`;
-        });
-
-        // Close confirmation modal on cancel
-        document.getElementById('cancelDelete').addEventListener('click', function() {
+    // Open confirmation modal on delete button click
+    document.querySelectorAll('.delete-button').forEach(button => {
+        button.addEventListener('click', function() {
+            departmentIdToDelete = this.getAttribute('data-department-id');
             const modal = document.getElementById('confirmationModal');
-            modal.classList.add('animate__fadeOut'); // Add fade out animation
-
-            // Create a handler function for animation end
-            const handleAnimationEnd = function() {
-                modal.classList.add('hidden'); // Hide modal after animation completes
-                modal.classList.remove('animate__fadeOut'); // Remove animation class
-                modal.removeEventListener('animationend', handleAnimationEnd); // Remove the listener
-            };
-
-            // Add the event listener for animation end
-            modal.addEventListener('animationend', handleAnimationEnd);
-        });
-
-        // Show appropriate message modal based on message type
-        const message = <?php echo json_encode($message); ?>;
-        const messageType = <?php echo json_encode($messageType); ?>;
-
-        if (message) {
-            const messageText = messageType === 'success' ? document.getElementById('successMessageText') : document.getElementById('errorMessageText');
-            const modalToShow = messageType === 'success' ? document.getElementById('successModal') : document.getElementById('errorModal');
-
-            messageText.textContent = message;
-            modalToShow.classList.remove('hidden');
-        }
-
-        // Close modals on button click
-        document.getElementById('closeSuccessModal').addEventListener('click', function() {
-            const modal = document.getElementById('successModal');
-            modal.classList.add('animate__fadeOut');
-
-            modal.addEventListener('animationend', function() {
-                modal.classList.add('hidden');
-                modal.classList.remove('animate__fadeOut');
-            });
-        });
-
-        document.getElementById('closeErrorModal').addEventListener('click', function() {
-            const modal = document.getElementById('errorModal');
-            modal.classList.add('animate__fadeOut');
-
-            modal.addEventListener('animationend', function() {
-                modal.classList.add('hidden');
-                modal.classList.remove('animate__fadeOut');
-            });
+            modal.classList.remove('hidden');
+            modal.classList.add('animate__animated', 'animate__fadeIn'); // Add fade-in animation
         });
     });
-    </script>
-</body>
-</html>
+
+    // Handle confirmation
+    document.getElementById('confirmDelete').addEventListener('click', function() {
+        // Redirect to the PHP delete script
+        window.location.href = `read_departments.php?id=${departmentIdToDelete}`;
+    });
+
+    // Close confirmation modal on cancel
+    document.getElementById('cancelDelete').addEventListener('click', function() {
+        const modal = document.getElementById('confirmationModal');
+        modal.classList.add('animate__fadeOut'); // Add fade-out animation
+
+        // Create a handler function for animation end
+        const handleAnimationEnd = function() {
+            modal.classList.add('hidden'); // Hide modal after animation completes
+            modal.classList.remove('animate__fadeOut'); // Remove animation class
+            modal.removeEventListener('animationend', handleAnimationEnd); // Remove the listener
+        };
+
+        // Add the event listener for animation end
+        modal.addEventListener('animationend', handleAnimationEnd);
+    });
+
+    // Show appropriate message modal based on message type
+    const message = <?php echo json_encode($message); ?>;
+    const messageType = <?php echo json_encode($messageType); ?>;
+
+    if (message) {
+        const messageText = messageType === 'success' ? document.getElementById('successMessageText') : document.getElementById('errorMessageText');
+        const modalToShow = messageType === 'success' ? document.getElementById('successModal') : document.getElementById('errorModal');
+
+        messageText.textContent = message;
+        modalToShow.classList.remove('hidden');
+
+        // If it's a success message, add fade-in animation
+        if (messageType === 'success') {
+            modalToShow.classList.add('animate__animated', 'animate__fadeIn'); // Add fade-in animation
+        }
+
+        // If it's an error message, add head shake animation immediately without fade-in
+        if (messageType === 'error') {
+            modalToShow.classList.add('animate__animated', 'animate__headShake'); // Add head shake animation
+        }
+    }
+
+    // Close modals on button click
+    document.getElementById('closeSuccessModal').addEventListener('click', function() {
+        const modal = document.getElementById('successModal');
+        modal.classList.add('animate__fadeOut'); // Add fade-out animation
+
+        modal.addEventListener('animationend', function() {
+            modal.classList.add('hidden'); // Hide modal after animation completes
+            modal.classList.remove('animate__fadeOut'); // Remove animation class
+        });
+    });
+
+    document.getElementById('closeErrorModal').addEventListener('click', function() {
+        const modal = document.getElementById('errorModal');
+        modal.classList.add('animate__fadeOut'); // Add fade-out animation
+
+        modal.addEventListener('animationend', function() {
+            modal.classList.add('hidden'); // Hide modal after animation completes
+            modal.classList.remove('animate__fadeOut'); // Remove animation class
+            modal.classList.remove('animate__headShake'); // Remove head shake class to reset state
+        });
+    });
+});
+</script>

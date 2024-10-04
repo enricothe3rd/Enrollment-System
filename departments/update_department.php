@@ -26,28 +26,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $phone = trim($_POST['phone']);
     $location = trim($_POST['location']);
 
-    // Validation checks
-    if (empty($name)) {
-        $_SESSION['error_message'] = "Department name is required.";
-    } elseif (!preg_match("/^[a-zA-Z\s]+$/", $name)) {
-        $_SESSION['error_message'] = "Department name must contain only letters and spaces.";
-    } elseif ($department->departmentExists($name, $id)) {
-        $_SESSION['error_message'] = "Department name already exists.";
-    } elseif (empty($established) || !is_numeric($established) || strlen($established) !== 4) {
-        $_SESSION['error_message'] = "A valid established year (4 digits) is required.";
-    } elseif (empty($dean) || !preg_match("/^[a-zA-Z\s]+$/", $dean)) {
-        $_SESSION['error_message'] = "Dean name is required and must contain only letters.";
-    } elseif (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $_SESSION['error_message'] = "A valid email is required.";
-    } elseif (empty($phone) || !preg_match('/^(?:\+63[9]\d{9}|09\d{9}|(?:\+63|0)?[9]\d{10}|^\d{4}-\d{4})$/', $phone)) {
-        $_SESSION['error_message'] = "A valid phone number is required.";
-    } elseif (empty($location)) {
-        $_SESSION['error_message'] = "Location is required.";
-    } elseif (!preg_match("/^[a-zA-Z0-9\s,.'-]+$/", $location)) {
-        $_SESSION['error_message'] = "Location can only contain letters, numbers, spaces, and the following characters: ,.'-";
-    } elseif (strlen($location) < 3 || strlen($location) > 100) {
-        $_SESSION['error_message'] = "Location must be between 3 and 100 characters.";
-    } else {
+
+// List of valid email providers
+$valid_providers = ['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com'];
+
+// Extract the domain from the email address
+$email_domain = substr(strrchr($email, "@"), 1);
+
+// Validation checks
+if (empty($name)) {
+    $_SESSION['error_message'] = "Department name is required.";
+} elseif (!preg_match("/^[a-zA-Z\s]+$/", $name)) {
+    $_SESSION['error_message'] = "Department name must contain only letters and spaces.";
+} elseif (empty($established) || !is_numeric($established) || strlen($established) !== 4) {
+    $_SESSION['error_message'] = "A valid established year (4 digits) is required.";
+} elseif (empty($dean) || !preg_match("/^[a-zA-Z\s]+$/", $dean)) {
+    $_SESSION['error_message'] = "Dean name is required and must contain only letters.";
+} elseif (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    $_SESSION['error_message'] = "A valid email is required.";
+} elseif (!in_array($email_domain, $valid_providers)) { // Corrected syntax error here
+    $_SESSION['error_message'] = "Email format must be one of the following: " . implode(', ', $valid_providers) . ".";
+} elseif (empty($phone) || !preg_match('/^(?:\+63[9]\d{9}|09\d{9}|(?:\+63|0)?[9]\d{10}|^\d{4}-\d{4})$/', $phone)) {
+    $_SESSION['error_message'] = "A valid phone number is required.";
+} elseif (empty($location)) {
+    $_SESSION['error_message'] = "Location is required.";
+} elseif (!preg_match("/^[a-zA-Z0-9\s,.'-]+$/", $location)) {
+    $_SESSION['error_message'] = "Location can only contain letters, numbers, spaces, and the following characters: ,.'-";
+} elseif (strlen($location) < 3 || strlen($location) > 100) {
+    $_SESSION['error_message'] = "Location must be between 3 and 100 characters.";
+} else {
         // If validation passes, update the department
         $faculty_count = $department->getFacultyCountByDepartment($id); // Get the faculty count from the department
         $department->update($id, $name, $established, $dean, $email, $phone, $location, $faculty_count);
@@ -110,20 +117,23 @@ if (isset($dept)) {
         
    
         <?php
-
 // Check if there's a success or error message
 if (isset($_SESSION['success_message'])) {
-    echo '<div class="bg-green-500 text-white p-4 rounded mb-4 animate__animated animate__fadeIn">' . $_SESSION['success_message'] . '</div>';
+    echo '<div class="bg-green-500 text-white p-4 rounded mb-4 animate__animated animate__fadeIn">' . 
+         htmlspecialchars($_SESSION['success_message']) . 
+         '</div>';
     unset($_SESSION['success_message']); // Clear the message after displaying
 
     // JavaScript redirect after 3 seconds (3000 milliseconds)
     echo '<script>
             setTimeout(function() {
-                window.location.href = "read_departments.php";
+                window.location.href = "read_departments.php"; // Consider making this dynamic
             }, 3000);
           </script>';
 } elseif (isset($_SESSION['error_message'])) {
-    echo '<div id="error-message" class="bg-red-100 mb-2 text-red-700 border border-red-400 rounded px-4 py-3 mt-4 animate__animated animate__fadeIn">' . $_SESSION['error_message'] . '</div>';
+    echo '<div id="error-message" class="bg-red-100 mb-2 text-red-700 border border-red-400 rounded px-4 py-3 mt-4 animate__animated animate__fadeIn">' . 
+         htmlspecialchars($_SESSION['error_message']) . 
+         '</div>';
     unset($_SESSION['error_message']); // Clear the error message after displaying
 
     // JavaScript to hide the error message after 5 seconds (5000 milliseconds)
@@ -133,13 +143,14 @@ if (isset($_SESSION['success_message'])) {
                 if (errorMessage) {
                     errorMessage.classList.add("animate__fadeOut");
                     setTimeout(function() {
-                        errorMessage.style.display = "none";
+                        errorMessage.style.display = "none"; // Hide after animation
                     }, 1000); // Match the duration of the fade-out animation
                 }
             }, 5000);
           </script>';
 }
 ?>
+
 
         <form action="update_department.php" method="post" class="space-y-6">
             <input type="hidden" name="id" value="<?php echo htmlspecialchars($id); ?>">

@@ -1,67 +1,86 @@
+
 <?php
 require 'Course.php';
 
 $course = new Course();
-$id = $_GET['id'];
-$currentCourse = $course->getCourseById($id);
-$departments = $course->getDepartments(); // Fetch departments
-
-// Handle the update request
-$course->handleUpdateCourseRequest($id);
-
+$courses = $course->getCourses();
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <title>Edit Course</title>
+
+    <title>View Courses</title>
+    <script>
+        function filterTable() {
+            const input = document.getElementById("searchInput");
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById("coursesTable");
+            const tr = table.getElementsByTagName("tr");
+            let hasMatches = false; // Flag to track if there are matches
+
+            for (let i = 1; i < tr.length; i++) { // Start from 1 to skip the header row
+                const td = tr[i].getElementsByTagName("td");
+                let rowContainsFilter = false;
+
+                for (let j = 0; j < td.length; j++) {
+                    if (td[j] && td[j].innerText.toLowerCase().includes(filter)) {
+                        rowContainsFilter = true;
+                        break;
+                    }
+                }
+                tr[i].style.display = rowContainsFilter ? "" : "none"; // Show or hide row
+                if (rowContainsFilter) {
+                    hasMatches = true; // Set the flag if there's a match
+                }
+            }
+
+            // Show or hide the no results message
+            const noResultsRow = document.getElementById("noResultsRow");
+            noResultsRow.style.display = hasMatches ? "none" : ""; // Show message if no matches
+        }
+    </script>
 </head>
-<body class="bg-gray-100">
-    <div class="max-w-lg mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
-    <button 
-            onclick="goBack()" 
-            class="mb-4 px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800 transition duration-200 flex items-center"
-        >
-            <i class="fas fa-arrow-left mr-2"></i> <!-- Arrow icon -->
-            Back
-        </button>
-        <h1 class="text-2xl font-bold text-red-800 mb-6 flex items-center">
-            <i class="fas fa-edit mr-2 text-red-500 text-lg"></i> <!-- Edit icon -->
-            Edit Course
-        </h1>
-        <form method="POST" action="update_course.php?id=<?= htmlspecialchars($id) ?>">
-            <div class="mb-6">
-                <label class="block text-red-700 text-sm font-bold mb-2 flex items-center">
-                    <i class="fas fa-book mr-2 text-red-500 text-lg"></i> <!-- Book icon -->
-                    Course Name
-                </label>
-                <input type="text" name="course_name" value="<?= htmlspecialchars($currentCourse['course_name']) ?>" 
-                       class="shadow border rounded border-red-300 w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500" required>
-            </div>
-            <div class="mb-6">
-                <label class="block text-red-700 text-sm font-bold mb-2 flex items-center">
-                    <i class="fas fa-building mr-2 text-red-500 text-lg"></i> <!-- Building icon -->
-                    Department
-                </label>
-                <select name="department_id" 
-                        class="shadow border rounded border-red-300 w-full py-2 px-3 text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500" required>
-                    <?php foreach ($departments as $dept): ?>
-                        <option value="<?= htmlspecialchars($dept['id']) ?>" <?= $dept['id'] == $currentCourse['department_id'] ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($dept['name']) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <button type="submit" class="w-full bg-red-700 hover:bg-red-800 text-white font-bold py-2 px-4 rounded transition duration-200 ease-in-out">Update</button>
-        </form>
+<body class="bg-transparent font-sans leading-normal tracking-normal">
+    <div class="max-w-8xl mx-auto mt-10 p-6 ">
+        <h1 class="text-3xl font-bold text-red-800 mb-6 ">Courses</h1>
+        
+        <!-- Create Course Button -->
+        <a href="create_course.php" class="inline-block mb-4 px-4 py-4 bg-red-700 text-white rounded hover:bg-red-800">Create Course</a>
+
+        <!-- Search Input -->
+        <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search by course or department..." class="mb-4 p-2 border border-gray-300 rounded">
+
+        <!-- Courses Table -->
+        <table id="coursesTable" class="min-w-full border-collapse shadow-md overflow-hidden">
+            <thead class="bg-red-800">
+                <tr>
+                    <th class="px-4 py-4 border-b text-left font-medium uppercase tracking-wider text-white">Course Name</th>
+                    <th class="px-4 py-4 border-b text-left font-medium uppercase tracking-wider text-white">Department</th>
+                    <th class="px-4 py-4 border-b text-left font-medium uppercase tracking-wider text-white">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="text-gray-700">
+                <?php foreach ($courses as $course): ?>
+                <tr class="border-b bg-red-50 hover:bg-red-200">
+                    <td class="border-t px-6 py-4"><?= htmlspecialchars($course['course_name']) ?></td>
+                    <td class="border-t px-6 py-4"><?= htmlspecialchars($course['department_name']) ?></td>
+                    <td class="border-t px-6 py-4 flex space-x-2">
+                        <a href="update_course.php?id=<?= $course['id'] ?>" class="bg-yellow-500 hover:bg-yellow-700 text-white font-semibold py-1 px-2 rounded transition duration-150">Edit</a>
+                        <a href="delete_course.php?id=<?= $course['id'] ?>" onclick="return confirm('Are you sure you want to delete this course?');" class="bg-red-500 hover:bg-red-700 text-white font-semibold py-1 px-2 rounded transition duration-150">Delete</a>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+                
+                <!-- No Results Row -->
+                <tr id="noResultsRow" style="display: none;">
+                    <td colspan="3" class="px-6 py-4 text-center text-red-500">No courses found matching your search criteria.</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </body>
 </html>
-
-<script>
-    function goBack() {
-        window.history.back(); // Navigates to the previous page
-    }
-</script>
