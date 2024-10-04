@@ -7,13 +7,14 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
 
     // Attempt to delete the subject
     if ($subject->delete($id)) {
-        // Redirect on successful deletion
-        header('Location: read_subjects.php?message=Subject deleted successfully.');
+        header('Location: read_subjects.php?message=Subject deleted successfully.'); // Redirect on successful deletion
         exit();
     } else {
-        echo 'Error: Unable to delete the subject. Please try again.';
+        // If deletion fails, you can set a specific message if needed
+        header('Location: read_subjects.php?id=' . $id . '&message=Unable to delete the subject.'); // Redirect with an error message
+        exit();
     }
 } else {
-    echo 'Error: No subject ID provided.';
+    echo 'Error: No subject ID provided.'; // Message if no ID is given
 }
 ?>

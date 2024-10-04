@@ -1,18 +1,57 @@
 <?php
-require 'Subject.php';
+session_start(); // Start the session
 
+require 'Subject.php'; // Include the Subject class
+
+// Create an instance of Subject
 $subject = new Subject();
 
+// Initialize variables to retain the form data
+$code = isset($_SESSION['last_code']) ? htmlspecialchars($_SESSION['last_code']) : '';
+$title = isset($_SESSION['last_title']) ? htmlspecialchars($_SESSION['last_title']) : '';
+$sectionId = isset($_SESSION['last_section_id']) ? htmlspecialchars($_SESSION['last_section_id']) : '';
+$units = isset($_SESSION['last_units']) ? htmlspecialchars($_SESSION['last_units']) : '';
+$semesterId = isset($_SESSION['last_semester_id']) ? htmlspecialchars($_SESSION['last_semester_id']) : '';
+$schoolYearId = isset($_SESSION['last_school_year_id']) ? htmlspecialchars($_SESSION['last_school_year_id']) : '';
+
+// Clear session variables after retrieving their values
+unset($_SESSION['last_code']);
+unset($_SESSION['last_title']);
+unset($_SESSION['last_section_id']);
+unset($_SESSION['last_units']);
+unset($_SESSION['last_semester_id']);
+unset($_SESSION['last_school_year_id']);
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Retrieve the submitted subject data
+    $code = isset($_POST['code']) ? htmlspecialchars($_POST['code']) : '';
+    $title = isset($_POST['title']) ? htmlspecialchars($_POST['title']) : '';
+    $sectionId = isset($_POST['section_id']) ? htmlspecialchars($_POST['section_id']) : '';
+    $units = isset($_POST['units']) ? htmlspecialchars($_POST['units']) : '';
+    $semesterId = isset($_POST['semester_id']) ? htmlspecialchars($_POST['semester_id']) : '';
+    $schoolYearId = isset($_POST['school_year_id']) ? htmlspecialchars($_POST['school_year_id']) : '';
+
+    // Store inputs in session for retrieval after redirect
+    $_SESSION['last_code'] = $code;
+    $_SESSION['last_title'] = $title;
+    $_SESSION['last_section_id'] = $sectionId;
+    $_SESSION['last_units'] = $units;
+    $_SESSION['last_semester_id'] = $semesterId;
+    $_SESSION['last_school_year_id'] = $schoolYearId;
+
     // Handle subject creation
     $subject->handleCreateSubjectRequest();
 }
 
-// Get all sections, semesters, and school years
+// Fetch all sections, semesters, and school years for dropdowns
 $sections = $subject->getAllSections();
 $semesters = $subject->getAllSemesters();
 $school_years = $subject->getAllSchoolYears(); // Fetch school years
+
+// Check for the message in the query string
+$message = isset($_GET['message']) ? $_GET['message'] : '';
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -33,19 +72,74 @@ $school_years = $subject->getAllSchoolYears(); // Fetch school years
         </button>
         
         <h1 class="text-2xl font-semibold text-red-800 mb-4">Add New Subject</h1>
+
+
+        <?php if ($message == 'invalid_input'): ?>
+            <div id="warning-message" class="mt-4 bg-yellow-200 text-yellow-700 p-4 rounded">
+            <h2 class="text-lg font-semibold">Warning</h2>
+        <p>Invalid input. Please ensure all fields are filled correctly.</p>
+    </div>
+    <script>
+        // Set a timeout to hide the error message after 3 seconds
+        setTimeout(function() {
+            var errorMessage = document.getElementById('warning-message');
+            if (errorMessage) {
+                errorMessage.style.display = 'none'; // Hide the message
+            }
+        }, 3000); // Hide after 3000 milliseconds (3 seconds)
+    </script>
+
+<?php elseif ($message == 'invalid_units'): ?>
+    <div id="error-message" class="mt-4 bg-yellow-200 text-yellow-700 p-4 rounded">
+    <h2 class="text-lg font-semibold">Warning</h2>
+        <p>Invalid number of units. Please enter a valid value.</p>
+    </div>
+    <script>
+        // Set a timeout to hide the error message after 3 seconds
+        setTimeout(function() {
+            var errorMessage = document.getElementById('error-message');
+            if (errorMessage) {
+                errorMessage.style.display = 'none'; // Hide the message
+            }
+        }, 3000); // Hide after 3000 milliseconds (3 seconds)
+    </script>
+
+<?php elseif ($message == 'success'): ?>
+    <div class="mt-4 bg-green-200 text-green-700 p-4 rounded">
+        <h2 class="text-lg font-semibold">Success</h2>
+        <p>The subject was created successfully.</p>
+    </div>
+    <script>
+        // Set a timeout to redirect after 3 seconds
+        setTimeout(function() {
+            window.location.href = 'read_subjects.php'; // Redirect to the subjects page
+        }, 3000);
+    </script>
+
+<?php elseif ($message == 'failure'): ?>
+    <div class="mt-4 bg-red-200 text-red-700 p-4 rounded">
+        <h2 class="text-lg font-semibold">Error</h2>
+        <p>Failed to create the subject. Please try again.</p>
+    </div>
+<?php endif; ?>
+
+
+
+
+
         <form action="create_subject.php" method="post" class="space-y-4">
             <div>
                 <label for="code" class="block text-red-700 font-medium">Subject Code:</label>
                 <div class="flex items-center border border-red-300 rounded-md shadow-sm">
                     <i class="fas fa-code px-3 text-red-500"></i> <!-- Subject code icon -->
-                    <input type="text" id="code" name="code" required placeholder="Enter subject code" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
+                    <input type="text" id="code" name="code" value="<?php echo $code; ?>"   placeholder="Enter subject code" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
                 </div>
             </div>
             <div>
                 <label for="title" class="block text-red-700 font-medium">Subject Title:</label>
                 <div class="flex items-center border border-red-300 rounded-md shadow-sm">
                     <i class="fas fa-book text-red-500 px-3"></i> <!-- Subject title icon -->
-                    <input type="text" id="title" name="title" required placeholder="Enter subject title" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
+                    <input type="text" id="title" name="title" value="<?php echo $title; ?>" placeholder="Enter subject title" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
                 </div>
             </div>
             <div>
@@ -91,7 +185,7 @@ $school_years = $subject->getAllSchoolYears(); // Fetch school years
                 <label for="units" class="block text-red-700 font-medium">Units:</label>
                 <div class="flex items-center border border-red-300 rounded-md shadow-sm">
                     <i class="fas fa-graduation-cap text-red-500 px-3"></i> <!-- Units icon -->
-                    <input type="number" id="units" name="units" required placeholder="Enter number of units" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
+                    <input type="number" id="units" name="units" value="<?php echo $units; ?>" placeholder="Enter number of units" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
                 </div>
             </div>
             <button type="submit" class="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 flex items-center justify-center">

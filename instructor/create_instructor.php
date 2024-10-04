@@ -1,37 +1,54 @@
 <?php
+session_start(); // Start the session
+
 require 'Instructor.php';
 
-// Create a new PDO connection
-$pdo = Database::connect();
+// Create an instance of the Instructor
+$instructor = new Instructor(Database::connect());
 
-// Create a new instance of the Instructor class
-$instructor = new Instructor($pdo);
+// Initialize variables to retain the form data
+$firstName = isset($_SESSION['last_first_name']) ? htmlspecialchars($_SESSION['last_first_name']) : '';
+$middleName = isset($_SESSION['last_middle_name']) ? htmlspecialchars($_SESSION['last_middle_name']) : '';
+$lastName = isset($_SESSION['last_last_name']) ? htmlspecialchars($_SESSION['last_last_name']) : '';
+$suffix = isset($_SESSION['last_suffix']) ? htmlspecialchars($_SESSION['last_suffix']) : '';
+$email = isset($_SESSION['last_email']) ? htmlspecialchars($_SESSION['last_email']) : '';
 
-// Handle form submission
+// Clear session variables after retrieving their values
+unset($_SESSION['last_first_name']);
+unset($_SESSION['last_middle_name']);
+unset($_SESSION['last_last_name']);
+unset($_SESSION['last_suffix']);
+unset($_SESSION['last_email']);
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $firstName = $_POST['first_name'] ?? '';
-    $middleName = $_POST['middle_name'] ?? '';
-    $lastName = $_POST['last_name'] ?? '';
-    $suffix = $_POST['suffix'] ?? '';
-    $email = $_POST['email'] ?? '';
-    $departmentId = $_POST['department_id'] ?? '';
-    $courseId = $_POST['course_id'] ?? '';
-    $sectionId = $_POST['section_id'] ?? '';
+    // Retrieve the submitted form data
+    $firstName = isset($_POST['first_name']) ? htmlspecialchars($_POST['first_name']) : '';
+    $middleName = isset($_POST['middle_name']) ? htmlspecialchars($_POST['middle_name']) : '';
+    $lastName = isset($_POST['last_name']) ? htmlspecialchars($_POST['last_name']) : '';
+    $suffix = isset($_POST['suffix']) ? htmlspecialchars($_POST['suffix']) : '';
+    $email = isset($_POST['email']) ? htmlspecialchars($_POST['email']) : '';
 
-    try {
-        // Create a new instructor
-        $instructor->create($firstName, $middleName, $lastName, $suffix, $email, $departmentId, $courseId, $sectionId);
-        $message = 'Instructor created successfully.';
-    } catch (Exception $e) {
-        $message = 'Error creating instructor: ' . $e->getMessage();
-    }
+
+    // Store inputs in session for retrieval after redirect
+    $_SESSION['last_first_name'] = $firstName;
+    $_SESSION['last_middle_name'] = $middleName;
+    $_SESSION['last_last_name'] = $lastName;
+    $_SESSION['last_suffix'] = $suffix;
+    $_SESSION['last_email'] = $email;
+  
+    
+    // Handle section creation
+    $instructor->handleCreateInstructorRequest();
 }
-
 // Fetch departments, courses, and sections for the dropdowns
 $departments = $instructor->getDepartments();
 $courses = $instructor->getCourses();
 $sections = $instructor->getSections();
 $emails = $instructor->getAllEmails(); // Fetch emails
+
+// Check for the message in the query string or session
+$message = isset($_SESSION['message']) ? $_SESSION['message'] : '';
+unset($_SESSION['message']); // Clear the message after displaying it
 ?>
 
 <!DOCTYPE html>
@@ -117,13 +134,55 @@ $emails = $instructor->getAllEmails(); // Fetch emails
         </button>
         
     <h1 class="text-2xl font-semibold text-red-800 mb-4">Create Instructor</h1>
+    <?php if (isset($_GET['message'])): ?>
+ 
+    
+    <?php if ($message == 'invalid_name'): ?>
+        <div id="error-message" class="mt-4 bg-red-200 text-red-700 p-4 rounded">
+            <h2 class="text-lg font-semibold">Error</h2>
+            <p>The instructor's name is invalid. Please use only alphabets and spaces.</p>
+        </div>
 
-    <!-- Display success or error message -->
-    <?php if (isset($message)): ?>
-        <div class="mb-4 p-4 <?= strpos($message, 'Error') !== false ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' ?> rounded-md">
-            <?= htmlspecialchars($message) ?>
+    <?php elseif ($message == 'invalid_email'): ?>
+        <div id="error-message" class="mt-4 bg-red-200 text-red-700 p-4 rounded">
+            <h2 class="text-lg font-semibold">Error</h2>
+            <p>The email format is invalid. Please provide a valid email address.</p>
+        </div>
+
+    <?php elseif ($message == 'exists'): ?>
+        <div id="error-message" class="mt-4 bg-red-200 text-red-700 p-4 rounded">
+            <h2 class="text-lg font-semibold">Error</h2>
+            <p>An instructor with this email already exists.</p>
+        </div>
+
+    <?php elseif ($message == 'success'): ?>
+        <div id="success-message" class="mt-4 bg-green-200 text-green-700 p-4 rounded">
+            <h2 class="text-lg font-semibold">Success</h2>
+            <p>The instructor has been created successfully.</p>
+        </div>
+
+    <?php elseif ($message == 'failure'): ?>
+        <div id="error-message" class="mt-4 bg-red-200 text-red-700 p-4 rounded">
+            <h2 class="text-lg font-semibold">Error</h2>
+            <p>There was an issue creating the instructor. Please try again.</p>
         </div>
     <?php endif; ?>
+
+    <script>
+        // Set a timeout to hide the messages after 3 seconds
+        setTimeout(function() {
+            var errorMessage = document.getElementById('error-message');
+            var successMessage = document.getElementById('success-message');
+            if (errorMessage) {
+                errorMessage.style.display = 'none'; // Hide the error message
+            }
+            if (successMessage) {
+                successMessage.style.display = 'none'; // Hide the success message
+            }
+        }, 3000); // Hide after 3000 milliseconds (3 seconds)
+    </script>
+<?php endif; ?>
+
 
   <form method="POST" class="space-y-4">
     <div>
@@ -133,7 +192,7 @@ $emails = $instructor->getAllEmails(); // Fetch emails
         <i class="fas fa-user  text-red-500 px-3"></i>
     
             
-            <input type="text" id="first_name" name="first_name" required placeholder="Enter First Name" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
+            <input type="text" id="first_name" name="first_name"  value="<?php echo $firstName; ?>" placeholder="Enter First Name" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
         
     </div>
     </div>
@@ -144,7 +203,7 @@ $emails = $instructor->getAllEmails(); // Fetch emails
         <i class="fas fa-user  text-red-500 px-3"></i>
     
            
-            <input type="text" id="middle_name" name="middle_name" placeholder="Enter Middle Name" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
+            <input type="text" id="middle_name" name="middle_name"  value="<?php echo $middleName; ?>" placeholder="Enter Middle Name" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
         
     </div>
     </div>
@@ -155,7 +214,7 @@ $emails = $instructor->getAllEmails(); // Fetch emails
         <i class="fas fa-user  text-red-500 px-3"></i>
     
     
-            <input type="text" id="last_name" name="last_name" required placeholder="Enter Last Name" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
+            <input type="text" id="last_name" name="last_name"  value="<?php echo $lastName; ?>" placeholder="Enter Last Name" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
  
     </div>
     </div>
@@ -166,7 +225,7 @@ $emails = $instructor->getAllEmails(); // Fetch emails
         <i class="fas fa-user  text-red-500 px-3"></i>
     
            
-            <input type="text" id="suffix" name="suffix" placeholder="Enter Suffix Name" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
+            <input type="text" id="suffix" name="suffix"  value="<?php echo $suffix; ?>" placeholder="Enter Suffix Name" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
    
     </div>
     </div>

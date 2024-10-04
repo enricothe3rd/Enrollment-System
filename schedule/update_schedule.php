@@ -30,6 +30,10 @@ $daysOfWeek = [
     'Saturday'  => 'Saturday',
     'Sunday'    => 'Sunday',
 ];
+
+
+// Check for message parameter to display feedback
+$message = isset($_GET['message']) ? $_GET['message'] : null;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -52,6 +56,19 @@ $daysOfWeek = [
             <form action="" method="post" class="space-y-6">
                 <input type="hidden" name="id" value="<?php echo htmlspecialchars($sched['id']); ?>">
 
+
+                <?php if (isset($message) && $message == 'success'): ?>
+    <div class="mt-4 bg-green-200 text-green-700 p-4 rounded">
+        <h2 class="text-lg font-semibold">Success</h2>
+        <p>The schedule was created successfully.</p>
+    </div>
+    <script>
+        // Set a timeout to redirect after 3 seconds
+        setTimeout(function() {
+            window.location.href = 'read_schedules.php'; // Make sure this file exists
+        }, 3000);
+    </script>
+<?php endif; ?>
                 <!-- Section Dropdown -->
                 <div>
                     <label for="section_id" class="block text-sm font-medium text-red-700">

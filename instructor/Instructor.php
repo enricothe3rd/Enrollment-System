@@ -51,12 +51,77 @@ class Instructor {
             'id' => $id
         ]);
     }
-    // Create a new instructor
-    public function create($firstName, $middleName, $lastName, $suffix, $email, $departmentId, $courseId, $sectionId) {
+// Create a new instructor
+public function handleCreateInstructorRequest() {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $firstName = $_POST['first_name'];
+        $middleName = $_POST['middle_name'];
+        $lastName = $_POST['last_name'];
+        $suffix = $_POST['suffix'];
+        $email = $_POST['email'];
+        $departmentId = $_POST['department_id'];
+        $courseId = $_POST['course_id'];
+        $sectionId = $_POST['section_id'];
+
+        // Validate the instructor's first and last names to allow only alphabets and spaces
+        if (!preg_match('/^[a-zA-Z ]+$/', $firstName) || !preg_match('/^[a-zA-Z ]+$/', $lastName)) {
+            header('Location: create_instructor.php?message=invalid_name');
+            exit();
+        }
+
+        // Validate email format
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            header('Location: create_instructor.php?message=invalid_email');
+            exit();
+        }
+
+        // Store inputs in session for retrieval after redirect
+        $_SESSION['last_first_name'] = $firstName;
+        $_SESSION['last_middle_name'] = $middleName;
+        $_SESSION['last_last_name'] = $lastName;
+        $_SESSION['last_suffix'] = $suffix;
+        $_SESSION['last_email'] = $email;
+        $_SESSION['last_department_id'] = $departmentId;
+        $_SESSION['last_course_id'] = $courseId;
+        $_SESSION['last_section_id'] = $sectionId;
+
+        // Check if the instructor already exists (assuming email must be unique)
+        if ($this->instructorExists($email)) {
+            header('Location: create_instructor.php?message=exists');
+            exit();
+        }
+
+        // If it doesn't exist, create the instructor
+        if ($this->create($firstName, $middleName, $lastName, $suffix, $email, $departmentId, $courseId, $sectionId)) {
+            header('Location: create_instructor.php?message=success');
+            exit();
+        } else {
+            header('Location: create_instructor.php?message=failure');
+            exit();
+        }
+    }
+}
+
+// Method to check if the instructor already exists
+public function instructorExists($email) {
+    try {
+        $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM instructors WHERE email = :email');
+        $stmt->execute([':email' => $email]);
+        $count = $stmt->fetchColumn();
+        return $count > 0; // Returns true if the instructor exists
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
+        return false;
+    }
+}
+
+// Method to create a new instructor
+public function create($firstName, $middleName, $lastName, $suffix, $email, $departmentId, $courseId, $sectionId) {
+    try {
         $sql = "INSERT INTO instructors (first_name, middle_name, last_name, suffix, email, department_id, course_id, section_id)
                 VALUES (:first_name, :middle_name, :last_name, :suffix, :email, :department_id, :course_id, :section_id)";
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([
+        return $stmt->execute([
             ':first_name' => $firstName,
             ':middle_name' => $middleName,
             ':last_name' => $lastName,
@@ -66,7 +131,25 @@ class Instructor {
             ':course_id' => $courseId,
             ':section_id' => $sectionId,
         ]);
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
+        return false;
     }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // Delete an instructor by ID
     public function delete($id) {

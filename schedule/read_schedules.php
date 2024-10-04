@@ -47,12 +47,24 @@ $schedules = $schedule->getAllSchedules();
     </script>
 </head>
 <body class="bg-transparent font-sans leading-normal tracking-normal">
-    <div class="container mx-auto mt-10 p-6">
+    <div class="mt-6">
         <h1 class="text-2xl font-semibold text-red-800 mb-4">Schedules</h1>
         <a href="create_schedule.php" class="inline-block mb-4 px-4 py-4 bg-red-700 text-white rounded hover:bg-red-800">Add New Schedule</a>
 
         <!-- Search Input -->
         <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search by section, subject, or room..." class="mb-4 p-2 border border-gray-300 rounded">
+
+        <?php if (isset($_GET['message']) && ($_GET['message'] == 'deleted')): ?>
+    <div id="deleted-message" class="mb-2 bg-green-200 text-green-700 p-4 rounded">
+        <h2 class="text-lg font-semibold">Success</h2>
+        <p>The schedule was deleted successfully.</p>
+    </div>
+    <script>
+        setTimeout(function() {
+            document.getElementById('deleted-message').style.display = 'none'; // Hide the message
+        }, 3000); // Hide after 3000 milliseconds (3 seconds)
+    </script>
+<?php endif; ?>
 
         <table id="schedulesTable" class="w-full border-collapse bg-white shadow-md rounded-lg overflow-hidden">
             <thead class="bg-red-800 text-white">

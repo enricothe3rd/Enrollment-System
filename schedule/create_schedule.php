@@ -28,6 +28,10 @@ if ($selectedSectionId) {
 } else {
     // Fetch all subjects initially (if no section selected)
     $subjects = $schedule->getAllSubjects();
+
+    // Check for the message in the query string
+    
+$message = isset($_GET['message']) ? $_GET['message'] : '';
 }
 ?>
 <!DOCTYPE html>
@@ -49,6 +53,20 @@ if ($selectedSectionId) {
             Back
         </button>
         <h1 class="text-3xl font-bold text-red-800 mb-6">Add New Schedule</h1>
+
+        <?php if (isset($message) && $message == 'success'): ?>
+    <div class="mt-4 bg-green-200 text-green-700 p-4 rounded">
+        <h2 class="text-lg font-semibold">Success</h2>
+        <p>The schedule was created successfully.</p>
+    </div>
+    <script>
+        // Set a timeout to redirect after 3 seconds
+        setTimeout(function() {
+            window.location.href = 'read_schedules.php'; // Make sure this file exists
+        }, 3000);
+    </script>
+<?php endif; ?>
+
         <form action="create_schedule.php" method="post" class="space-y-6">
             <div>
                 <label for="section_id" class="block text-sm font-medium text-red-700">

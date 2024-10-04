@@ -31,14 +31,12 @@ public function handleCreateScheduleRequest() {
 
             // Validate fields and create schedule
             if ($this->create($subject_id, $section_id, $day_of_week, $start_time, $end_time, $room_number_id)) {
-                header('Location: read_schedules.php'); // Redirect to a success page
+                header('Location: create_schedule.php?message=success'); // Redirect to a success page
                 exit();
             } else {
                 echo 'Failed to create schedule.';
             }
-        } else {
-            echo 'Please fill in all required fields: ' . implode(', ', $missingFields);
-        }
+        } 
     }
 }
 
@@ -84,7 +82,8 @@ public function create($subject_id, $section_id, $day_of_week, $start_time, $end
 
                 // Validate fields
                 if ($this->update($id, $subject_id, $section_id, $day_of_week, $start_time, $end_time, $room)) {
-                    header('Location: read_schedules.php'); // Redirect to a success page
+                    header('Location: update_schedule.php?id=' . $id . '&message=success'); // Redirect to a success page with section ID
+
                     exit();
                 } else {
                     echo 'Failed to update schedule.';
@@ -155,17 +154,21 @@ LEFT JOIN classrooms c ON s.room = c.id;  -- Corrected join: schedules.room link
         }
     }
 
-    // Delete a schedule
-    public function delete($id) {
-        try {
-            $stmt = $this->pdo->prepare('DELETE FROM schedules WHERE id = :id');
-            $stmt->bindParam(':id', $id);
-            return $stmt->execute();
-        } catch (PDOException $e) {
-            echo "Error: " . $e->getMessage();
-            return false;
-        }
+// delete_schedule.php
+public function delete($id) {
+    try {
+        // Proceed to delete the schedule without any checks
+        $stmt = $this->pdo->prepare('DELETE FROM schedules WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+
+        // Redirect with a success message if deletion is successful
+        header('Location: read_schedules.php?id=' . $id . '&message=deleted');
+        exit();
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
+        return false;
     }
+}
 
     // Get all sections
     public function getAllSections() {
