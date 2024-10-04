@@ -81,7 +81,6 @@ $pdo = Database::connect();
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('subjects')"><i class="fas fa-user mr-3"></i> Instructor Details</a></li>
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('department')"><i class="fas fa-building mr-3"></i> Enrolled Subjects</a></li>
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('courses')"><i class="fas fa-graduation-cap mr-3"></i> Student By Subjects <i class="fas fa-chevron-right arrow-icon ml-auto"></i></a></li>
-                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('sections')"><i class="fas fa-list mr-3"></i> Sections</a></li>
                 </ul>
             </nav>
         </aside>
@@ -108,9 +107,7 @@ $pdo = Database::connect();
                 <iframe src="instructor/student_by_subject.php" title="Courses"></iframe>
             </div>
 
-            <div id="sections" class="content-section">
-                <iframe src="payments/re.php" title="Sections"></iframe>
-            </div>
+
         </main>
     </div>
 

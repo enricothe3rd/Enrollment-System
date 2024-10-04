@@ -57,7 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['subject_id'])) {
     if (empty($students)) {
         $_SESSION['error_message'] = "No students enrolled in that subject."; // Set error message
     } else {
-        // $_SESSION['success_message'] = "Students are enrolled in that subject."; // Set success message
+        $_SESSION['success_message'] = "Students are enrolled in that subject."; // Set success message
     }
 
 
@@ -117,7 +117,7 @@ if (!isset($_SESSION['error_message'])) {
 
 
 // Include the message handler to display messages
-include 'message_handler.php';
+include '../message/message_handler.php';
 
 
 
@@ -162,7 +162,7 @@ $grades = $grades->fetchAll(PDO::FETCH_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
     <title>Instructor Manage Grades</title>
 </head>
 <body class=" font-sans leading-normal tracking-normal">
@@ -170,10 +170,6 @@ $grades = $grades->fetchAll(PDO::FETCH_ASSOC);
         <h1 class="text-2xl font-semibold text-red-800 mb-4">Manage Grades</h1>
 <!-- Form for Selecting Subject -->
 <form method="POST" action="" class="mb-6">
-
-
-
-
     <h2 class="text-xl font-semibold mb-4 text-red-800">Select Subject to View Students</h2>
     <div class="mb-4">
         <label for="subject_id" class="block px-3 text-red-700 font-medium">Subject:</label>
@@ -293,13 +289,13 @@ $grades = $grades->fetchAll(PDO::FETCH_ASSOC);
 </html>
 
 <!-- Success Modal -->
-<div id="successModal" class="fixed inset-0 flex items-center justify-center hidden">
-    <div class="bg-white p-6 rounded shadow-md max-w-sm">
-        <h2 class="text-lg font-semibold mb-4 flex items-center">
-            <!-- You can add any title here -->
-        </h2>
-        <img src="../assets/images/modal-icons/checked.png" alt="Success Image" class="w-24 h-24 m-5 mx-7 rounded">
-        <p class="text-red-700 bold text-center">Deletion Success!</p>
+<div id="successModal" class="fixed inset-0 flex items-center justify-center hidden ">
+    <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm mx-4">
+        <img src="../assets/images/modal-icons/checked.png" alt="Success Image" class="w-16 h-16 mx-auto mb-4 rounded-full border-2 border-green-500">
+        <p class="text-green-600 font-semibold text-center text-2xl">
+            Deletion Success!
+        </p>
+
     </div>
 </div>
 
@@ -315,7 +311,6 @@ $grades = $grades->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
 </div>
-
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         let gradeIdToDelete;
@@ -354,12 +349,16 @@ $grades = $grades->fetchAll(PDO::FETCH_ASSOC);
                 if (response.ok) {
                     // Hide confirmation modal and show success modal
                     document.getElementById('confirmationModal').classList.add('hidden');
-                    document.getElementById('successModal').classList.remove('hidden');
+                    
+                    const successModal = document.getElementById('successModal');
+                    successModal.classList.remove('hidden');
+                    const modalContent = successModal.querySelector('div'); // Select the modal content
+                    modalContent.classList.add('animate__bounceIn'); // Add fade-in animation
                     
                     // Redirect after a few seconds
                     setTimeout(() => {
                         window.location.href = 'grades.php'; // Replace with your grades page
-                    }, 10000);
+                    }, 2000); // Adjusted to 3 seconds for a better user experience
                 }
             })
             .catch(error => {
@@ -374,7 +373,16 @@ $grades = $grades->fetchAll(PDO::FETCH_ASSOC);
 
         // Close success modal on button click
         document.getElementById('closeSuccessModal').addEventListener('click', function() {
-            document.getElementById('successModal').classList.add('hidden');
+            const successModal = document.getElementById('successModal');
+            const modalContent = successModal.querySelector('div'); // Select the modal content
+            modalContent.classList.remove('animate__fadeIn'); // Reset for future animations
+            modalContent.classList.add('animate__fadeOut'); // Add fade-out animation
+
+            // Use a timeout to hide the modal completely after the animation
+            setTimeout(() => {
+                successModal.classList.add('hidden');
+                modalContent.classList.remove('animate__fadeOut'); // Reset for future animations
+            }, 300); // Match this duration with the CSS transition duration
         });
     });
 </script>

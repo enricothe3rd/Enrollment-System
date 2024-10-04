@@ -40,7 +40,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['subject_id'])) {
     ");
     $stmt->execute([$subject_id]);
     $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Check if no students were enrolled in the selected subject
+        if (empty($students)) {
+            $_SESSION['error_message'] = "No students enrolled in that subject."; // Set error message
+        } else {
+            $_SESSION['success_message'] = "Students are enrolled in that subject."; // Set success message
+        }
 }
+
+// Include the message handler to display messages
+include '../Enrolled_subject/message_handler.php';
 ?>
 
 <!DOCTYPE html>
@@ -49,18 +59,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['subject_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
     <title>View Students by Subject</title>
 </head>
-<body class="bg-gray-100 p-6">
-    <div class="container mx-auto bg-white rounded-lg shadow-lg p-6">
-        <h1 class="text-2xl font-bold mb-6">View Students by Subject</h1>
+<body class=" font-sans leading-normal tracking-normal">
+    <div class="">
+        <h1 class="text-2xl font-semibold text-red-800 mb-4">View Students by Subject</h1>
 
         <!-- Form for Selecting Subject -->
         <form method="POST" action="" class="mb-6">
-            <h2 class="text-xl font-semibold mb-4">Select Subject to View Students</h2>
+            <h2 class="text-xl font-semibold mb-4 text-red-800">Select Subject to View Students</h2>
             <div class="mb-4">
-                <label for="subject_id" class="block text-gray-700">Subject:</label>
-                <select name="subject_id" class="border rounded p-2 w-full" required>
+                <label for="subject_id" class="block px-3 text-red-700 font-medium">Subject:</label>
+                <select name="subject_id" class="border rounded p-2 w-full border-red-300 outline-none" required>
                     <option value="">-- Select a Subject --</option>
                     <?php foreach ($assigned_subjects as $subject): ?>
                         <option value="<?= $subject['id']; ?>"><?= htmlspecialchars($subject['title']); ?></option>
@@ -68,30 +79,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['subject_id'])) {
                 </select>
             </div>
 
-            <button type="submit" class="bg-blue-500 text-white rounded py-2 px-4 hover:bg-blue-600">View Students</button>
+            <button type="submit" class="bg-red-700 text-white rounded py-2 px-4 hover:bg-red-800">View Students</button>
         </form>
 
         <!-- If subject_id is selected, display students -->
         <?php if (!empty($students)): ?>
-            <h2 class="text-xl font-semibold mb-4">Students Enrolled in Selected Subject</h2>
-            <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow">
-                <thead>
+            <h2 class="text-xl font-semibold mb-4 text-red-700">Students Enrolled in Selected Subject</h2>
+            <table  class="w-full border-collapse  shadow-md rounded-lg">
+                <thead class="bg-red-800">
                     <tr>
-                        <th class="border-b border-gray-300 p-4">Student Number</th>
-                        <th class="border-b border-gray-300 p-4">Student Name</th>
+                        <th class="px-4 py-4 border-b text-left text-white">Student Number</th>
+                        <th class="px-4 py-4 border-b text-left text-white">Student Name</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($students as $student): ?>
                         <tr class="hover:bg-gray-100">
-                            <td class="border-b border-gray-300 p-4"><?= htmlspecialchars($student['student_number']); ?></td>
-                            <td class="border-b border-gray-300 p-4"><?= htmlspecialchars($student['firstname'] . ' ' . $student['lastname']); ?></td>
+                            <td class="px-4 py-4"><?= htmlspecialchars($student['student_number']); ?></td>
+                            <td class="px-4 py-4"><?= htmlspecialchars($student['firstname'] . ' ' . $student['lastname']); ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
-        <?php else: ?>
-            <p class="text-gray-500">No students found for this subject.</p>
+
         <?php endif; ?>
     </div>
 </body>
