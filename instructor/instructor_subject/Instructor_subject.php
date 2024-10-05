@@ -8,10 +8,6 @@ class InstructorSubject {
         $this->db = Database::connect();
     }
 
-    public function getDepartments() {
-        $stmt = $this->db->query("SELECT * FROM departments");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
 
     public function getCoursesByDepartment($department_id) {
         $stmt = $this->db->prepare("SELECT * FROM courses WHERE department_id = :department_id");
@@ -35,10 +31,6 @@ class InstructorSubject {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getInstructors() {
-        $stmt = $this->db->query("SELECT * FROM instructors");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
 
     public function getSubjects() {
         $stmt = $this->db->query("SELECT * FROM subjects");
@@ -55,9 +47,18 @@ class InstructorSubject {
         $stmt->bindParam(':instructor_id', $instructor_id);
         $stmt->bindParam(':subject_id', $subject_id);
         $stmt->bindParam(':semester_id', $semester_id);
-        $stmt->execute();
+    
+        if ($stmt->execute()) {
+            // Redirect to a success page with a success message
+            header('Location: create_instructor_subject.php?message=success');
+            exit(); // Stop further execution
+        } else {
+            // Handle failure (optional: redirect to an error page)
+            header('Location: create_instructor_subject.php?message=error');
+            exit(); // Stop further execution
+        }
     }
-
+    
    
     public function read() {
         $sql = "
@@ -103,15 +104,56 @@ class InstructorSubject {
         $stmt->bindParam(':instructor_id', $instructor_id);
         $stmt->bindParam(':subject_id', $subject_id);
         $stmt->bindParam(':semester_id', $semester_id);
-        $stmt->execute();
-    }
     
-    public function deleteAssignment($id) {
-        $stmt = $this->db->prepare("DELETE FROM instructor_subjects WHERE id = :id");
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        $stmt->execute();
+        if ($stmt->execute()) {
+            // Redirect to a success page with the updated ID
+            header('Location: edit_instructor_subject.php?id=' . $id . '&message=success');
+            exit(); // Stop further execution
+        } else {
+            // Handle failure (optional: redirect to an error page)
+            header('Location: edit_instructor_subject.php?message=error');
+            exit(); // Stop further execution
+        }
     }
+
+     // Fetch all departments
+     public function getDepartments()
+     {
+         $stmt = $this->db->prepare("SELECT id, name FROM departments");
+         $stmt->execute();
+         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+     }
+ 
+     // Fetch all instructors
+     public function getInstructors()
+     {
+         $stmt = $this->db->prepare("SELECT id, first_name, last_name FROM instructors");
+         $stmt->execute();
+         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+     }
     
+    
+     public function deleteAssignment($id) {
+        try {
+            // Check if the assignment has associated records (optional)
+            // if ($this->assignmentHasRecords($id)) {
+            //     header('Location: read_sections.php?id=' . $id . '&message=exists');
+            //     exit();
+            // }
+    
+            // Proceed to delete the assignment
+            $stmt = $this->db->prepare('DELETE FROM instructor_subjects WHERE id = :id');
+            $stmt->execute([':id' => $id]);
+    
+            // Redirect with a success message if deletion is successful
+            header('Location: read_instructor_subject.php?id=' . $id . '&message=deleted');
+            exit();
+        } catch (PDOException $e) {
+            // Handle the error appropriately
+            echo "Error: " . $e->getMessage();
+            return false;
+        }
+    }
     
     
 }

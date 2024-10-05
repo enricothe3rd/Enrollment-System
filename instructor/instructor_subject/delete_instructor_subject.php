@@ -1,18 +1,13 @@
 <?php
 require 'Instructor_subject.php';
 
-$instructorSubject = new InstructorSubject();
-
-if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
-    parse_str(file_get_contents("php://input"), $data);
-    if (isset($data['id'])) {
-        $id = $data['id'];
-        $instructorSubject->deleteAssignment($id); // Make sure this method exists
-        echo json_encode(['success' => true]);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'No ID provided']);
-    }
+if (isset($_GET['id']) && !empty($_GET['id'])) {
+    $id = $_GET['id'];
+    $instructorSubject = new InstructorSubject();
+    $instructorSubject->deleteAssignment($id); // Ensure this method exists
+    header('Location: read_instructor_subject.php'); // Adjust the redirect as needed
+    exit();
 } else {
-    echo json_encode(['success' => false, 'message' => 'Invalid request method']);
+    echo 'No instructor subject ID provided.';
 }
 ?>

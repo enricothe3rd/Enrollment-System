@@ -12,6 +12,9 @@ $middleName = isset($_SESSION['last_middle_name']) ? htmlspecialchars($_SESSION[
 $lastName = isset($_SESSION['last_last_name']) ? htmlspecialchars($_SESSION['last_last_name']) : '';
 $suffix = isset($_SESSION['last_suffix']) ? htmlspecialchars($_SESSION['last_suffix']) : '';
 $email = isset($_SESSION['last_email']) ? htmlspecialchars($_SESSION['last_email']) : '';
+$departmentId = isset($_SESSION['last_department_id']) ? htmlspecialchars($_SESSION['last_department_id']) : '';
+$courseId = isset($_SESSION['last_course_id']) ? htmlspecialchars($_SESSION['last_course_id']) : '';
+$sectionId = isset($_SESSION['last_section_id']) ? htmlspecialchars($_SESSION['last_section_id']) : '';
 
 // Clear session variables after retrieving their values
 unset($_SESSION['last_first_name']);
@@ -19,6 +22,10 @@ unset($_SESSION['last_middle_name']);
 unset($_SESSION['last_last_name']);
 unset($_SESSION['last_suffix']);
 unset($_SESSION['last_email']);
+unset($_SESSION['last_department_id']);
+unset($_SESSION['last_course_id']);
+unset($_SESSION['last_section_id']);
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Retrieve the submitted form data
@@ -26,29 +33,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $middleName = isset($_POST['middle_name']) ? htmlspecialchars($_POST['middle_name']) : '';
     $lastName = isset($_POST['last_name']) ? htmlspecialchars($_POST['last_name']) : '';
     $suffix = isset($_POST['suffix']) ? htmlspecialchars($_POST['suffix']) : '';
-    $email = isset($_POST['email']) ? htmlspecialchars($_POST['email']) : '';
-
+    $email = isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; // Store submitted email
+    $departmentId = isset($_POST['department_id']) ? htmlspecialchars($_POST['department_id']) : '';
+    $courseId = isset($_POST['course_id']) ? htmlspecialchars($_POST['course_id']) : '';
+    $sectionId = isset($_POST['section_id']) ? htmlspecialchars($_POST['section_id']) : '';
 
     // Store inputs in session for retrieval after redirect
     $_SESSION['last_first_name'] = $firstName;
     $_SESSION['last_middle_name'] = $middleName;
     $_SESSION['last_last_name'] = $lastName;
     $_SESSION['last_suffix'] = $suffix;
-    $_SESSION['last_email'] = $email;
-  
-    
+    $_SESSION['last_email'] = $email; // Store email here
+    $_SESSION['last_department_id'] = $departmentId;
+    $_SESSION['last_course_id'] = $courseId;
+    $_SESSION['last_section_id'] = $sectionId;
+
     // Handle section creation
-    $instructor->handleCreateInstructorRequest();
+    $instructor->handleInstructorCreation();
+    
+   
 }
+
 // Fetch departments, courses, and sections for the dropdowns
 $departments = $instructor->getDepartments();
 $courses = $instructor->getCourses();
 $sections = $instructor->getSections();
 $emails = $instructor->getAllEmails(); // Fetch emails
 
-// Check for the message in the query string or session
-$message = isset($_SESSION['message']) ? $_SESSION['message'] : '';
-unset($_SESSION['message']); // Clear the message after displaying it
+// Check for the message in the session
+$message = isset($_GET['message']) ? $_GET['message'] : '';
+
+
 ?>
 
 <!DOCTYPE html>
@@ -134,165 +149,169 @@ unset($_SESSION['message']); // Clear the message after displaying it
         </button>
         
     <h1 class="text-2xl font-semibold text-red-800 mb-4">Create Instructor</h1>
-    <?php if (isset($_GET['message'])): ?>
  
-    
-    <?php if ($message == 'invalid_name'): ?>
-        <div id="error-message" class="mt-4 bg-red-200 text-red-700 p-4 rounded">
-            <h2 class="text-lg font-semibold">Error</h2>
-            <p>The instructor's name is invalid. Please use only alphabets and spaces.</p>
-        </div>
-
-    <?php elseif ($message == 'invalid_email'): ?>
-        <div id="error-message" class="mt-4 bg-red-200 text-red-700 p-4 rounded">
-            <h2 class="text-lg font-semibold">Error</h2>
-            <p>The email format is invalid. Please provide a valid email address.</p>
-        </div>
-
-    <?php elseif ($message == 'exists'): ?>
-        <div id="error-message" class="mt-4 bg-red-200 text-red-700 p-4 rounded">
-            <h2 class="text-lg font-semibold">Error</h2>
-            <p>An instructor with this email already exists.</p>
-        </div>
-
-    <?php elseif ($message == 'success'): ?>
-        <div id="success-message" class="mt-4 bg-green-200 text-green-700 p-4 rounded">
-            <h2 class="text-lg font-semibold">Success</h2>
-            <p>The instructor has been created successfully.</p>
-        </div>
-
-    <?php elseif ($message == 'failure'): ?>
-        <div id="error-message" class="mt-4 bg-red-200 text-red-700 p-4 rounded">
-            <h2 class="text-lg font-semibold">Error</h2>
-            <p>There was an issue creating the instructor. Please try again.</p>
-        </div>
-    <?php endif; ?>
+ 
+    <?php if ($message == 'exists'): ?>
+    <div id="error-message" class="mt-4 bg-red-200 text-red-700 p-4 rounded">
+        <h2 class="text-lg font-semibold">Error</h2>
+        <p>The email already exists for this instructor. Please use another</p>
+    </div>
 
     <script>
-        // Set a timeout to hide the messages after 3 seconds
+        // Set a timeout to hide the error message after 3 seconds
         setTimeout(function() {
             var errorMessage = document.getElementById('error-message');
-            var successMessage = document.getElementById('success-message');
             if (errorMessage) {
-                errorMessage.style.display = 'none'; // Hide the error message
-            }
-            if (successMessage) {
-                successMessage.style.display = 'none'; // Hide the success message
+                errorMessage.style.display = 'none'; // Hide the message
             }
         }, 3000); // Hide after 3000 milliseconds (3 seconds)
     </script>
+
+<?php elseif ($message == 'invalid_name'): ?>
+    <div id="error-message" class="mt-4 bg-red-200 text-red-700 p-4 rounded">
+        <h2 class="text-lg font-semibold">Error</h2>
+        <p>The instructor name is invalid. Please use only alphanumeric characters and hyphens.</p>
+    </div>
+
+    <script>
+        // Set a timeout to hide the error message after 3 seconds
+        setTimeout(function() {
+            var errorMessage = document.getElementById('error-message');
+            if (errorMessage) {
+                errorMessage.style.display = 'none'; // Hide the message
+            }
+        }, 3000); // Hide after 3000 milliseconds (3 seconds)
+    </script>
+
+<?php elseif ($message == 'success'): ?>
+    <div class="mt-4 bg-green-200 text-green-700 p-4 rounded">
+        <h2 class="text-lg font-semibold">Success</h2>
+        <p>The section was created successfully.</p>
+    </div>
+    <script>
+        // Set a timeout to redirect after 3 seconds
+        setTimeout(function() {
+            window.location.href = 'read_instructors.php'; // Make sure this file exists
+        }, 3000);
+        
+    </script>
+
+<?php elseif ($message == 'failure'): ?>
+    <div class="mt-4 bg-red-200 text-red-700 p-4 rounded">
+        <h2 class="text-lg font-semibold">Error</h2>
+        <p>Failed to create the section. Please try again.</p>
+    </div>
 <?php endif; ?>
 
 
-  <form method="POST" class="space-y-4">
-    <div>
-    <label for="first_name" class="block text-red-700 font-medium">First Name</label>
+<form action="create_instructor.php" method="post" class="space-y-4">
     <!-- First Name -->
-      <div class="flex items-center border border-red-300 rounded-md shadow-sm">
-        <i class="fas fa-user  text-red-500 px-3"></i>
-    
-            
-            <input type="text" id="first_name" name="first_name"  value="<?php echo $firstName; ?>" placeholder="Enter First Name" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
-        
-    </div>
-    </div>
-    <!-- Middle Name -->
-     <div>
-     <label for="middle_name" class="block text-red-700 font-medium">Middle Name</label>
-      <div class="flex items-center border border-red-300 rounded-md shadow-sm">
-        <i class="fas fa-user  text-red-500 px-3"></i>
-    
-           
-            <input type="text" id="middle_name" name="middle_name"  value="<?php echo $middleName; ?>" placeholder="Enter Middle Name" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
-        
-    </div>
-    </div>
-    <!-- Last Name -->
-     <div>
-     <label for="last_name" class="block text-red-700 font-medium">Last Name</label>
-      <div class="flex items-center border border-red-300 rounded-md shadow-sm">
-        <i class="fas fa-user  text-red-500 px-3"></i>
-    
-    
-            <input type="text" id="last_name" name="last_name"  value="<?php echo $lastName; ?>" placeholder="Enter Last Name" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
- 
-    </div>
-    </div>
-    <!-- Suffix -->
-     <div>
-     <label for="suffix" class="block text-red-700 font-medium">Suffix (optional)</label>
-      <div class="flex items-center border border-red-300 rounded-md shadow-sm">
-        <i class="fas fa-user  text-red-500 px-3"></i>
-    
-           
-            <input type="text" id="suffix" name="suffix"  value="<?php echo $suffix; ?>" placeholder="Enter Suffix Name" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
-   
-    </div>
+    <div>
+        <label for="first_name" class="block text-red-700 font-medium">First Name</label>
+        <div class="flex items-center border border-red-300 rounded-md shadow-sm">
+            <i class="fas fa-user text-red-500 px-3"></i>
+            <input type="text" id="first_name" name="first_name" value="<?php echo $firstName; ?>" placeholder="Enter First Name" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
+        </div>
     </div>
 
- <!-- Email Dropdown -->
+    <!-- Middle Name -->
+    <div>
+        <label for="middle_name" class="block text-red-700 font-medium">Middle Name</label>
+        <div class="flex items-center border border-red-300 rounded-md shadow-sm">
+            <i class="fas fa-user text-red-500 px-3"></i>
+            <input type="text" id="middle_name" name="middle_name" value="<?php echo $middleName; ?>" placeholder="Enter Middle Name" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
+        </div>
+    </div>
+
+    <!-- Last Name -->
+    <div>
+        <label for="last_name" class="block text-red-700 font-medium">Last Name</label>
+        <div class="flex items-center border border-red-300 rounded-md shadow-sm">
+            <i class="fas fa-user text-red-500 px-3"></i>
+            <input type="text" id="last_name" name="last_name" value="<?php echo $lastName; ?>" placeholder="Enter Last Name" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
+        </div>
+    </div>
+
+    <!-- Suffix -->
+    <div>
+        <label for="suffix" class="block text-red-700 font-medium">Suffix (optional)</label>
+        <div class="flex items-center border border-red-300 rounded-md shadow-sm">
+            <i class="fas fa-user text-red-500 px-3"></i>
+            <input type="text" id="suffix" name="suffix" value="<?php echo $suffix; ?>" placeholder="Enter Suffix Name" class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
+        </div>
+    </div>
+
+<!-- Email Dropdown -->
 <div>
     <label for="email" class="block text-red-700 font-medium">Email</label>
     <div class="flex items-center border border-red-300 rounded-md shadow-sm">
         <i class="fas fa-envelope text-red-500 px-3"></i>
         <select id="email" name="email" required class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
-            <option value="" disabled selected>Select an Email</option>
+            <option value="" disabled>Select an Email</option>
             <?php foreach ($emails as $user): ?>
-                <option value="<?= htmlspecialchars($user['email']) ?>"><?= htmlspecialchars($user['email']) ?></option>
+                <option value="<?= htmlspecialchars($user['email']) ?>" <?= (isset($_SESSION['last_email']) && $_SESSION['last_email'] === $user['email']) ? 'selected' : '' ?>><?= htmlspecialchars($user['email']) ?></option>
             <?php endforeach; ?>
         </select>
     </div>
 </div>
 
+
     <!-- Department -->
-     <div>
-     <label for="department_id" class="block text-red-700 font-medium">Department</label>
-      <div class="flex items-center border border-red-300 rounded-md shadow-sm">
-        <i class="fas fa-building  text-red-500 px-3"></i>
-    
-          
+    <div>
+        <label for="department_id" class="block text-red-700 font-medium">Department</label>
+        <div class="flex items-center border border-red-300 rounded-md shadow-sm">
+            <i class="fas fa-building text-red-500 px-3"></i>
             <select id="department_id" name="department_id" required class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
                 <option value="" disabled selected>Select a Department</option>
                 <?php foreach ($departments as $department): ?>
-                    <option value="<?= htmlspecialchars($department['id']) ?>"><?= htmlspecialchars($department['name']) ?></option>
+                    <option value="<?= htmlspecialchars($department['id']) ?>" <?= ($department['id'] == $departmentId) ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($department['name']) ?>
+                    </option>
                 <?php endforeach; ?>
             </select>
-   
+        </div>
     </div>
-    </div>
+
     <!-- Course -->
-     <div>
-    <label for="course_id" class="block text-red-700 font-medium">Course</label>
-      <div class="flex items-center border border-red-300 rounded-md shadow-sm">
-        <i class="fas fa-book  text-red-500 px-3"></i>
-    
-            
+    <div>
+        <label for="course_id" class="block text-red-700 font-medium">Course</label>
+        <div class="flex items-center border border-red-300 rounded-md shadow-sm">
+            <i class="fas fa-book-open text-red-500 px-3"></i>
             <select id="course_id" name="course_id" required class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
                 <option value="" disabled selected>Select a Course</option>
-                <!-- Courses will be populated based on department selection -->
+                <?php foreach ($courses as $course): ?>
+                    <option value="<?= htmlspecialchars($course['id']) ?>" <?= ($course['id'] == $courseId) ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($course['course_name']) ?>
+                    </option>
+                <?php endforeach; ?>
             </select>
-
-    </div>
+        </div>
     </div>
 
     <!-- Section -->
-     <div>
-     <label for="section_id" class="block text-red-700 font-medium">Section</label>
-      <div class="flex items-center border border-red-300 rounded-md shadow-sm">
-        <i class="fas fa-chalkboard-teacher  text-red-500 px-3"></i>
-    
+    <div>
+        <label for="section_id" class="block text-red-700 font-medium">Section</label>
+        <div class="flex items-center border border-red-300 rounded-md shadow-sm">
+            <i class="fas fa-users text-red-500 px-3"></i>
             <select id="section_id" name="section_id" required class="bg-red-50 block w-full px-3 py-2 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
                 <option value="" disabled selected>Select a Section</option>
-                <!-- Sections will be populated based on course selection -->
+                <?php foreach ($sections as $section): ?>
+                    <option value="<?= htmlspecialchars($section['id']) ?>" <?= ($section['id'] == $sectionId) ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($section['name']) ?>
+                    </option>
+                <?php endforeach; ?>
             </select>
-
+        </div>
     </div>
-    </div>
 
-    <button type="submit" class="w-full bg-red-700 hover:bg-red-800 text-white font-bold py-2 px-4 rounded-md">
-        <i class="fas fa-save mr-2"></i>Create
-    </button>
+    <!-- Submit Button -->
+    <div class="flex justify-end">
+        <button type="submit" class="px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800 transition duration-200">
+            Submit
+        </button>
+    </div>
 </form>
+
 
 </div>
 

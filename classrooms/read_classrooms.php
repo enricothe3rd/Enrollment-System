@@ -2,6 +2,8 @@
 require 'Classroom.php';
 $classroom = new Classroom();
 $classrooms = $classroom->getClassrooms();
+
+$message = isset($_GET['message']) ? $_GET['message'] : '';
 ?>
 
 <!DOCTYPE html>
@@ -13,9 +15,54 @@ $classrooms = $classroom->getClassrooms();
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-transparent font-sans leading-normal tracking-normal">
-    <div class="container mx-auto mt-10 p-6">
+    <div class="mt-6">
         <h1 class="text-2xl font-semibold text-red-800 mb-6">Classrooms</h1>
-        <a href="create_classroom.php" class="inline-block px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800 mb-4">Add New Classroom</a>
+
+
+        <?php if ($message == 'delete_successful'): ?>
+    <div class="mt-4 bg-green-200 text-green-700 p-4 rounded">
+        <h2 class="text-lg font-semibold">Success</h2>
+        <p>The classroom was deleted successfully.</p>
+    </div>
+    <script>
+        // Set a timeout to redirect after 3 seconds
+        setTimeout(function() {
+            window.location.href = 'read_classrooms.php'; // Redirect to the list of classrooms
+        }, 3000);
+    </script>
+
+<?php elseif ($message == 'no_classroom_found'): ?>
+    <div id="error-message" class="mt-4 bg-yellow-200 text-yellow-700 p-4 rounded">
+        <h2 class="text-lg font-semibold">Notice</h2>
+        <p>No classroom found with the given ID.</p>
+    </div>
+    <script>
+        // Set a timeout to hide the notice message after 3 seconds
+        setTimeout(function() {
+            var errorMessage = document.getElementById('error-message');
+            if (errorMessage) {
+                errorMessage.style.display = 'none'; // Hide the message
+            }
+        }, 3000); // Hide after 3000 milliseconds (3 seconds)
+    </script>
+
+<?php elseif ($message == 'delete_failed'): ?>
+    <div id="error-message" class="mt-4 bg-red-200 text-red-700 p-4 rounded">
+        <h2 class="text-lg font-semibold">Error</h2>
+        <p>Failed to delete the classroom. Please try again.</p>
+    </div>
+    <script>
+        // Set a timeout to hide the error message after 3 seconds
+        setTimeout(function() {
+            var errorMessage = document.getElementById('error-message');
+            if (errorMessage) {
+                errorMessage.style.display = 'none'; // Hide the message
+            }
+        }, 3000); // Hide after 3000 milliseconds (3 seconds)
+    </script>
+<?php endif; ?>
+
+        <a href="create_classroom.php" class="inline-block mt-2 px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800 mb-4">Add New Classroom</a>
         <table class="min-w-full border-collapse shadow-md rounded-lg">
             <thead class="bg-red-800">
                 <tr>

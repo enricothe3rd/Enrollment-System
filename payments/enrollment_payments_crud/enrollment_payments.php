@@ -1,4 +1,6 @@
 <?php
+session_start(); // Start the session
+
 require '../../db/db_connection3.php'; // Ensure to include your database connection file
 
 // Get the PDO instance from your Database class
@@ -26,10 +28,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // Update the existing row
             $sql = "UPDATE enrollment_payments SET units_price = :units_price, miscellaneous_fee = :miscellaneous_fee, months_of_payments = :months_of_payments";
             $stmt = $pdo->prepare($sql);
+            $_SESSION['message'] = "Successfully updated the entry."; // Set success message
         } else {
             // Insert new row
             $sql = "INSERT INTO enrollment_payments (units_price, miscellaneous_fee, months_of_payments) VALUES (:units_price, :miscellaneous_fee, :months_of_payments)";
             $stmt = $pdo->prepare($sql);
+            $_SESSION['message'] = "Successfully added the entry."; // Set success message
         }
 
         // Bind parameters and execute
@@ -51,6 +55,7 @@ if (isset($_GET['delete'])) {
     try {
         $stmt = $pdo->prepare("DELETE FROM enrollment_payments");
         $stmt->execute();
+        $_SESSION['message'] = "Successfully deleted the entry."; // Set success message
         header('Location: enrollment_payments.php');
         exit();
     } catch (PDOException $e) {
@@ -87,6 +92,18 @@ try {
 <body class="bg-gray-100">
 
     <div class="max-w-lg mx-auto mt-10 p-8 bg-white rounded-lg shadow-lg">
+        <!-- Display success message -->
+        <?php if (isset($_SESSION['message'])): ?>
+            <div id="success-message" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                <strong class="font-bold">Success!</strong>
+                <span class="block sm:inline"><?php echo $_SESSION['message']; ?></span>
+                <span onclick="this.parentElement.style.display='none'" class="absolute top-0 bottom-0 right-0 px-4 py-3 cursor-pointer">
+                    <i class="fas fa-times"></i>
+                </span>
+            </div>
+            <?php unset($_SESSION['message']); // Clear message after displaying ?>
+        <?php endif; ?>
+
         <!-- Units Price Form -->
         <h1 class="text-3xl font-bold text-red-800 mb-6"><i class="fas fa-money-bill-wave"></i> Units Price Form</h1>
         
@@ -147,30 +164,29 @@ try {
         <div class="mt-8">
             <h2 class="text-lg font-bold text-red-700"><i class="fas fa-list"></i> Existing Enrollment Payments</h2>
             <table class="min-w-full mt-4 border border-red-300 rounded-md shadow-sm">
-                <thead class="bg-red-50">
+                <thead class="bg-red-800">
                     <tr>
-                        <th class="border px-4 py-2 text-red-700">Units Price</th>
-                        <th class="border px-4 py-2 text-red-700">Miscellaneous Fee</th>
-                        <th class="border px-4 py-2 text-red-700">Months of Payments</th>
-                        <th class="border px-4 py-2 text-red-700">Actions</th>
+                        <th class="border px-4 py-2 text-white">Units Price</th>
+                        <th class="border px-4 py-2 text-white">Miscellaneous Fee</th>
+                        <th class="border px-4 py-2 text-white">Months of Payments</th>
+                        <th class="border px-4 py-2 text-white">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if ($existing_data): ?>
-                        <tr>
+                        <tr class="bg-red-50">
                             <td class="border px-4 py-2"><?php echo htmlspecialchars($existing_data['units_price']); ?></td>
                             <td class="border px-4 py-2"><?php echo htmlspecialchars($existing_data['miscellaneous_fee']); ?></td>
                             <td class="border px-4 py-2"><?php echo htmlspecialchars($existing_data['months_of_payments']); ?></td>
                             <td class="border px-4 py-2">
-                                <a href="?delete=1" onclick="return confirm('Are you sure you want to delete this entry?');"
-                                   class="text-red-600 hover:text-red-800">
-                                   <i class="fas fa-trash-alt"></i> Delete
+                                <a href="?delete=1"  onclick="return confirmDelete();" class="text-red-600 hover:text-red-800">
+                                    <i class="fas fa-trash-alt"></i> Delete
                                 </a>
                             </td>
                         </tr>
                     <?php else: ?>
                         <tr>
-                            <td colspan="4" class="border px-4 py-2 text-center">No entries found</td>
+                            <td colspan="4" class="border text-center px-4 py-2 text-red-600">No records found.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
@@ -178,7 +194,20 @@ try {
         </div>
     </div>
 
+    <script>
+        // Hide the success message after 3 seconds
+        setTimeout(function() {
+            var message = document.getElementById('success-message');
+            if (message) {
+                message.style.display = 'none';
+            }
+        }, 3000);
+
+        function confirmDelete() {
+        return confirm("Are you sure you want to delete this payments?");
+    }
+    </script>
+
+
 </body>
 </html>
-
-

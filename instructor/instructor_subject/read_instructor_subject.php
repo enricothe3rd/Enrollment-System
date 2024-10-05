@@ -68,7 +68,7 @@ $assignments = $instructorSubject->read();
 <body class="bg-transparent font-sans leading-normal tracking-normal">
 
     <!-- Container -->
-    <div class="max-w-8xl mx-auto mt-10 p-6">
+    <div class="mt-6">
         <h1 class="text-2xl font-semibold text-red-800 mb-4">Instructor Subjects</h1>
 
         <!-- Add New Assignment Button -->
@@ -81,6 +81,21 @@ $assignments = $instructorSubject->read();
 
         </div>
 
+        <?php if (isset($_GET['message'])): ?>
+
+    <?php if ($_GET['message'] == 'deleted'): ?>
+        <div id="deleted-message" class="mb-2 bg-green-200 text-green-700 p-4 rounded">
+            <h2 class="text-lg font-semibold">Success</h2>
+            <p>The instructor assignment was deleted successfully.</p>
+        </div>
+        <script>
+        setTimeout(function() {
+            document.getElementById('deleted-message').style.display = 'none'; // Hide the message
+        }, 3000); // Hide after 3000 milliseconds (3 seconds)
+    </script>
+    
+    <?php endif; ?>
+    <?php endif; ?>
 
         <!-- Table -->
         <div class="overflow-x-auto">
@@ -102,12 +117,12 @@ $assignments = $instructorSubject->read();
                         <td class="px-4 py-3 text-center flex space-x-2 justify-center">
                             <!-- Edit Button -->
                             <a href="edit_instructor_subject.php?id=<?php echo htmlspecialchars($assignment['id']); ?>" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-1 px-2 rounded transition duration-150">
-                                Edit
-                            </a>
+    Edit
+</a>
+
                             <!-- Delete Button -->
-                            <button onclick="deleteAssignment(<?php echo htmlspecialchars($assignment['id']); ?>)" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-2 rounded transition duration-150">
-                                Delete
-                            </button>
+                            <a href="delete_instructor_subject.php?id=<?php echo htmlspecialchars($assignment['id']); ?>" onclick="return confirm('Are you sure you want to delete this instructor assignment?');" class="bg-red-500 hover:bg-red-700 text-white font-semibold py-1 px-2 rounded transition duration-150">Delete</a>
+                 
                         </td>
                     </tr>
                     <?php endforeach; ?>

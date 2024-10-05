@@ -15,10 +15,44 @@ $semesters = $semester->getSemesters();
 </head>
 <body class="bg-transparent font-sans leading-normal tracking-normal">
 
-    <div class="container mx-auto mt-10 p-6 ">
+    <div class="mt-6 ">
         <h2 class="text-2xl font-semibold text-red-800 mb-6">Semesters</h2>
+<!-- Display success or error messages -->
+<?php if (isset($_GET['message'])): ?>
+    <?php if ($_GET['message'] == 'not_found'): ?>
+        <div class="mt-4 bg-red-200 text-red-700 p-4 rounded">
+            <h2 class="text-lg font-semibold">Error</h2>
+            <p>The semester was not found.</p>
+        </div>
+        <script>
+            setTimeout(function() {
+                window.location.href = 'read_semesters.php'; // Redirect after 3 seconds
+            }, 3000);
+        </script>
+    <?php elseif ($_GET['message'] == 'deleted_successfully'): ?>
+        <div class="mt-4 bg-green-200 text-green-700 p-4 rounded">
+            <h2 class="text-lg font-semibold">Success</h2>
+            <p>The semester was deleted successfully.</p>
+        </div>
+        <script>
+            setTimeout(function() {
+                window.location.href = 'read_semesters.php'; // Redirect after 3 seconds
+            }, 3000);
+        </script>
+    <?php elseif ($_GET['message'] == 'delete_failed'): ?>
+        <div class="mt-4 bg-red-200 text-red-700 p-4 rounded">
+            <h2 class="text-lg font-semibold">Error</h2>
+            <p>Failed to delete the semester. Please try again.</p>
+        </div>
+        <script>
+            setTimeout(function() {
+                window.location.href = 'read_semesters.php'; // Redirect after 3 seconds
+            }, 3000);
+        </script>
+    <?php endif; ?>
+<?php endif; ?>
 
-        <div class="mb-4">
+        <div class="mb-4 mt-2">
             <a href="create_semester.php" class="inline-block px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800">Add Semester</a>
         </div>
 

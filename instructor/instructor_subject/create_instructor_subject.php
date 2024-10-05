@@ -9,6 +9,9 @@ $departments = $instructorSubject->getDepartments();
 
 // Fetch instructors
 $instructors = $instructorSubject->getInstructors();
+
+
+$message = isset($_GET['message']) ? $_GET['message'] : '';
 ?>
 
 <!DOCTYPE html>
@@ -81,83 +84,178 @@ $instructors = $instructorSubject->getInstructors();
             Back
         </button>
         <h1 class="text-2xl font-semibold text-red-800 mb-4">Assign Subject to Instructor</h1>
-        <form method="POST" action="process_instructor.php" class="space-y-4">
-            <!-- Instructor Information -->
-            <div class="mb-4">
-                <label for="instructor" class="block text-red-700 font-medium">
-                    <i class="fas fa-user-tie mr-2"></i> Select Instructor:
-                </label>
-                <select id="instructor" name="instructor" class="bg-red-50 block w-full px-3 py-3 text-red-800 border-red-300 rounded-md shadow-sm focus:outline-none focus:bg-red-100 focus:border-red-500 sm:text-sm">
-                    <option>Select an instructor</option>
-                    <?php
-                    foreach ($instructors as $inst) {
-                        echo "<option value='{$inst['id']}'>{$inst['first_name']} {$inst['last_name']}</option>";
-                    }
-                    ?>
-                </select>
-            </div>
+        
+        
+        <?php if (isset($_GET['message'])): ?>
+    <?php if ($_GET['message'] == 'success'): ?>
+        <div class="mt-4 bg-green-200 text-green-700 p-4 rounded">
+            <h2 class="text-lg font-semibold">Success</h2>
+            <p>The instructor was added to the subject successfully.</p>
+        </div>
+        <script>
+            // Set a timeout to redirect after 3 seconds
+            setTimeout(function() {
+                window.location.href = 'read_instructor_subject.php'; // Adjust the redirection as needed
+            }, 3000);
+        </script>
 
-            <!-- Department Dropdown -->
-            <div class="mb-4">
-                <label for="department" class="block text-red-700 font-medium">
-                    <i class="fas fa-building mr-2"></i> Select Department:
-                </label>
-                <select id="department" name="department" onchange="fetchCourses(this.value)" class="bg-red-50 block w-full px-3 py-3 text-red-800 border-red-300 rounded-md shadow-sm focus:outline-none focus:bg-red-100 focus:border-red-500 sm:text-sm">
-                    <option>Select a department</option>
-                    <?php
-                    foreach ($departments as $department) {
-                        echo "<option value='{$department['id']}'>{$department['name']}</option>";
-                    }
-                    ?>
-                </select>
-            </div>
+    <?php elseif ($_GET['message'] == 'error'): ?>
+        <div class="mt-4 bg-red-200 text-red-700 p-4 rounded">
+            <h2 class="text-lg font-semibold">Error</h2>
+            <p>Failed to add the subject to the instructor. Please try again.</p>
+        </div>
 
-            <!-- Course Dropdown -->
-            <div class="mb-4">
-                <label for="course" class="block text-red-700 font-medium">
-                    <i class="fas fa-book mr-2"></i> Select Course:
-                </label>
-                <select id="course" name="course" onchange="fetchSections(this.value)" class="bg-red-50 block w-full px-3 py-3 text-red-800 border-red-300 rounded-md shadow-sm focus:outline-none focus:bg-red-100 focus:border-red-500 sm:text-sm">
-                    <option>Select a course</option>
-                </select>
-            </div>
+    <?php elseif ($_GET['message'] == 'invalid_name'): ?>
+        <div id="error-message" class="mt-4 bg-red-200 text-red-700 p-4 rounded">
+            <h2 class="text-lg font-semibold">Error</h2>
+            <p>The subject name is invalid. Please use only alphanumeric characters and hyphens.</p>
+        </div>
+        <script>
+            // Set a timeout to hide the error message after 3 seconds
+            setTimeout(function() {
+                var errorMessage = document.getElementById('error-message');
+                if (errorMessage) {
+                    errorMessage.style.display = 'none'; // Hide the message
+                }
+            }, 3000); // Hide after 3000 milliseconds (3 seconds)
+        </script>
 
-            <!-- Section Dropdown -->
-            <div class="mb-4">
-                <label for="section" class="block text-red-700 font-medium">
-                    <i class="fas fa-chalkboard-teacher mr-2"></i> Select Section:
-                </label>
-                <select id="section" name="section" onchange="updateSubjects()" class="bg-red-50 block w-full px-3 py-3 text-red-800 border-red-300 rounded-md shadow-sm focus:outline-none focus:bg-red-100 focus:border-red-500 sm:text-sm">
-                    <option>Select a section</option>
-                </select>
-            </div>
+    <?php elseif ($_GET['message'] == 'invalid_instructor'): ?>
+        <div id="error-message" class="mt-4 bg-red-200 text-red-700 p-4 rounded">
+            <h2 class="text-lg font-semibold">Error</h2>
+            <p>The selected instructor does not exist. Please select a valid instructor.</p>
+        </div>
+        <script>
+            // Set a timeout to hide the error message after 3 seconds
+            setTimeout(function() {
+                var errorMessage = document.getElementById('error-message');
+                if (errorMessage) {
+                    errorMessage.style.display = 'none'; // Hide the message
+                }
+            }, 3000); // Hide after 3000 milliseconds (3 seconds)
+        </script>
+    <?php endif; ?>
+<?php endif; ?>
 
-            <!-- Semester Dropdown -->
-            <div class="mb-4">
-                <label for="semester" class="block text-red-700 font-medium">
-                    <i class="fas fa-calendar-alt mr-2"></i> Select Semester:
-                </label>
-                <select id="semester" name="semester" onchange="updateSubjects()" class="bg-red-50 block w-full px-3 py-3 text-red-800 border-red-300 rounded-md shadow-sm focus:outline-none focus:bg-red-100 focus:border-red-500 sm:text-sm">
-                    <option value="1">1st Semester</option>
-                    <option value="2">2nd Semester</option>
-                </select>
-            </div>
+<form method="POST" action="process_instructor.php" class="space-y-4" id="instructorForm">
+    <!-- Instructor Information -->
+    <div class="mb-4">
+        <label for="instructor" class="block text-red-700 font-medium">
+            <i class="fas fa-user-tie mr-2"></i> Select Instructor: <span class="text-red-600">*</span>
+        </label>
+        <select id="instructor" name="instructor" class="bg-red-50 block w-full px-3 py-3 text-red-800 border-red-300 rounded-md shadow-sm focus:outline-none focus:bg-red-100 focus:border-red-500 sm:text-sm" required>
+            <option>Select an instructor</option>
+            <?php foreach ($instructors as $inst): ?>
+                <option value="<?= $inst['id'] ?>"><?= $inst['first_name'] ?> <?= $inst['last_name'] ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
 
-            <!-- Subject Dropdown -->
-            <div class="mb-4">
-                <label for="subject" class="block text-red-700 font-medium">
-                    <i class="fas fa-book-open mr-2"></i> Select Subject:
-                </label>
-                <select id="subject" name="subject" class="bg-red-50 block w-full px-3 py-3 text-red-800 border-red-300 rounded-md shadow-sm focus:outline-none focus:bg-red-100 focus:border-red-500 sm:text-sm">
-                    <option>Select a subject</option>
-                </select>
-            </div>
+    <!-- Department Dropdown -->
+    <div class="mb-4">
+        <label for="department" class="block text-red-700 font-medium">
+            <i class="fas fa-building mr-2"></i> Select Department: <span class="text-red-600">*</span>
+        </label>
+        <select id="department" name="department" onchange="fetchCourses(this.value); checkFormCompletion();" class="bg-red-50 block w-full px-3 py-3 text-red-800 border-red-300 rounded-md shadow-sm focus:outline-none focus:bg-red-100 focus:border-red-500 sm:text-sm" required>
+            <option>Select a department</option>
+            <?php foreach ($departments as $department): ?>
+                <option value="<?= $department['id'] ?>"><?= $department['name'] ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
 
-            <!-- Submit Button -->
-            <button type="submit" class="w-full bg-red-700 text-white py-2 px-4 rounded-lg hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <i class="fas fa-plus-circle mr-2"></i> Assign Subject
-            </button>
-        </form>
+    <!-- Course Dropdown -->
+    <div class="mb-4">
+        <label for="course" class="block text-red-700 font-medium">
+            <i class="fas fa-book mr-2"></i> Select Course: <span class="text-red-600">*</span>
+        </label>
+        <select id="course" name="course" onchange="fetchSections(this.value); checkFormCompletion();" class="bg-red-50 block w-full px-3 py-3 text-red-800 border-red-300 rounded-md shadow-sm focus:outline-none focus:bg-red-100 focus:border-red-500 sm:text-sm" required>
+            <option>Select a course</option>
+        </select>
+    </div>
+
+    <!-- Section Dropdown -->
+    <div class="mb-4">
+        <label for="section" class="block text-red-700 font-medium">
+            <i class="fas fa-chalkboard-teacher mr-2"></i> Select Section: <span class="text-red-600">*</span>
+        </label>
+        <select id="section" name="section" onchange="updateSubjects(); checkFormCompletion();" class="bg-red-50 block w-full px-3 py-3 text-red-800 border-red-300 rounded-md shadow-sm focus:outline-none focus:bg-red-100 focus:border-red-500 sm:text-sm" required>
+            <option>Select a section</option>
+        </select>
+    </div>
+
+<!-- Semester Dropdown -->
+<div class="mb-4">
+    <label for="semester" class="block text-red-700 font-medium">
+        <i class="fas fa-calendar-alt mr-2"></i> Select Semester: *
+    </label>
+    <select id="semester" name="semester" onchange="updateSubjects()" class="bg-red-50 block w-full px-3 py-3 text-red-800 border-red-300 rounded-md shadow-sm focus:outline-none focus:bg-red-100 focus:border-red-500 sm:text-sm" required>
+        <option value="">Select Semester</option> <!-- Default value -->
+        <option value="1">1st Semester</option>
+        <option value="2">2nd Semester</option>
+    </select>
+</div>
+
+
+    <!-- Subject Dropdown -->
+    <div class="mb-4">
+        <label for="subject" class="block text-red-700 font-medium">
+            <i class="fas fa-book-open mr-2"></i> Select Subject: <span class="text-red-600">*</span>
+        </label>
+        <select id="subject" name="subject" class="bg-red-50 block w-full px-3 py-3 text-red-800 border-red-300 rounded-md shadow-sm focus:outline-none focus:bg-red-100 focus:border-red-500 sm:text-sm" required>
+            <option>Select a subject</option>
+        </select>
+    </div>
+
+    <!-- Submit Button -->
+    <button type="submit" id="submitButton" class="w-full bg-red-700 text-white py-2 px-4 rounded-lg hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-blue-500" disabled style="opacity: 0.5;">
+        <i class="fas fa-plus-circle mr-2"></i> Assign Subject
+    </button>
+</form>
+<script>
+    // Function to check if all required fields are filled
+    function checkFormCompletion() {
+        const fields = [
+            document.getElementById('instructor'),
+            document.getElementById('department'),
+            document.getElementById('course'),
+            document.getElementById('section'),
+            document.getElementById('semester'),
+            document.getElementById('subject')
+        ];
+
+        // Check if all fields have a valid selection
+        const allFilled = fields.every(field => {
+            // Ensure the field value is neither empty nor the default options
+            return field.value !== '' &&
+                field.value !== 'Select an instructor' &&
+                field.value !== 'Select a department' && 
+                field.value !== 'Select a course' && 
+                field.value !== 'Select a section' && 
+                field.value !== 'Select a subject' && 
+                field.value !== 'Select Semester'; // Check for the semester default
+        });
+
+        const submitButton = document.getElementById('submitButton');
+        if (allFilled) {
+            submitButton.disabled = false;
+            submitButton.style.opacity = 1; // Reset opacity
+        } else {
+            submitButton.disabled = true;
+            submitButton.style.opacity = 0.5; // Set low opacity
+        }
+    }
+
+    // Attach change event listeners to each select element
+    document.querySelectorAll('select').forEach(select => {
+        select.addEventListener('change', checkFormCompletion);
+    });
+
+    // Call checkFormCompletion on page load to initialize button state
+    document.addEventListener('DOMContentLoaded', checkFormCompletion);
+</script>
+
+
     </div>
 </body>
 <script>

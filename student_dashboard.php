@@ -111,10 +111,8 @@ if ($student_number) {
 
   
 
-                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('subjects')"><i class="fas fa-user mr-3"></i> My Subjects</a></li>
+                    
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('department')"><i class="fas fa-building mr-3"></i> Research Fees</a></li>
-                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('courses')"><i class="fas fa-graduation-cap mr-3"></i> Courses <i class="fas fa-chevron-right arrow-icon ml-auto"></i></a></li>
-                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('sections')"><i class="fas fa-list mr-3"></i> Sections</a></li>
                 </ul>
             </nav>
         </aside>
@@ -122,11 +120,11 @@ if ($student_number) {
         <!-- Main Content -->
         <main class="flex-1 p-6 overflow-hidden">
             <div id="home" class="content-section">
-                <iframe src="home.php" title="Home"></iframe>
+            <iframe src="Enrolled_subject/enrolled_subject.php" title="My Subjects"></iframe>
             </div>
 
             <div id="profile" class="content-section">
-                <iframe src="profile/student_profile.php" title="My Profile"></iframe>
+                <iframe src="instructor/get_grades.php" title="My Profile"></iframe>
             </div>
             <?php if (empty($payment_method)): ?>
             <div id="enrollment" class="content-section">
@@ -134,20 +132,12 @@ if ($student_number) {
             </div>
             <?php endif; ?>
             <div id="department" class="content-section">
-                <iframe src="payments/enrollment_payments_crud/research_fees.php" title="Research Fees"></iframe>
+                <iframe src="Enrolled_subject/enrolled_subject" title="Research Fees"></iframe>
             </div>
 
-            <div id="subjects" class="content-section">
-                <iframe src="Enrolled_subject/enrolled_subject.php" title="My Subjects"></iframe>
-            </div>
+   
 
-            <div id="courses" class="content-section">
-                <iframe src="payments/payment_form.php" title="Courses"></iframe>
-            </div>
 
-            <div id="sections" class="content-section">
-                <iframe src="payments/re.php" title="Sections"></iframe>
-            </div>
         </main>
     </div>
 

@@ -6,14 +6,14 @@ $semester = new Semester();
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
     $semester_data = $semester->getSemesterById($id);
-
+}
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $semester->handleUpdateSemesterRequest($id);
     }
-} else {
-    header('Location: read_semesters.php');
-    exit();
-}
+
+    
+// Check for message parameter to display feedback
+$message = isset($_GET['message']) ? $_GET['message'] : null;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -36,6 +36,62 @@ if (isset($_GET['id'])) {
         </button>
 
         <h1 class="text-2xl font-semibold text-red-800 mb-4">Edit Semester</h1>
+
+
+      <!-- Display success or error messages -->
+<?php if (isset($_GET['message'])): ?>
+    <?php if ($_GET['message'] == 'not_found'): ?>
+        <div class="mt-4 bg-red-200 text-red-700 p-4 rounded">
+            <h2 class="text-lg font-semibold">Error</h2>
+            <p>The semester was not found.</p>
+        </div>
+        <script>
+            setTimeout(function() {
+                window.location.href = 'create_semester.php'; // Redirect after 3 seconds
+            }, 3000);
+        </script>
+    <?php elseif ($_GET['message'] == 'invalid_name'): ?>
+        <div class="mt-4 bg-red-200 text-red-700 p-4 rounded">
+            <h2 class="text-lg font-semibold">Error</h2>
+            <p>Invalid semester name. Only letters, numbers, hyphens, and single spaces are allowed.</p>
+        </div>
+        <script>
+            setTimeout(function() {
+                window.location.href = 'create_semester.php'; // Redirect after 3 seconds
+            }, 3000);
+        </script>
+    <?php elseif ($_GET['message'] == 'exists'): ?>
+        <div class="mt-4 bg-red-200 text-red-700 p-4 rounded">
+            <h2 class="text-lg font-semibold">Error</h2>
+            <p>The semester name already exists. Please choose a different name.</p>
+        </div>
+        <script>
+            setTimeout(function() {
+                window.location.href = 'edit_semester.php?id=<?php echo htmlspecialchars($_GET['id']); ?>'; // Redirect after 3 seconds
+            }, 3000);
+        </script>
+    <?php elseif ($_GET['message'] == 'updated_successfully'): ?>
+        <div class="mt-4 bg-green-200 text-green-700 p-4 rounded">
+            <h2 class="text-lg font-semibold">Success</h2>
+            <p>The semester was updated successfully.</p>
+        </div>
+        <script>
+            setTimeout(function() {
+                window.location.href = 'read_semesters.php'; // Redirect after 3 seconds
+            }, 3000);
+        </script>
+    <?php elseif ($_GET['message'] == 'update_failed'): ?>
+        <div class="mt-4 bg-red-200 text-red-700 p-4 rounded">
+            <h2 class="text-lg font-semibold">Error</h2>
+            <p>Failed to update the semester. Please try again.</p>
+        </div>
+        <script>
+            setTimeout(function() {
+                window.location.href = 'create_semester.php'; // Redirect after 3 seconds
+            }, 3000);
+        </script>
+    <?php endif; ?>
+<?php endif; ?>
 
         <form method="POST" class="space-y-4">
             <div>

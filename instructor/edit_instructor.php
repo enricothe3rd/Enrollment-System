@@ -1,35 +1,32 @@
 <?php
-require 'Instructor.php'; // Make sure this path is correct
+// Assuming you have included your Instructor class and initiated it
+require_once 'Instructor.php';
+// Assuming your db_connection3.php returns a PDO object, e.g., $pdo
+$pdo = Database::connect(); // Modify according to how you retrieve the PDO connection
 
-// Get the PDO connection
-$pdo = Database::connect();
-
-// Create an instance of Instructor
+// Pass the PDO object to the Instructor class
 $instructor = new Instructor($pdo);
 
-$id = $_GET['id'];
-$instructorData = $instructor->read($id);
+// Retrieve the instructor ID from the URL
+$instructorId = isset($_GET['id']) ? $_GET['id'] : null;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Call the method to handle the update, passing the instructor ID
+    $instructor->handleInstructorUpdate($instructorId);
+}
+
+// Optionally, fetch the instructor details to pre-populate the form
+$instructorDetails = $instructor->read($instructorId);
+
 
 // Fetch courses and sections for the dropdowns
 $courses = $instructor->getCourses(); // Fetch all courses
 $sections = $instructor->getSections(); // Fetch all sections
 $departments = $instructor->getDepartments(); // Fetch all departments
 $emails = $instructor->getAllEmails(); // Fetch all departments
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $firstName = $_POST['first_name'];
-    $middleName = $_POST['middle_name']; // New field
-    $lastName = $_POST['last_name'];
-    $suffix = $_POST['suffix']; // New field
-    $email = $_POST['email'];
-    $departmentId = $_POST['department_id'];
-    $courseId = $_POST['course_id'];
-    $sectionId = $_POST['section_id'];
 
-    // Update the instructor with the new data
-    $instructor->update($id, $firstName, $middleName, $lastName, $suffix, $email, $departmentId, $courseId, $sectionId);
-
-    echo "Instructor updated successfully!";
-}
+// Check for message parameter to display feedback
+$message = isset($_GET['message']) ? $_GET['message'] : null;
 ?>
 
 <!DOCTYPE html>
@@ -56,6 +53,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </button>
                 <h1 class="text-2xl font-semibold text-red-800 mb-4">Edit Instructor</h1>
 
+                <?php if ($message == 'exists'): ?>
+    <div id="error-message" class="mt-4 bg-red-200 text-red-700 p-4 rounded">
+        <h2 class="text-lg font-semibold">Error</h2>
+        <p>The email already exists for this instructor. Please use another</p>
+    </div>
+
+    <script>
+        // Set a timeout to hide the error message after 3 seconds
+        setTimeout(function() {
+            var errorMessage = document.getElementById('error-message');
+            if (errorMessage) {
+                errorMessage.style.display = 'none'; // Hide the message
+            }
+        }, 3000); // Hide after 3000 milliseconds (3 seconds)
+    </script>
+
+<?php elseif ($message == 'invalid_name'): ?>
+    <div id="error-message" class="mt-4 bg-red-200 text-red-700 p-4 rounded">
+        <h2 class="text-lg font-semibold">Error</h2>
+        <p>The instructor name is invalid. Please use only alphanumeric characters and hyphens.</p>
+    </div>
+
+    <script>
+        // Set a timeout to hide the error message after 3 seconds
+        setTimeout(function() {
+            var errorMessage = document.getElementById('error-message');
+            if (errorMessage) {
+                errorMessage.style.display = 'none'; // Hide the message
+            }
+        }, 3000); // Hide after 3000 milliseconds (3 seconds)
+    </script>
+
+<?php elseif ($message == 'success'): ?>
+    <div class="mt-4 bg-green-200 text-green-700 p-4 rounded">
+        <h2 class="text-lg font-semibold">Success</h2>
+        <p>The section was created successfully.</p>
+    </div>
+    <script>
+        // Set a timeout to redirect after 3 seconds
+        setTimeout(function() {
+            window.location.href = 'read_instructors.php'; // Make sure this file exists
+        }, 3000);
+        
+    </script>
+
+<?php elseif ($message == 'failure'): ?>
+    <div class="mt-4 bg-red-200 text-red-700 p-4 rounded">
+        <h2 class="text-lg font-semibold">Error</h2>
+        <p>Failed to create the section. Please try again.</p>
+    </div>
+<?php endif; ?>
+
+
                 <form method="POST" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- First Name -->
@@ -65,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <span class="flex items-center px-3">
                                     <i class="fas fa-user  text-red-500"></i>
                                 </span>
-                                <input type="text" id="first_name" name="first_name" value="<?= htmlspecialchars($instructorData['first_name']) ?>" 
+                                <input type="text" id="first_name" name="first_name" value="<?= htmlspecialchars($instructorDetails['first_name']) ?>" 
                                        class="mt-1 block w-full rounded-lg shadow-sm px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
                             </div>
                         </div>
@@ -77,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <span class="flex items-center px-3">
                                     <i class="fas fa-user  text-red-500"></i>
                                 </span>
-                                <input type="text" id="middle_name" name="middle_name" value="<?= htmlspecialchars($instructorData['middle_name']) ?>" 
+                                <input type="text" id="middle_name" name="middle_name" value="<?= htmlspecialchars($instructorDetails['middle_name']) ?>" 
                                        class="mt-1 block w-full rounded-lg shadow-sm px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                             </div>
                         </div>
@@ -89,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <span class="flex items-center px-3">
                                     <i class="fas fa-user  text-red-500"></i>
                                 </span>
-                                <input type="text" id="last_name" name="last_name" value="<?= htmlspecialchars($instructorData['last_name']) ?>" 
+                                <input type="text" id="last_name" name="last_name" value="<?= htmlspecialchars($instructorDetails['last_name']) ?>" 
                                        class="mt-1 block w-full rounded-lg shadow-sm px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
                             </div>
                         </div>
@@ -101,7 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <span class="flex items-center px-3">
                                     <i class="fas fa-user-tag  text-red-500"></i>
                                 </span>
-                                <input type="text" id="suffix" name="suffix" value="<?= htmlspecialchars($instructorData['suffix']) ?>" 
+                                <input type="text" id="suffix" name="suffix" value="<?= htmlspecialchars($instructorDetails['suffix']) ?>" 
                                        class="mt-1 block w-full rounded-lg shadow-sm px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                             </div>
                         </div>
@@ -117,7 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <select id="email" name="email" class="mt-1 block w-full rounded-lg shadow-sm px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
             <!-- <option value="">Select Email</option> -->
             <?php foreach ($emails as $userEmail): ?>
-                <option value="<?= htmlspecialchars($userEmail['email']) ?>" <?= $userEmail['email'] == $instructorData['email'] ? 'selected' : '' ?>>
+                <option value="<?= htmlspecialchars($userEmail['email']) ?>" <?= $userEmail['email'] == $instructorDetails['email'] ? 'selected' : '' ?>>
                     <?= htmlspecialchars($userEmail['email']) ?>
                 </option>
             <?php endforeach; ?>
@@ -136,7 +186,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <select id="department_id" name="department_id" 
                                     class="mt-1 block w-full rounded-lg shadow-sm px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
                                 <?php foreach ($departments as $dept): ?>
-                                    <option value="<?= $dept['id'] ?>" <?= $dept['id'] == $instructorData['department_id'] ? 'selected' : '' ?>>
+                                    <option value="<?= $dept['id'] ?>" <?= $dept['id'] == $instructorDetails['department_id'] ? 'selected' : '' ?>>
                                         <?= htmlspecialchars($dept['name']) ?>
                                     </option>
                                 <?php endforeach; ?>
@@ -155,7 +205,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     class="mt-1 block w-full rounded-lg shadow-sm px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                 <option value="">Select Course</option>
                                 <?php foreach ($courses as $course): ?>
-                                    <option value="<?= $course['id'] ?>" <?= $course['id'] == $instructorData['course_id'] ? 'selected' : '' ?>>
+                                    <option value="<?= $course['id'] ?>" <?= $course['id'] == $instructorDetails['course_id'] ? 'selected' : '' ?>>
                                         <?= htmlspecialchars($course['course_name']) ?>
                                     </option>
                                 <?php endforeach; ?>
@@ -174,7 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     class="mt-1 block w-full rounded-lg shadow-sm px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                 <option value="">Select Section</option>
                                 <?php foreach ($sections as $section): ?>
-                                    <option value="<?= $section['id'] ?>" <?= $section['id'] == $instructorData['section_id'] ? 'selected' : '' ?>>
+                                    <option value="<?= $section['id'] ?>" <?= $section['id'] == $instructorDetails['section_id'] ? 'selected' : '' ?>>
                                         <?= htmlspecialchars($section['name']) ?>
                                     </option>
                                 <?php endforeach; ?>

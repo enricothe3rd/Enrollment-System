@@ -84,7 +84,9 @@
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('sex_option')"><i class="fas fa-file-alt mr-3"></i>Add Sex Options</a></li>
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('status_option')"><i class="fas fa-file-alt mr-3"></i>Add Status Options</a></li>
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('suffixes')"><i class="fas fa-file-alt mr-3"></i>Add Suffixes</a></li>
-                    <li><a href="#" class="flex items-center py-3 px-4 mb-10 hover:bg-red-500" onclick="showContent('school_year')"><i class="fas fa-file-alt mr-3"></i>Add School Year</a></li>
+                    <li><a href="#" class="flex items-center py-3 px-4  hover:bg-red-500" onclick="showContent('school_year')"><i class="fas fa-file-alt mr-3"></i>Add School Year</a></li>
+                    <li><a href="#" class="flex items-center py-3 px-4  hover:bg-red-500" onclick="showContent('enrolled_subject')"><i class="fas fa-file-alt mr-3"></i>Enrollment Subject</a></li>
+                    <li><a href="#" class="flex items-center py-3 px-4 mb-10 hover:bg-red-500" onclick="showContent('student_by_subject')"><i class="fas fa-file-alt mr-3"></i>All Student Grades</a></li>
                 </ul>
             </nav>
         </aside>
@@ -150,6 +152,13 @@
             </div>
             <div id="school_year" class="content-section">
                 <iframe src="enrollment/school_year.php" title="school_year"></iframe>
+            </div>
+
+            <div id="enrolled_subject" class="content-section">
+                <iframe src="Enrolled_subject/grades.php" title="school_year"></iframe>
+            </div>
+            <div id="student_by_subject" class="content-section">
+                <iframe src="instructor/student_by_subject.php" title="school_year"></iframe>
             </div>
         </main>
     </div>

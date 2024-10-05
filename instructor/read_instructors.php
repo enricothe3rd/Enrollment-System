@@ -48,7 +48,7 @@ $instructors = $instructor->readAll();
 </head>
 <body class="bg-gray-100 font-sans leading-normal tracking-normal">
 
-<div class="container mx-auto mt-10 p-6">
+<div class="mt-6">
     <div class="bg-transparent overflow-hidden">
         <div class="p-6">
             <h1 class="text-2xl font-semibold text-red-800 mb-4">Instructor List</h1>
@@ -61,6 +61,31 @@ $instructors = $instructor->readAll();
             <!-- Search Input -->
             <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search by name, email, or department..." class="mb-4 p-2 border border-gray-300 rounded">
 
+
+            <?php if (isset($_GET['message'])): ?>
+    <?php if ($_GET['message'] == 'exists'): ?>
+        <div id="error-message" class="mb-2 bg-red-200 text-red-700 p-4 rounded">
+            <h2 class="text-lg font-semibold">Error</h2>
+            <p>This instructor cannot be deleted because it has assign on a subject.</p>
+        </div>
+        <script>
+        setTimeout(function() {
+            document.getElementById('error-message').style.display = 'none'; // Hide the message
+        }, 3000); // Hide after 3000 milliseconds (3 seconds)
+    </script>
+    <?php elseif ($_GET['message'] == 'deleted'): ?>
+        <div id="deleted-message" class="mb-2 bg-green-200 text-green-700 p-4 rounded">
+            <h2 class="text-lg font-semibold">Success</h2>
+            <p>The instructor was deleted successfully.</p>
+        </div>
+        <script>
+        setTimeout(function() {
+            document.getElementById('deleted-message').style.display = 'none'; // Hide the message
+        }, 3000); // Hide after 3000 milliseconds (3 seconds)
+    </script>
+    
+    <?php endif; ?>
+<?php endif; ?>
             <!-- Table Container -->
             <div class="overflow-x-auto">
                 <!-- Table -->
@@ -90,8 +115,8 @@ $instructors = $instructor->readAll();
                                 <td class="px-6 py-4 whitespace-nowrap text-gray-500"><?= htmlspecialchars($row['course_name']) ?></td>
                                 <td class="px-6 py-4 whitespace-nowrap text-gray-500"><?= htmlspecialchars($row['section_name']) ?></td>
                                 <td class="px-6 py-4 whitespace-nowrap text-gray-500 flex space-x-2">
-                                    <a href="edit_instructor.php?id=<?= htmlspecialchars($row['id']) ?>" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-1 px-2 rounded transition duration-150">Edit</a>
-                                    <a href="delete_instructor.php?id=<?= htmlspecialchars($row['id']) ?>" onclick="return confirm('Are you sure you want to delete this instructor?');" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-2 rounded transition duration-150">Delete</a>
+                                <a href="edit_instructor.php?id=<?php echo $row['id']; ?>" class="bg-yellow-500 hover:bg-yellow-700 text-white font-semibold py-1 px-2 rounded transition duration-150">Edit</a>
+                                <a href="delete_instructor.php?id=<?= htmlspecialchars($row['id']) ?>" onclick="return confirm('Are you sure you want to delete this instructor?');" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-2 rounded transition duration-150">Delete</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
