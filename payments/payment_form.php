@@ -19,7 +19,17 @@ $payment = new Payment();
 $unitPrice = '';
 $miscellaneousFee = '';
 $totalUnits = $payment->getTotalUnitsForStudent($student_number); // Fetching total units
+$totalmonths = $payment->getMonthsOfPayments(); // Fetching total units
 
+
+// Optionally, display the results
+if (!empty($totalmonths)) {
+    foreach ($totalmonths as $payment1) {
+        $totalmonthly = $payment1['months_of_payments'];
+    }
+} else {
+    echo 'No months of payments found.'; // Handle case where no results are returned
+}
 // Fetching enrollment details
 $details = $payment->getEnrollmentDetails($student_number);
 if ($details) {
@@ -39,6 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $amountPerUnit = filter_input(INPUT_POST, 'amount_per_unit', FILTER_VALIDATE_FLOAT);
     $miscellaneousFee = filter_input(INPUT_POST, 'miscellaneous_fee', FILTER_VALIDATE_FLOAT);
     $paymentMethod = filter_input(INPUT_POST, 'payment_method', FILTER_SANITIZE_STRING);
+    $totalmonthly = filter_input(INPUT_POST, 'number_of_months_payment', FILTER_SANITIZE_STRING);
 
     // Check if total_payment is set and valid
     if (isset($_POST['total_payment'])) {
@@ -142,6 +153,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </div>
 
+<div class="mb-4 relative ">
+    <label for="number_of_months_payment" class="block text-sm font-medium">total monthly</label>
+    <div class="flex items-center bg-red-100 border border-red-300 rounded-md shadow-sm mt-1">
+        <span class="bg-red-800 text-white px-3 py-2 rounded-l-md">₱</span>
+        <input type="number" name="number_of_months_payment" id="number_of_months_payment" 
+               value="<?php echo htmlspecialchars($totalmonthly); ?>" 
+               required class="flex-1 p-2 border-l border-gray-300 rounded-r-md" 
+               placeholder="Enter amount" 
+               oninput="calculateMonthlyPayments()" 
+               disabled>
+    </div>
+</div>
+
 <div class="mb-4 relative">
     <label for="miscellaneous_fee" class="block text-sm font-medium">Miscellaneous Fee:</label>
     <div class="flex items-center bg-red-100 border border-red-300 rounded-md shadow-sm mt-1">
@@ -216,6 +240,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     payment_method: document.getElementById('payment_method').value,
                     number_of_units: document.getElementById('number_of_units').value,
                     transaction_id: data.orderID, // PayPal transaction ID
+                    number_of_months_payment: document.getElementById('number_of_months_payment').value,
+                    
                 };
 
                 // Send AJAX request to store the payment

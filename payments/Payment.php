@@ -10,10 +10,17 @@ class Payment {
 
     public function create($data) {
         try {
-            $sql = "INSERT INTO payments (student_number, number_of_units, amount_per_unit, miscellaneous_fee, total_payment, payment_method, transaction_id)
-                    VALUES (:student_number, :number_of_units, :amount_per_unit, :miscellaneous_fee, :total_payment, :payment_method, :transaction_id)";
+            // Set values to null if payment method is cash
+            if ($data['payment_method'] === 'cash') {
+                $data['number_of_months_payment'] = null; // or ''
+                $data['monthly_payment'] = null; // or ''
+                $data['next_payment_due_date'] = null; // or ''
+            }
+    
+            $sql = "INSERT INTO payments (student_number, number_of_units, amount_per_unit, miscellaneous_fee, total_payment, payment_method, transaction_id, number_of_months_payment, monthly_payment, next_payment_due_date)
+                    VALUES (:student_number, :number_of_units, :amount_per_unit, :miscellaneous_fee, :total_payment, :payment_method, :transaction_id, :number_of_months_payment, :monthly_payment, :next_payment_due_date)";
             $stmt = $this->conn->prepare($sql);
-            
+    
             // Bind parameters
             $stmt->bindParam(':student_number', $data['student_number']);
             $stmt->bindParam(':number_of_units', $data['number_of_units']);
@@ -22,15 +29,18 @@ class Payment {
             $stmt->bindParam(':total_payment', $data['total_payment']);
             $stmt->bindParam(':payment_method', $data['payment_method']);
             $stmt->bindParam(':transaction_id', $data['transaction_id']);
-            
+            $stmt->bindParam(':number_of_months_payment', $data['number_of_months_payment']);
+            $stmt->bindParam(':monthly_payment', $data['monthly_payment']);
+            $stmt->bindParam(':next_payment_due_date', $data['next_payment_due_date']);
+    
             // Log payment data
             error_log("Payment Data: " . print_r($data, true));
-            
+    
             if (!$stmt->execute()) {
                 error_log("SQL Error: " . implode(", ", $stmt->errorInfo()));
                 return false;
             }
-
+    
             // Update the payment status to completed
             return $this->updatePaymentStatus($data['student_number']);
         } catch (PDOException $e) {
@@ -38,6 +48,7 @@ class Payment {
             return false;
         }
     }
+    
 
     private function updatePaymentStatus($student_number) {
         try {
@@ -181,6 +192,7 @@ class Payment {
         }
     }
 
+    
     // Method to check if a payment already exists for a student
     private function getPaymentByStudentNumber($student_number) {
         try {
