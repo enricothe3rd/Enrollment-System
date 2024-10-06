@@ -10,11 +10,13 @@ if (isset($_SESSION['student_number']) && isset($_SESSION['user_email'])) {
     $student_number = $_SESSION['student_number'];
     $email = $_SESSION['user_email'];
 
-    // Check if the student has made payments
+    // Check if the student has made payments with the desired status and method
     $checkPaymentStmt = $pdo->prepare("
         SELECT COUNT(*) 
         FROM payments 
         WHERE student_number = :student_number
+        AND payment_status = 'completed'
+        AND payment_method = 'cash'
     ");
     
     // Bind the student number
@@ -22,13 +24,13 @@ if (isset($_SESSION['student_number']) && isset($_SESSION['user_email'])) {
     
     // Execute the payment check
     $checkPaymentStmt->execute();
-    $paymentExists = $checkPaymentStmt->fetchColumn();
+    $paymentValid = $checkPaymentStmt->fetchColumn();
 
     // Initialize subjects array
     $subjects = [];
 
-    // Only fetch subjects if the payment exists
-    if ($paymentExists > 0) {
+    // Only fetch subjects if the payment is valid
+    if ($paymentValid > 0) {
         // Prepare the SQL statement to fetch subject enrollments
         $SubjectStmt = $pdo->prepare("
             SELECT 
@@ -64,8 +66,8 @@ if (isset($_SESSION['student_number']) && isset($_SESSION['user_email'])) {
         // Fetch the subjects
         $subjects = $SubjectStmt->fetchAll(PDO::FETCH_ASSOC);
     } else {
-        // If no payment, inform the user
-        displayMessage('error', 'Payment Required', 'No payment found for this student. Please complete the payment to view subjects.');
+        // If no valid payment, inform the user
+        displayMessage('error', 'Payment Required', 'No valid payment found for this student. Please complete your payment using cash to view subjects.');
         exit; // Exit to prevent further processing
     }
 } else {
@@ -85,6 +87,7 @@ function formatTime($time) {
     return date("g:i A", strtotime($time));
 }
 ?>
+
 
 
 <!DOCTYPE html>
@@ -109,10 +112,7 @@ function formatTime($time) {
     
     <!-- Display the course and section names -->
     <div class="mb-4">
-        <?php if ($section_name): ?>
-            <h3 class="block text-red-700 text-lg font-medium">Section: <span class="text-gray-800"><?= htmlspecialchars($section_name) ?></span></h3>
-        <?php endif; ?>
-
+   
         <?php if ($course_name): ?>
             <h3 class="block text-red-700 text-lg font-medium">Course: <span class="text-gray-800"><?= htmlspecialchars($course_name) ?></span></h3>
         <?php endif; ?>
@@ -126,10 +126,16 @@ function formatTime($time) {
         <?php endif; ?>
     </div>
 
+
+            <div>
+                <p>please complete you payment first</p>
+            </div>
+
     <!-- Table of subject enrollments -->
     <table class="min-w-full table-auto bg-gray-50 rounded-lg shadow-md">
         <thead class="bg-red-800">
             <tr class="hidden sm:table-row">
+            <th class="px-4 py-4 border-b text-left text-white">Section Name</th>
                 <th class="px-4 py-4 border-b text-left text-white">Subject Code</th>
                 <th class="px-4 py-4 border-b text-left text-white">Subject Title</th>
                 <th class="px-4 py-4 border-b text-left text-white">Units</th>
@@ -141,6 +147,10 @@ function formatTime($time) {
             <?php if (!empty($subjects)): ?>
                 <?php foreach ($subjects as $subject): ?>
                     <tr class="border-b bg-red-50 hover:bg-red-200 block sm:table-row">
+                    <td class="border-t px-6 py-3 block sm:table-cell">
+                            <span class="sm:hidden font-semibold">Room: </span>
+                            <?= htmlspecialchars($subject['section_name']) ?>
+                        </td>
                         <td class="border-t px-6 py-3 block sm:table-cell">
                             <span class="sm:hidden font-semibold">Subject Code: </span>
                             <?= htmlspecialchars($subject['subject_code']) ?>

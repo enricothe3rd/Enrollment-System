@@ -19,7 +19,6 @@ if (!$paymentDetails) {
     exit;
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,37 +26,59 @@ if (!$paymentDetails) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Receipt</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .receipt-header {
+            border-bottom: 2px solid #0070ba; /* PayPal blue */
+        }
+        .receipt-footer {
+            border-top: 2px solid #0070ba; /* PayPal blue */
+        }
+        .button {
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .button:hover {
+            background-color: #005999; /* Darker shade for hover */
+            transform: scale(1.05); /* Slight zoom effect */
+        }
+        .rounded-button {
+            border-radius: 12px; /* Rounded corners */
+        }
+    </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-lg">
-        <div class="text-center">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
+        <div class="text-center receipt-header pb-4">
             <img src="../assets/images/school-logo/bcc-icon.png" alt="School Logo" class="w-16 h-16 mx-auto">
-            <h1 class="text-2xl font-bold mt-4">Payment Receipt</h1>
-        </div>
-        <hr class="my-4">
-        
-        <div class="text-center">
-            <p class="text-lg font-semibold">Student Number: <span class="font-normal"><?php echo htmlspecialchars($paymentDetails['student_number']); ?></span></p>
-            <p class="text-lg font-semibold">Transaction ID: <span class="font-normal"><?php echo htmlspecialchars($paymentDetails['transaction_id']); ?></span></p>
-            <p class="text-lg font-semibold">Amount Paid: <span class="font-normal">₱<?php echo htmlspecialchars(number_format($paymentDetails['total_payment'], 2)); ?> PHP</span></p>
-            <p class="text-lg font-semibold">Date: <span class="font-normal"><?php echo htmlspecialchars(date("F j, Y", strtotime($paymentDetails['created_at']))); ?></span></p>
+            <h1 class="text-3xl font-bold mt-2 text-gray-800">Payment Receipt</h1>
         </div>
         
-        <hr class="my-4">
-        
-        <div class="text-center">
-            <p class="italic">Thank you for your payment!</p>
+        <div class="my-4">
+            <p class="text-lg font-semibold text-gray-700">Student Number: <span class="font-normal text-gray-600"><?php echo htmlspecialchars($paymentDetails['student_number']); ?></span></p>
+            <p class="text-lg font-semibold text-gray-700">Transaction ID: <span class="font-normal text-gray-600"><?php echo htmlspecialchars($paymentDetails['transaction_id']); ?></span></p>
+            <p class="text-lg font-semibold text-gray-700">Amount Paid: <span class="font-normal text-gray-600">₱<?php echo htmlspecialchars(number_format($paymentDetails['total_payment'], 2)); ?> PHP</span></p>
+            <p class="text-lg font-semibold text-gray-700">Date: <span class="font-normal text-gray-600"><?php echo htmlspecialchars(date("F j, Y", strtotime($paymentDetails['created_at']))); ?></span></p>
         </div>
 
-        <a href="receipt_print.php" class="bg-blue-500 text-white font-semibold py-2 px-4 rounded hover:bg-blue-600 inline-block mt-4">
-            Print Receipt
-        </a>
+        <div class="text-center receipt-footer py-4">
+            <p class="italic text-gray-600">Thank you for your payment!</p>
+        </div>
 
-        <a class="bg-blue-500 text-white font-semibold py-2 px-4 rounded hover:bg-blue-600 inline-block mt-4" onclick="openTwoFiles(event)">
-            Print COR
-        </a>
+        <div class="flex justify-center space-x-4 mt-4">
+            <a href="receipt_print.php" class="bg-blue-500 text-white font-semibold py-2 px-6 rounded-button button">
+                Print Receipt
+            </a>
+            <a class="bg-blue-500 text-white font-semibold py-2 px-6 rounded-button button" onclick="openTwoFiles(event)">
+                Print COR
+            </a>
+            <button onclick="window.top.location.reload();" class="bg-green-500 text-white font-semibold py-2 px-6 rounded-button button">
+                Go to Dashboard
+            </button>
+        </div>
+    </div>
+</body>
+</html>
 
-        <script>
+<script>
             function openTwoFiles(event) {
                 event.preventDefault();  // Prevent the default anchor action
                 
@@ -68,13 +89,3 @@ if (!$paymentDetails) {
                 window.location.href = 'print_cor1.php';
             }
         </script>
-<!-- Button to go to the student dashboard -->
-<button onclick="window.top.location.reload();" class="bg-green-500 text-white font-semibold py-2 px-4 rounded hover:bg-green-600 inline-block mt-4">
-    Go to Dashboard
-</button>
-
-
-
-    </div>
-</body>
-</html>

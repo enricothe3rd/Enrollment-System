@@ -101,18 +101,21 @@ if ($student_number) {
                 <ul>
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('home')"><i class="fas fa-home mr-3"></i> Home</a></li>
                     <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('profile')"><i class="fas fa-home mr-3"></i> My Profile</a></li>
+                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('subjects')"><i class="fas fa-home mr-3"></i> My Subjects</a></li>
+                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('grades')"><i class="fas fa-home mr-3"></i> My Grades</a></li>
+
                     <?php if (empty($payment_method)): ?>
-    <li>
-        <a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('enrollment')">
-            <i class="fas fa-user-plus mr-3"></i> Enrollments
-        </a>
-    </li>
-<?php endif; ?>
+                            <li>
+                                <a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('enrollment')">
+                                    <i class="fas fa-user-plus mr-3"></i> Enrollments
+                                </a>
+                            </li>
+                        <?php endif; ?>
 
   
 
                     
-                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('department')"><i class="fas fa-building mr-3"></i> Research Fees</a></li>
+                    <li><a href="#" class="flex items-center py-3 px-4 hover:bg-red-500" onclick="showContent('department')"><i class="fas fa-building mr-3"></i> My Payments</a></li>
                 </ul>
             </nav>
         </aside>
@@ -120,11 +123,17 @@ if ($student_number) {
         <!-- Main Content -->
         <main class="flex-1 p-6 overflow-hidden">
             <div id="home" class="content-section">
-            <iframe src="Enrolled_subject/enrolled_subject.php" title="My Subjects"></iframe>
+            <iframe src="" title="My Subjects"></iframe>
             </div>
-
             <div id="profile" class="content-section">
-                <iframe src="instructor/get_grades.php" title="My Profile"></iframe>
+                <iframe src="profile/student_profile.php" title="My Profile"></iframe>
+            </div>
+   
+            <div id="subjects" class="content-section">
+                <iframe src="Enrolled_subject/enrolled_subject.php" title="My Subject"></iframe>
+            </div>
+            <div id="grades" class="content-section">
+                <iframe src="instructor/get_grades.php" title="My grades"></iframe>
             </div>
             <?php if (empty($payment_method)): ?>
             <div id="enrollment" class="content-section">
@@ -132,7 +141,7 @@ if ($student_number) {
             </div>
             <?php endif; ?>
             <div id="department" class="content-section">
-                <iframe src="Enrolled_subject/enrolled_subject" title="Research Fees"></iframe>
+                <iframe src="Enrolled_subject/enrolled_payments.php" title="Research Fees"></iframe>
             </div>
 
    

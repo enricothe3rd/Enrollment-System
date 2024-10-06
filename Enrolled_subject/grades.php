@@ -5,32 +5,47 @@ require '../db/db_connection3.php'; // Ensure this path is correct
 
 $db = Database::connect();
 
-session_start(); // Start session to access instructor data
-$instructor_id = $_SESSION['instructor_id'] ?? null;
+session_start(); // Start session to access user data
 
-// Fetch the instructor's ID
-$instructors = [];
-if ($instructor_id) {
-    $stmt = $db->prepare("SELECT id FROM instructors WHERE id = ?");
-    $stmt->execute([$instructor_id]);
-    $instructors = $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+// Get the instructor's email from the session
+$email = $_SESSION['user_email'] ?? null;
 
-if (!empty($instructors)) {
-    $instructor_id = $instructors[0]['id']; // Set the instructor_id if it exists
+// Initialize instructor_id
+$instructor_id = null;
+
+// Fetch the instructor's ID based on email
+if ($email) {
+    $stmt = $db->prepare("SELECT id FROM instructors WHERE email = ?");
+    $stmt->execute([$email]);
+    $instructor = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if ($instructor) {
+        $instructor_id = $instructor['id']; // Set the instructor_id if found
+    } else {
+        die("Instructor not found."); // Handle case where instructor does not exist
+    }
 } else {
-    die("Instructor not found."); // Handle case where instructor does not exist
+    die("No instructor email found in session."); // Handle case where email is not in session
 }
 
 // Fetch subjects assigned to this instructor
 $assigned_subjects = [];
-if (!empty($instructor_id)) {
+if ($instructor_id) {
     $stmt = $db->prepare("
-        SELECT s.id, s.title, s.units 
-        FROM instructor_subjects isub 
-        JOIN subjects s ON isub.subject_id = s.id 
-        WHERE isub.instructor_id = ?
-    ");
+    SELECT 
+        s.id, 
+        s.title, 
+        s.units, 
+        sec.name AS section_name,  -- Add section name column
+        c.course_name               -- Add course name column
+    FROM instructor_subjects isub 
+    JOIN subjects s ON isub.subject_id = s.id 
+    JOIN sections sec ON s.section_id = sec.id  -- Join with sections table
+    JOIN courses c ON sec.course_id = c.id      -- Join with courses table to get the course name
+    WHERE isub.instructor_id = ?
+");
+
+
     $stmt->execute([$instructor_id]);
     $assigned_subjects = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
@@ -43,13 +58,23 @@ $subject_id = null; // Initialize subject_id
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['subject_id'])) {
     $subject_id = $_POST['subject_id'];
     
-    // Prepare and execute the query
-    $stmt = $db->prepare("
-        SELECT e.student_number, e.firstname, e.lastname 
-        FROM subject_enrollments se 
-        JOIN enrollments e ON se.student_number = e.student_number 
-        WHERE se.subject_id = ?
-    ");
+// Prepare and execute the query
+// Prepare and execute the query
+$stmt = $db->prepare("
+    SELECT 
+        e.student_number, 
+        e.firstname, 
+        e.lastname, 
+        e.suffix,              -- Add suffix column
+        sub.title AS subject_title,  -- Add subject title column
+        sec.name AS section_name      -- Add section name column
+    FROM subject_enrollments se 
+    JOIN enrollments e ON se.student_number = e.student_number 
+    JOIN subjects sub ON se.subject_id = sub.id  -- Join with subjects table
+    JOIN sections sec ON sub.section_id = sec.id  -- Join with sections table
+    WHERE se.subject_id = ?
+");
+
     $stmt->execute([$subject_id]);
     $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
@@ -78,42 +103,61 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_grade'])) {
     // Debugging output to check received values
     error_log("Student Number: $student_number, Subject ID: $subject_id, Prelim: $prelim, Midterm: $midterm, Finals: $finals");
 
+    // Validate grades only if they are set and not empty
+    if (!empty($prelim) && ($prelim < 1 || $prelim > 5)) {
+        $_SESSION['error_message'] = "Prelim grade must be between 1 and 5.";
+    }
 
+    if (!empty($midterm) && ($midterm < 1 || $midterm > 5)) {
+        $_SESSION['error_message'] = "Midterm grade must be between 1 and 5.";
+    }
 
- // Validate grades only if they are set and not empty
-if (!empty($prelim) && ($prelim < 1 || $prelim > 5)) {
-    $_SESSION['error_message'] = "Prelim grade must be between 1 and 5.";
+    if (!empty($finals) && ($finals < 1 || $finals > 5)) {
+        $_SESSION['error_message'] = "Finals grade must be between 1 and 5.";
+    }
+
+    // Proceed only if there is no error message
+    if (!isset($_SESSION['error_message'])) {
+        // Check if a grade entry already exists for this student and subject
+        $stmt = $db->prepare("SELECT id FROM grades WHERE student_number = ? AND subject_id = ?");
+        $stmt->execute([$student_number, $subject_id]);
+        $existing_grade = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Get the number of units for the subject
+        $stmt = $db->prepare("SELECT units FROM subjects WHERE id = ?");
+        $stmt->execute([$subject_id]);
+        $subject = $stmt->fetch(PDO::FETCH_ASSOC);
+        $units = $subject['units'] ?? 0; // Assuming the units column in subjects table
+
+// Convert grades and units to floats
+$prelim = floatval($prelim);
+$midterm = floatval($midterm);
+$finals = floatval($finals);
+$units = floatval($units); // Convert units to float
+
+// Calculate total grade using the overall units
+if ($units > 0) { // Ensure units are valid for division
+    // Calculate the total grades based on the weights
+    $total_grades = ($prelim * 0.3) + ($midterm * 0.3) + ($finals * 0.4);
+} else {
+    $total_grades = 0; // If no units, set total grades to 0 to avoid division by zero
 }
 
-if (!empty($midterm) && ($midterm < 1 || $midterm > 5)) {
-    $_SESSION['error_message'] = "Midterm grade must be between 1 and 5.";
-}
 
-if (!empty($finals) && ($finals < 1 || $finals > 5)) {
-    $_SESSION['error_message'] = "Finals grade must be between 1 and 5.";
-}
-
-// Proceed only if there is no error message
-if (!isset($_SESSION['error_message'])) {
-    // Check if a grade entry already exists for this student and subject
-    $stmt = $db->prepare("SELECT id FROM grades WHERE student_number = ? AND subject_id = ?");
-    $stmt->execute([$student_number, $subject_id]);
-    $existing_grade = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if ($existing_grade) {
-        // Update existing grade
-        $stmt = $db->prepare("UPDATE grades SET prelim = ?, midterm = ?, finals = ? WHERE id = ?");
-        $stmt->execute([$prelim, $midterm, $finals, $existing_grade['id']]);
-        $_SESSION['success_message'] = "Grades successfully updated."; // Set success message in session
-    } else {
-        // Insert new grade
-        $stmt = $db->prepare("INSERT INTO grades (student_number, subject_id, prelim, midterm, finals) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([$student_number, $subject_id, $prelim, $midterm, $finals]);
-        $_SESSION['success_message'] = "Grades successfully added."; // Set success message in session
+        if ($existing_grade) {
+            // Update existing grade
+            $stmt = $db->prepare("UPDATE grades SET prelim = ?, midterm = ?, finals = ?, total_grade = ? WHERE id = ?");
+            $stmt->execute([$prelim, $midterm, $finals, $total_grades, $existing_grade['id']]);
+            $_SESSION['success_message'] = "Grades successfully updated."; // Set success message in session
+        } else {
+            // Insert new grade
+            $stmt = $db->prepare("INSERT INTO grades (student_number, subject_id, prelim, midterm, finals, total_grade) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$student_number, $subject_id, $prelim, $midterm, $finals, $total_grades]);
+            $_SESSION['success_message'] = "Grades successfully added."; // Set success message in session
+        }
     }
 }
 
-}
 
 
 // Include the message handler to display messages
@@ -144,13 +188,26 @@ if (isset($_SESSION['message'])) {
     unset($_SESSION['message']); // Clear the message after displaying it
 }
 
-// Fetch all grades for displaying, including units
 $grades = $db->prepare("
-    SELECT g.id, e.student_number, e.firstname, e.lastname, sub.title AS subject_title, g.prelim, g.midterm, g.finals, sub.units 
+    SELECT 
+        g.id, 
+        e.student_number, 
+        e.firstname, 
+        e.lastname, 
+             e.suffix, 
+        sub.title AS subject_title, 
+        g.prelim, 
+        g.midterm, 
+        g.finals, 
+        g.total_grade,  -- Add total_grade column here
+        sub.units, 
+        sec.name AS section_name  -- Add section name column
     FROM grades g 
     JOIN enrollments e ON g.student_number = e.student_number 
-    JOIN subjects sub ON g.subject_id = sub.id
+    JOIN subjects sub ON g.subject_id = sub.id 
+    JOIN sections sec ON sub.section_id = sec.id  -- Join with sections table
 ");
+
 $grades->execute();
 $grades = $grades->fetchAll(PDO::FETCH_ASSOC);
 
@@ -177,7 +234,7 @@ $grades = $grades->fetchAll(PDO::FETCH_ASSOC);
             <option value="" disabled selected>Select a subject</option>
             <?php foreach ($assigned_subjects as $subject): ?>
                 <option value="<?= $subject['id']; ?>" <?= isset($subject_id) && $subject_id == $subject['id'] ? 'selected' : ''; ?>>
-                    <?= htmlspecialchars($subject['title'] ?? ''); ?>
+                    <?= htmlspecialchars(strtoupper(($subject['title'] ?? '') . ' - ' . ($subject['section_name'] ?? ''). ' - ' . ($subject['course_name'] ?? ''))); ?>
                 </option>
             <?php endforeach; ?>
         </select>
@@ -200,7 +257,8 @@ $grades = $grades->fetchAll(PDO::FETCH_ASSOC);
             <select name="student_number" class="border border-red-300 outline-none rounded p-2 w-full" required>
                 <?php foreach ($students as $student): ?>
                     <option value="<?= htmlspecialchars($student['student_number'] ?? ''); ?>">
-                        <?= htmlspecialchars(($student['firstname'] ?? '') . ' ' . ($student['lastname'] ?? '')); ?>
+                        <?= htmlspecialchars(strtoupper(($student['firstname'] ?? '') . ' ' . ($student['lastname'] ?? '') . ' ' . ($student['suffix'] ?? ''))
+                                            . ' , ' . ($student['section_name'] ?? '') . ' , ' . ($student['subject_title'] ?? '')); ?>
                     </option>
                 <?php endforeach; ?>
             </select>
@@ -251,11 +309,13 @@ $grades = $grades->fetchAll(PDO::FETCH_ASSOC);
                 <tr>
                     <th class="px-4 py-4 border-b text-left text-white">Student Number</th>
                     <th class="px-4 py-4 border-b text-left text-white">Student Name</th>
+                    <th class="px-4 py-4 border-b text-left text-white">Section Name</th>
                     <th class="px-4 py-4 border-b text-left text-white">Subject</th>
                     <th class="px-4 py-4 border-b text-left text-white">Units</th>
                     <th class="px-4 py-4 border-b text-left text-white">Prelim</th>
                     <th class="px-4 py-4 border-b text-left text-white">Midterm</th>
                     <th class="px-4 py-4 border-b text-left text-white">Finals</th>
+                    <th class="px-4 py-4 border-b text-left text-white">Total</th>
                     <th class="px-4 py-4 border-b text-left text-white">Actions</th>
                 </tr>
             </thead>
@@ -263,12 +323,15 @@ $grades = $grades->fetchAll(PDO::FETCH_ASSOC);
                 <?php foreach ($grades as $grade): ?>
                     <tr class="border-b bg-red-50 hover:bg-red-200">
                         <td class="px-4 py-4"><?= htmlspecialchars($grade['student_number'] ?? ''); ?></td>
-                        <td class="px-4 py-4"><?= htmlspecialchars($grade['firstname'] . ' ' . $grade['lastname']); ?></td>
+                        <td class="px-4 py-4"><?= htmlspecialchars(strtoupper($grade['firstname'] . ' ' . $grade['suffix']. ' ' . $grade['lastname'])); ?></td>
+
+                        <td class="px-4 py-4"><?= htmlspecialchars($grade['section_name'] ?? ''); ?></td>
                         <td class="px-4 py-4"><?= htmlspecialchars($grade['subject_title'] ?? ''); ?></td>
                         <td class="px-4 py-4"><?= htmlspecialchars($grade['units'] ?? ''); ?></td>
                         <td class="px-4 py-4"><?= htmlspecialchars($grade['prelim'] ?? ''); ?></td>
                         <td class="px-4 py-4"><?= htmlspecialchars($grade['midterm'] ?? ''); ?></td>
                         <td class="px-4 py-4"><?= htmlspecialchars($grade['finals'] ?? ''); ?></td>
+                        <td class="px-4 py-4"><?= htmlspecialchars($grade['total_grade'] ?? ''); ?></td>
                         <td class="px-4 py-4">
                             <form method="POST" action="" class="inline">
                                 <input type="hidden" name="grade_id" value="<?= htmlspecialchars($grade['id'] ?? ''); ?>">

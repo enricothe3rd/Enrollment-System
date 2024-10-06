@@ -102,42 +102,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </script>
 </head>
-<body>
+<body class="flex justify-center items-center h-screen m-0">
     <div class="container mx-auto p-6 max-w-2xl">
-        <h1 class="text-2xl font-bold mb-4">Payment Form</h1>
+    <button 
+            onclick="goBack()" 
+            class="mb-4 px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800 transition duration-200 flex items-center"
+        >
+            <i class="fas fa-arrow-left mr-2"></i>
+            Back
+        </button>
+        <h1 class="text-4xl font-bold mb-4 text-red-800 text-center mt-4">Payment Form</h1>
         <form action="" method="POST">
-            <div class="mb-4">
-                <label for="student_id" class="block text-sm font-medium">Student ID:</label>
-                <input type="text" name="student_id" id="student_id" value="<?php echo htmlspecialchars($student_number); ?>" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" readonly>
-            </div>
-            <div class="mb-4">
-                <label for="number_of_units" class="block text-sm font-medium">Your Total Number of Units</label>
-                <input type="number" name="number_of_units" id="number_of_units" value="<?php echo htmlspecialchars($totalUnits); ?>" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" readonly>
-            </div>
-            <div class="mb-4 relative">
-                <label for="amount_per_unit" class="block text-sm font-medium">Amount per Unit:</label>
-                <div class="flex items-center border border-gray-300 rounded-md shadow-sm mt-1">
-                    <span class="bg-gray-200 text-gray-700 px-3 py-2 rounded-l-md">₱</span>
-                    <input type="number" name="amount_per_unit" id="amount_per_unit" value="<?php echo htmlspecialchars($unitPrice); ?>" required class="flex-1 p-2 border-l border-gray-300 rounded-r-md" placeholder="Enter amount" oninput="calculateMonthlyPayments()">
-                </div>
-            </div>
-            <div class="mb-4 relative">
-                <label for="miscellaneous_fee" class="block text-sm font-medium">Miscellaneous Fee:</label>
-                <div class="flex items-center border border-gray-300 rounded-md shadow-sm mt-1">
-                    <span class="bg-gray-200 text-gray-700 px-3 py-2 rounded-l-md">₱</span>
-                    <input type="number" name="miscellaneous_fee" id="miscellaneous_fee" value="<?php echo htmlspecialchars($miscellaneousFee); ?>" required class="flex-1 p-2 border-l border-gray-300 rounded-r-md" placeholder="Enter fee" oninput="calculateMonthlyPayments()">
-                </div>
-            </div>
-            <div class="mb-4 relative">
-                <label for="total_payment" class="block text-sm font-medium">Total Payment:</label>
-                <div class="flex items-center border border-gray-300 rounded-md shadow-sm mt-1">
-                    <span class="bg-gray-200 text-gray-700 px-3 py-2 rounded-l-md">₱</span>
-                    <input type="number" name="total_payment" id="total_payment" value="<?php echo htmlspecialchars($totalPayment); ?>" class="flex-1 p-2 border-l border-gray-300 rounded-r-md" readonly>
-                </div>
-            </div>
+        <div class="mb-4">
+    <label for="student_id" class="block text-sm font-medium">Student ID:</label>
+    <input type="text" name="student_id" id="student_id" 
+           value="<?php echo htmlspecialchars($student_number); ?>" 
+           required class="mt-1 block w-full bg-red-100  border border-red-300 rounded-md shadow-sm p-2" 
+           disabled>
+</div>
+
+<div class="mb-4">
+    <label for="number_of_units" class="block text-sm font-medium">Your Total Number of Units:</label>
+    <input type="number" name="number_of_units" id="number_of_units" 
+           value="<?php echo htmlspecialchars($totalUnits); ?>" 
+           class="mt-1 block w-full border bg-red-100  border-red-300 rounded-md shadow-sm p-2" 
+           disabled>
+</div>
+
+<div class="mb-4 relative">
+    <label for="amount_per_unit" class="block text-sm font-medium">Amount per Unit:</label>
+    <div class="flex items-center bg-red-100 border border-red-300 rounded-md shadow-sm mt-1">
+        <span class="bg-red-800 text-white px-3 py-2 rounded-l-md">₱</span>
+        <input type="number" name="amount_per_unit" id="amount_per_unit" 
+               value="<?php echo htmlspecialchars($unitPrice); ?>" 
+               required class="flex-1 p-2 border-l border-gray-300 rounded-r-md" 
+               placeholder="Enter amount" 
+               oninput="calculateMonthlyPayments()" 
+               disabled>
+    </div>
+</div>
+
+<div class="mb-4 relative">
+    <label for="miscellaneous_fee" class="block text-sm font-medium">Miscellaneous Fee:</label>
+    <div class="flex items-center bg-red-100 border border-red-300 rounded-md shadow-sm mt-1">
+        <span class="bg-red-800 text-white px-3 py-2 rounded-l-md">₱</span>
+        <input type="number" name="miscellaneous_fee" id="miscellaneous_fee" 
+               value="<?php echo htmlspecialchars($miscellaneousFee); ?>" 
+               required class="flex-1 p-2 border-l border-gray-300 rounded-r-md" 
+               placeholder="Enter fee" 
+               oninput="calculateMonthlyPayments()" 
+               disabled>
+    </div>
+</div>
+
+<div class="mb-4 relative">
+    <label for="total_payment" class="block text-sm font-medium">Total Payment:</label>
+    <div class="flex items-center bg-red-100 border border-red-300 border-gray-300 rounded-md shadow-sm mt-1">
+        <span class="bg-red-800 text-white px-3 py-2 rounded-l-md">₱</span>
+        <input type="number" name="total_payment" id="total_payment" 
+               value="<?php echo htmlspecialchars($totalPayment); ?>" 
+               class="flex-1 p-2 border-l border-gray-300 rounded-r-md" 
+               disabled>
+    </div>
+</div>
+
             <div class="mb-4">
                 <label for="payment_method" class="block text-sm font-medium">Payment Method:</label>
-                <select name="payment_method" id="payment_method" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" onchange="handlePaymentMethodChange()">
+                <select name="payment_method" id="payment_method" required class="mt-1 block w-full border bg-red-100 border-red-300 rounded-md shadow-sm p-2 outline-none" onchange="handlePaymentMethodChange()">
                     <option value="cash">Cash</option>
                     <option value="installment">Installment</option>
                 </select>
@@ -147,12 +178,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div id="paypal-button-container" class="mt-4"></div>
             
             <!-- Submit Payment Button (for cash payments or other methods) -->
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Submit Payment</button>
+            <!-- <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Submit Payment</button> -->
         </form>
 
         <table id="monthlyPaymentsTable" class="mt-4 w-full border border-gray-300" style="display: none;">
             <thead>
-                <tr class="bg-gray-200">
+                <tr class="bg-red-800">
                     <th class="border border-gray-300 p-2">Month</th>
                     <th class="border border-gray-300 p-2">Amount (₱)</th>
                 </tr>
@@ -215,3 +246,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 </body>
 </html>
+
+<script>
+    function goBack() {
+        window.history.back(); // Navigates to the previous page
+    }
+</script>

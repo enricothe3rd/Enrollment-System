@@ -30,11 +30,24 @@ class Payment {
                 error_log("SQL Error: " . implode(", ", $stmt->errorInfo()));
                 return false;
             }
-            
-            return true;
+
+            // Update the payment status to completed
+            return $this->updatePaymentStatus($data['student_number']);
         } catch (PDOException $e) {
             error_log("Database error: " . $e->getMessage());
             return false;
+        }
+    }
+
+    private function updatePaymentStatus($student_number) {
+        try {
+            $sql = "UPDATE payments SET payment_status = 'completed' WHERE student_number = :student_number";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bindParam(':student_number', $student_number);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Database error while updating payment status: " . $e->getMessage());
+            return false; // Return false on error
         }
     }
 
