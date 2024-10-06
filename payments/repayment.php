@@ -103,9 +103,7 @@ if ($student_number) {
     <h1>Make a Monthly Payment</h1>
     <p><strong>Student Number:</strong> <?php echo htmlspecialchars($student_number); ?></p> <!-- Display the student number -->
     <p><strong>Latest Monthly Payment Amount:</strong> PHP <?php echo htmlspecialchars($monthly_payment); ?></p> <!-- Display latest payment amount -->
-    <p><strong>Total Amount Paid:</strong> PHP <?php echo htmlspecialchars($total_paid); ?></p> <!-- Display total amount paid -->
     <p><strong>Number of Months Paid:</strong> <?php echo htmlspecialchars($number_of_months); ?></p> <!-- Display number of months paid -->
-    <p><strong>Total Months for Payment Plan:</strong> <?php echo htmlspecialchars($total_months); ?></p> <!-- Display total months for payment plan -->
     <p><strong>Remaining Months:</strong> <?php echo htmlspecialchars($remaining_months); ?></p> <!-- Display remaining months -->
 
     <form id="payment-form" method="post" action=""> <!-- Updated action to post to itself -->
@@ -121,10 +119,11 @@ if ($student_number) {
         paypal.Buttons({
             createOrder: function(data, actions) {
                 const amount = document.getElementById('monthly_payment').value; // Get the payment amount from the input
+
                 return actions.order.create({
                     purchase_units: [{
                         amount: {
-                            value: amount // Set the amount to charge
+                            value: amount // Set the total amount to charge (monthly)
                         }
                     }]
                 });

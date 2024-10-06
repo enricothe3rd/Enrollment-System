@@ -16,9 +16,14 @@ class Payment {
                 $data['monthly_payment'] = null; // or ''
                 $data['next_payment_due_date'] = null; // or ''
             }
+
+                  // Set values to null if payment method is cash
+                  if ($data['payment_method'] === 'installment') {
+                    $data['total_payment'] = 0; // or ''
+                }
     
-            $sql = "INSERT INTO payments (student_number, number_of_units, amount_per_unit, miscellaneous_fee, total_payment, payment_method, transaction_id, number_of_months_payment, monthly_payment, next_payment_due_date)
-                    VALUES (:student_number, :number_of_units, :amount_per_unit, :miscellaneous_fee, :total_payment, :payment_method, :transaction_id, :number_of_months_payment, :monthly_payment, :next_payment_due_date)";
+            $sql = "INSERT INTO payments (student_number, number_of_units, amount_per_unit, miscellaneous_fee, total_payment, payment_method, transaction_id, number_of_months_payment, monthly_payment, next_payment_due_date, installment_down_payment)
+                    VALUES (:student_number, :number_of_units, :amount_per_unit, :miscellaneous_fee, :total_payment, :payment_method, :transaction_id, :number_of_months_payment, :monthly_payment, :next_payment_due_date, :installment_down_payment)";
             $stmt = $this->conn->prepare($sql);
     
             // Bind parameters
@@ -32,6 +37,7 @@ class Payment {
             $stmt->bindParam(':number_of_months_payment', $data['number_of_months_payment']);
             $stmt->bindParam(':monthly_payment', $data['monthly_payment']);
             $stmt->bindParam(':next_payment_due_date', $data['next_payment_due_date']);
+            $stmt->bindParam(':installment_down_payment', $data['installment_down_payment']);
     
             // Log payment data
             error_log("Payment Data: " . print_r($data, true));

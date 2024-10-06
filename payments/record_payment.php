@@ -33,6 +33,7 @@ $paymentData = [
     'number_of_months_payment' => $data['number_of_months_payment'],
     'monthly_payment' => $monthlyPayment, // New column
     'next_payment_due_date' => $nextPaymentDate, // New column
+    'installment_down_payment' => $data['installment_down_payment'],
 ];
 
 // Insert payment into the database
