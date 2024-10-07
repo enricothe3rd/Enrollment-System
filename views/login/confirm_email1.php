@@ -1,5 +1,5 @@
 <?php
-require 'db_connection.php'; // Include this line to establish database connection
+require '../../db/db_connection.php'; // Include this line to establish database connection
 
 // Token expiration time (e.g., 24 hours)
 $token_expiration_time = 24 * 60 * 60;
@@ -42,7 +42,7 @@ if (isset($_GET['token'])) {
                             <link href='https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css' rel='stylesheet'>
                             <script>
                                 setTimeout(function() {
-                                    window.location.href = 'index.php';
+                                    window.location.href = '../../index.php';
                                 }, 3000); // 3 seconds delay
                             </script>
                         </head>
@@ -68,7 +68,7 @@ if (isset($_GET['token'])) {
                     <link href='https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css' rel='stylesheet'>
                     <script>
                         setTimeout(function() {
-                            window.location.href = 'index.php';
+                            window.location.href = '../../index.php';
                         }, 3000); // 3 seconds delay
                     </script>
                 </head>

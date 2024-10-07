@@ -151,7 +151,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <?php if ($redirect): ?>
         <script>
             setTimeout(function() {
-                window.location.href = 'index.php';
+                window.location.href = '../../index.php';
             }, 5000); // Redirect after 5 seconds
         </script>
     <?php endif; ?>
