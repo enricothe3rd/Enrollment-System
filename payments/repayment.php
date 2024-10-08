@@ -2,7 +2,7 @@
 session_start(); // Start the session
 
 // Include the Database class
-require '../db/db_connection3.php'; // Make sure this path is correct
+require '../db/db_connection3.php'; // Ensure this path is correct
 
 // Get the PDO instance
 $db = Database::connect(); // Use the Database class to get the PDO instance
@@ -10,95 +10,114 @@ $db = Database::connect(); // Use the Database class to get the PDO instance
 // Retrieve student_number from session
 $student_number = isset($_SESSION['student_number']) ? $_SESSION['student_number'] : null;
 
-// Initialize variables for payment breakdown
-$monthly_payment = 0;
-$number_of_months_payment = 0;
-$next_due_date = null;
 
-// Check if the form was submitted
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Get the POST data
-    $submitted_payment = $_POST['monthly_payment'];
-    $transaction_id = $_POST['transaction_id'];
-
-    // Fetch the latest payment record for the student to get the expected monthly payment
-    $stmt = $db->prepare("SELECT monthly_payment, number_of_months_payment, next_payment_due_date FROM payments WHERE student_number = ? ORDER BY created_at DESC LIMIT 1");
-    $stmt->execute([$student_number]);
-    $latest_payment = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    // If there's a previous payment, use its monthly payment for comparison
-    if ($latest_payment) {
-        $expected_payment = $latest_payment['monthly_payment'];
-        $number_of_months_payment = $latest_payment['number_of_months_payment']; // Fetch the current number of months
-        $next_due_date = $latest_payment['next_payment_due_date'];
-    } else {
-        // No previous payment, set default values
-        $expected_payment = $submitted_payment; // Use submitted amount as expected payment
-        $number_of_months_payment = 0; // Start with 0 months
-        $next_due_date = null; // No previous due date
-    }
-
-    // Determine the next payment due date (e.g., adding 1 month from the current due date or current date)
-    if ($next_due_date) {
-        $next_due_date = date('Y-m-d', strtotime($next_due_date . ' +1 month')); // Update to next month
-    } else {
-        $next_due_date = date('Y-m-d', strtotime('+1 month')); // Set the due date to one month from now
-    }
-
-    // Prepare the insert statement for the new payment
-    $stmt = $db->prepare("INSERT INTO payments (student_number, monthly_payment, transaction_id, next_payment_due_date) VALUES (?, ?, ?, ?)");
-
-    // Execute the insert statement
-    if ($stmt->execute([$student_number, $submitted_payment, $transaction_id, $next_due_date])) {
-        echo "<script>alert('Payment of \$$submitted_payment processed successfully for student number: $student_number');</script>";
-
-        // If the user paid the exact expected monthly payment, decrement the number_of_months_payment
-        if ($submitted_payment == $expected_payment) {
-            $number_of_months_payment = max(0, $number_of_months_payment - 1); // Decrement, but ensure it doesn't go below 0
-        }
-        // If the user paid less than the expected payment, do nothing (leave the number_of_months_payment unchanged)
-        
-        // Update the number_of_months_payment in the database after the payment
-        $update_stmt = $db->prepare("UPDATE payments SET number_of_months_payment = ? WHERE student_number = ? AND transaction_id = ?");
-        $update_stmt->execute([$number_of_months_payment, $student_number, $transaction_id]);
-
-    } else {
-        echo "<script>alert('Error processing payment.');</script>";
-    }
-}
-
-// Fetch the breakdown of payments for the student
 if ($student_number) {
-    // Get the latest monthly payment and the total number of months for the payment plan
-    $stmt = $db->prepare("SELECT monthly_payment, number_of_months_payment FROM payments WHERE student_number = ? ORDER BY created_at DESC LIMIT 1");
-    $stmt->execute([$student_number]);
-    $latest_payment = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-    if ($latest_payment) {
-        $monthly_payment = $latest_payment['monthly_payment'];
-        $total_months = $latest_payment['number_of_months_payment']; // Fetch total months from the latest payment record
-    }
 
-    // Get the total paid and number of months paid
-    $stmt = $db->prepare("SELECT SUM(monthly_payment) AS total_paid, COUNT(*) AS number_of_months FROM payments WHERE student_number = ?");
-    $stmt->execute([$student_number]);
-    $payment_info = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-    if ($payment_info) {
-        $total_paid = $payment_info['total_paid'];
-        $number_of_months = $payment_info['number_of_months'];
-        // Calculate the remaining months
-        $remaining_months = $total_months - $number_of_months;
+        try {
+            // SQL query to get the sum of installment payments by student_number
+            $sql = "SELECT SUM(installment_down_payment) AS total_installment
+                    FROM payments
+                    WHERE student_number = :student_number";
+
+            $stmt1 = $db->prepare($sql);
+            $stmt1->bindParam(':student_number', $student_number);
+            $stmt1->execute();
+
+            // Fetch result
+            $result = $stmt1->fetch(PDO::FETCH_ASSOC);
+            $total_already_payed = isset($result['total_installment']) ? $result['total_installment'] : 0;
+
+        } catch (PDOException $e) {
+            echo "Error: " . $e->getMessage();
+        }
+
+
+
+        // Prepare the SQL statement
+        $stmt = $db->prepare("
+            SELECT number_of_months_payment, monthly_payment, next_payment_due_date, installment_down_payment
+            FROM payments
+            WHERE student_number = :student_number
+        ");
+        
+        // Bind the student_number parameter
+        $stmt->bindParam(':student_number', $student_number, PDO::PARAM_STR);
+        
+        // Execute the query
+        $stmt->execute();
+        
+        // Fetch the result as an associative array
+        $paymentDetails = $stmt->fetch(PDO::FETCH_ASSOC);
+
+
+       
+        //Number of months payment
+        $number_of_months = $paymentDetails['number_of_months_payment'];
+
+        //Month Payment
+        $monthly_payment = $paymentDetails['monthly_payment'];
+
+        //Payment Due Date
+        $payment_due_date = $paymentDetails['next_payment_due_date']; 
+
+        // /Calculate the Total Installment 
+        $total_installment = $number_of_months *  $monthly_payment;
+        
+        // Calculate next payment due date
+        $next_payment_due_date = date('Y-m-d', strtotime($paymentDetails['next_payment_due_date'] . ' +1 month'));
+
+        //Calculate that will deduct
+        $remaining_balance = $total_installment -$total_already_payed;
+
+
+
+ }
+ else {
+    echo "Student number is not set in the session.";
+}
+
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $student_monthly_payment = $_POST['total_amount1']; // Corrected from 'monthly_payment'
+    $transaction_id = $_POST['transaction_id']; // Get transaction ID from hidden input
+
+    try {
+        // Assuming you have variables for $installment_down_payment and $next_payment_due_date
+        $installment_down_payment = $student_monthly_payment; // Adjust this as per your logic
+      // Add one month to the current due date
+      $current_due_date = new DateTime($payment_due_date);
+      $next_payment_due_date = $current_due_date->modify('+1 month')->format('Y-m-d');
+
+        // Insert new payment record
+        $insertStmt = $db->prepare("INSERT INTO payments (student_number, transaction_id, installment_down_payment, next_payment_due_date, payment_status) 
+                                      VALUES (:student_number, :transaction_id, :installment_down_payment, :next_payment_due_date, 'completed')");
+        $insertStmt->execute([
+            ':student_number' => $_SESSION['student_number'],
+            ':transaction_id' => $transaction_id,
+            ':installment_down_payment' => $installment_down_payment,
+            ':next_payment_due_date' => $next_payment_due_date
+        ]);
+
+        echo "Payment processed successfully! Transaction ID: $transaction_id. Next payment due date is " . $next_payment_due_date;
+
+    } catch (Exception $e) {
+        echo "Error processing payment: " . $e->getMessage();
     }
 }
-?>
 
-<!DOCTYPE html>
+
+
+
+
+
+
+?><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monthly Payment</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://www.paypal.com/sdk/js?client-id=AeTnJCEfQ0MJolcWHGQSC8kwaMioTs_jWRC1mOJ05nqsy2zJe7ou1LvYQ88-EMm1vIIjImwRKvULNCT-&currency=PHP"></script>
     <style>
         body {
@@ -131,17 +150,139 @@ if ($student_number) {
     </style>
 </head>
 <body>
-    <h1>Make a Monthly Payment</h1>
-    <p><strong>Student Number:</strong> <?php echo htmlspecialchars($student_number); ?></p> <!-- Display the student number -->
-    <p><strong>Latest Monthly Payment Amount:</strong> PHP <?php echo htmlspecialchars($monthly_payment); ?></p> <!-- Display latest payment amount -->
-    <p><strong>Number of Months Paid:</strong> <?php echo htmlspecialchars($number_of_months); ?></p> <!-- Display number of months paid -->
-    <p><strong>Remaining Months:</strong> <?php echo htmlspecialchars($remaining_months); ?></p> <!-- Display remaining months -->
+    <form id="payment-form" method="post" action="">
+        <input type="hidden" id="hidden_total" name="total_amount1" value="0.00">
+        <div class="bg-gray-100 p-6 rounded-lg shadow-md max-w-lg mx-auto">
+            <!-- Payment Details -->
+            <div class="mb-6">
+                <p class="text-lg font-semibold text-gray-800">
+                    Number of Installment: <span class="font-bold text-blue-600" id="installment-count"></span>
+                </p>
+                <p class="text-lg font-semibold text-gray-800 mt-2">
+                    Total Tuition: <span class="font-bold text-green-600">₱<span id="total-amount"><?php echo htmlspecialchars($total_installment); ?></span></span>
+                </p>
+                <p class="text-lg font-semibold text-gray-800 mt-2">
+                    Amount Already Payed: <span class="font-bold text-green-600">₱<span id="total_already_payed"><?php echo htmlspecialchars($total_already_payed); ?></span></span>
+                </p>
+                <p class="text-lg font-semibold text-gray-800 mt-2">
+                    Remaining Balance: <span class="font-bold text-red-600">₱<span id="remaining-balance"><?php echo htmlspecialchars($remaining_balance); ?></span></span>
+                </p>
+            </div>
 
-    <form id="payment-form" method="post" action=""> <!-- Updated action to post to itself -->
-        <label for="monthly_payment">Monthly Payment Amount:</label>
-        <input type="number" id="monthly_payment" name="monthly_payment" required>
-        
-        <input type="hidden" id="transaction_id" name="transaction_id"> <!-- Hidden input for transaction ID -->
+            <?php
+// Calculate the dynamic monthly payment based on remaining balance and number of months
+$monthly_payment = $remaining_balance / $number_of_months;
+
+// Calculate the maximum months based on the remaining balance
+$max_months = floor($remaining_balance / $monthly_payment);
+
+// Loop to render checkboxes only for the available months
+for ($i = 1; $i <= $number_of_months; $i++) {
+    if ($i <= $max_months) {
+?>
+    <div class="flex items-center mb-4 p-3 bg-gray-50 border rounded-lg shadow-sm hover:bg-gray-100 transition duration-200 ease-in-out">
+        <input type="checkbox" name="month_payment[]" value="<?= $monthly_payment ?>" 
+               class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+               id="month-<?= $i ?>" onchange="updateTotal(this); toggleCustomAmount()">
+        <label class="ml-3 text-gray-700" for="month-<?= $i ?>">Month <?= $i ?> - Payment: 
+            <span class="font-semibold text-green-600">₱<?= number_format($monthly_payment, 2) ?></span>
+        </label>
+    </div>
+<?php
+    }
+}
+?>
+
+<!-- Custom Amount Input -->
+<div class="mb-4">
+    <label for="custom_amount">Custom Amount:</label>
+    <input type="number" id="custom_amount" name="custom_amount" placeholder="Enter custom amount" min="0" oninput="updateCustomAmount(this)">
+    <p class="text-lg font-semibold text-gray-800 mt-2">
+        Amount Selected: <span class="font-bold text-green-600">₱<span id="total-amount1">0.00</span></span>
+    </p>
+</div>
+
+<script>
+function toggleCustomAmount() {
+    // Get all checkboxes
+    const checkboxes = document.querySelectorAll('input[name="month_payment[]"]');
+    const customAmountInput = document.getElementById('custom_amount');
+
+    // Check if any checkbox is checked
+    const isAnyChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+
+    // Enable or disable the custom amount input based on checkbox state
+    customAmountInput.disabled = isAnyChecked;
+    
+    // Optionally clear the custom amount if it's disabled
+    if (isAnyChecked) {
+        customAmountInput.value = '';
+    }
+}
+</script>
+
+
+        <script>
+            // Display the number of installments allowed based on remaining balance
+            document.getElementById('installment-count').innerText = Math.floor(parseFloat(document.getElementById('remaining-balance').innerText) / parseFloat(<?php echo json_encode($monthly_payment); ?>));
+
+            function updateTotal(checkbox) {
+    const totalAmountElement = document.getElementById('total-amount1');
+    const hiddenTotalInput = document.getElementById('hidden_total');
+    const remainingBalanceElement = document.getElementById('remaining-balance');
+    
+    let currentTotal = parseFloat(totalAmountElement.innerText) || 0;
+    const remainingBalance = parseFloat(remainingBalanceElement.innerText) || 0;
+
+    const monthlyPayment = parseFloat(checkbox.value) || 0;
+
+    if (checkbox.checked) {
+        if (currentTotal + monthlyPayment > remainingBalance) {
+            alert("You cannot select more than the remaining balance.");
+            checkbox.checked = false;
+            return;
+        }
+        currentTotal += monthlyPayment;
+    } else {
+        currentTotal -= monthlyPayment;
+    }
+
+    // Update the total display and hidden input
+    totalAmountElement.innerText = currentTotal.toFixed(2);
+    hiddenTotalInput.value = currentTotal.toFixed(2);
+}
+
+
+function updateCustomAmount(input) {
+    const totalAmountElement = document.getElementById('total-amount1');
+    const hiddenTotalInput = document.getElementById('hidden_total');
+    const remainingBalanceElement = document.getElementById('remaining-balance');
+
+    const customAmount = parseFloat(input.value) || 0;
+    const remainingBalance = parseFloat(remainingBalanceElement.innerText) || 0;
+
+    if (customAmount > remainingBalance) {
+        alert("Custom amount cannot exceed the remaining balance.");
+        input.value = ''; // Clear the input if overpaid
+        totalAmountElement.innerText = '0.00';
+        hiddenTotalInput.value = '0.00';
+        return;
+    }
+
+    // Reset checkboxes when a custom amount is entered
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+    });
+
+    // Update total with custom amount
+    totalAmountElement.innerText = customAmount.toFixed(2);
+    hiddenTotalInput.value = customAmount.toFixed(2);
+}
+
+        </script>
+
+        <input type="hidden" id="transaction_id" name="transaction_id">
         
         <div id="paypal-button-container"></div>
     </form>
@@ -149,31 +290,22 @@ if ($student_number) {
     <script>
         paypal.Buttons({
             createOrder: function(data, actions) {
-                const amount = document.getElementById('monthly_payment').value; // Get the payment amount from the input
-
+                const amount = document.getElementById('total-amount1').innerText; // Use updated amount
                 return actions.order.create({
                     purchase_units: [{
                         amount: {
-                            value: amount // Set the total amount to charge (monthly)
+                            value: amount // Use the calculated amount
                         }
                     }]
                 });
             },
             onApprove: function(data, actions) {
                 return actions.order.capture().then(function(details) {
-                    alert('Transaction completed by ' + details.payer.name.given_name);
-
-                    // Set the transaction ID in the hidden input
-                    document.getElementById('transaction_id').value = details.id;
-
-                    // Submit the form
-                    document.getElementById('payment-form').submit();
+                    document.getElementById('transaction_id').value = details.id; // Set transaction ID in hidden input
+                    document.getElementById('payment-form').submit(); // Submit form after capturing the order
                 });
-            },
-            onCancel: function(data) {
-                alert('Transaction was canceled.');
             }
-        }).render('#paypal-button-container'); // Display the PayPal button
+        }).render('#paypal-button-container'); // Display PayPal button
     </script>
 </body>
 </html>
